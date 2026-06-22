@@ -1,0 +1,100 @@
+import type { PasswordUpdate, User } from "../types/user";
+import { HttpClient } from "../libs/https/http-client";
+import type { Profile } from "../types/profile";
+
+const API_URL = "/users";
+
+export async function createUser(data: User) {
+  const response =  await HttpClient.post(API_URL, data);
+  return response;
+}
+
+export async function getUsers(
+  search?: string,
+  name?: string,
+  username?: string,
+  surname?: string,
+  email?: string,
+  roles?: string[],
+  page?: any,
+  size?: number,
+  sorting?: string[],
+) {
+  try {
+    const query = new URLSearchParams();
+
+    if (search) query.append("search", search);
+    if (name !== undefined) query.append("name", name.toString());
+    if (username !== undefined) query.append("username", username.toString());
+    if (surname !== undefined) query.append("surname", surname.toString());
+    if (email !== undefined) query.append("email", email.toString());
+
+    if (page !== undefined) query.append("page", page.toString());
+    if (size !== undefined) query.append("size", size.toString());
+    if (sorting && sorting.length > 0) {
+      sorting.forEach((s) => query.append("sort", s));
+    }
+    if (roles && roles.length >= 0) {
+      roles.forEach((s) => query.append("roles", s));
+    }
+
+    const urlWithQuery =
+      query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
+
+    const response = await HttpClient.get<any>(urlWithQuery);
+    return response;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to fetch users");
+  }
+}
+
+export async function deleteUsers(id: number ) {
+  try {
+    const response = await HttpClient.delete(API_URL + `/${id}`);
+    return response;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to delete user");
+  }
+}
+export async function updateUsers(id: any, user: User) {
+  try {
+    const response = await HttpClient.put(API_URL + `/${id}`, user);
+    return response;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to update user");
+  }
+}
+export async function getById({ id, signal }: { id: any; signal?: AbortSignal }): Promise<Profile> {
+  try {
+    const response = await HttpClient.get<Profile>(API_URL + `/${id}`, { signal });
+    return response;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to fetch user");
+  }
+}
+export async function getByEmail(email: string) {
+  return await HttpClient.get(API_URL, { params: { email } });
+}
+
+export async function changePassword(changePasswordData: PasswordUpdate) {
+  try {
+    const response = await HttpClient.put(
+      API_URL + "/change-password",
+      changePasswordData,
+    );
+    return response;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to change password");
+  }
+}
+
+export async function updateProfile(updateProfileData: Profile) {
+  try {
+    const response = await HttpClient.put(API_URL, updateProfileData);
+    return response;
+  } catch (error: any) {
+    throw new Error(
+      error?.response?.data?.message || "Failed to update user"
+    );
+  }
+}
