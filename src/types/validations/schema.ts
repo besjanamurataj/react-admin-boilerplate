@@ -72,9 +72,72 @@ export const roleSchema = z.object({
   authorities: z.array(z.number()).min(1, "Select at least one authority"),
 });
 
+export const universitySchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  code: z.string().min(2, "Code must be at least 2 characters"),
+  city: z.string().min(2, "City must be at least 2 characters"),
+  email: z
+    .string()
+    .regex(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      "Email is not valid, put a valid email",
+    ),
+});
+
+export const departmentSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  code: z.string().min(2, "Code must be at least 2 characters"),
+  universityId: z
+    .number()
+    .min(1, "Select a university"),
+  description: z
+    .string()
+    .min(2, "Description must be at least 2 characters"),
+});
+
+export const studentSchema = z.object({
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z
+    .string()
+    .regex(
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      "Email is not valid, put a valid email",
+    ),
+  birthDate: z.string().min(1, "Birth date is required"),
+  active: z.boolean(),
+  departmentId: z
+    .number()
+    .min(1, "Select a department"),
+});
+
+
+export const enrollmentSchema = z.object({
+  enrollmentDate: z
+    .string()
+    .min(1, "Enrollment date is required"),
+
+  universityId: z
+    .number()
+    .min(1, "Select a university"),
+
+  departmentId: z
+    .number()
+    .min(1, "Select a department"),
+
+  studentId: z
+    .number()
+    .min(1, "Select a student"),
+});
+
+
 export type ProfileFormValues = z.infer<typeof profileSchema>;
 export type UserFormValues = z.infer<typeof userSchema>;
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type ForgotFormValue = z.infer<typeof forgotSchema>;
 export type PasswordFormValue = z.infer<typeof passwordSchema>;
 export type RoleFormValue = z.infer<typeof roleSchema>;
+export type UniversityFormValue = z.infer<typeof universitySchema>;
+export type DepartmentFormValue = z.infer<typeof departmentSchema>;
+export type StudentFormValue = z.infer<typeof studentSchema>;
+export type EnrollmentFormValue = z.infer<typeof enrollmentSchema>;
