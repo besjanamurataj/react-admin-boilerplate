@@ -6,6 +6,11 @@
     "home": "Home",
     "role": "Ruolo",
     "user": "Utente",
+    "analytics": "Analisi",
+    "university": "Università",
+    "department": "Dipartimento",
+    "student": "Studente",
+    "enrollment": "Iscrizione",
     "galery": "Galleria",
     "edit": "Modifica",
     "delete": "Elimina",
@@ -29,7 +34,11 @@
     "updateProfile": "Aggiorna Profilo",
     "startPlaybook": "Inizia Playbook",
     "changePassword": "Cambia Password",
-    "updatePassword": "Aggiorna Password"
+    "updatePassword": "Aggiorna Password",
+    "yes": "Sì",
+    "no": "No",
+    "all": "-",
+    "noResults": "-"
   },
   "roles": {
     "title": "Ruoli",
@@ -61,7 +70,6 @@
     "birthDatePlaceholder": "Seleziona la data di nascita",
     "genderPlaceholder": "Seleziona il sesso",
     "streetPlaceholder": "Inserisci l'indirizzo",
-
     "table": {
       "firstName": "Nome",
       "lastName": "Cognome",
@@ -114,6 +122,119 @@
     "roleDeleteSuccess": "Ruolo eliminato con successo.",
     "userDeleteSuccess": "Utente eliminato con successo.",
     "profileUpdateSuccess": "Profilo aggiornato con successo.",
-    "profileUpdateError": "Impossibile aggiornare il profilo."
+    "profileUpdateError": "Impossibile aggiornare il profilo.",
+    "studentCreated": "Studente creato con successo.",
+    "studentUpdated": "Studente aggiornato con successo.",
+    "studentDeleteSuccess": "Studente eliminato con successo.",
+    "studentOperationFailed": "Operazione sullo studente non riuscita.",
+    "universityDeleteSuccess": "Università eliminata con successo.",
+    "departmentDeleteSuccess": "Dipartimento eliminato con successo."
+  },
+  "dashboard": {
+    "title": "Dashboard Analitica",
+    "subtitle": "Panoramica di utenti, ruoli e autorizzazioni.",
+    "totalUsers": "Utenti totali",
+    "totalRoles": "Ruoli totali",
+    "totalAuthorities": "Autorizzazioni totali",
+    "users": "Utenti registrati nel sistema",
+    "roles": "Ruoli disponibili nel sistema",
+    "authorities": "Autorizzazioni disponibili nel sistema"
+  },
+  "roleUsage": {
+    "title": "Utilizzo dei ruoli",
+    "description": "Numero di utenti assegnati a ciascun ruolo.",
+    "loading": "Caricamento dell'utilizzo dei ruoli...",
+    "noData": "Nessun dato disponibile sull'utilizzo dei ruoli.",
+    "users": "Utenti",
+    "role": "Ruolo"
+  },
+  "recentUsers": {
+    "title": "Utenti recenti",
+    "description": "Gli utenti aggiunti più di recente.",
+    "loading": "Caricamento degli utenti recenti...",
+    "noData": "Nessun utente disponibile.",
+    "noRoles": "Nessun ruolo",
+    "previous": "Precedente",
+    "next": "Successiva",
+    "page": "Pagina",
+    "of": "di"
+  },
+  "students": {
+    "title": "Studenti",
+    "description": "Gestisci gli studenti e i loro dipartimenti.",
+    "searchPlaceholder": "Cerca studenti",
+    "firstNamePlaceholder": "Inserisci il nome",
+    "lastNamePlaceholder": "Inserisci il cognome",
+    "emailPlaceholder": "Inserisci l'indirizzo email",
+    "departmentPlaceholder": "Seleziona dipartimento",
+    "birthDatePlaceholder": "Seleziona la data di nascita",
+    "createStudent": "Crea Studente",
+    "editStudent": "Modifica Studente",
+    "viewStudent": "Visualizza Studente",
+    "deleteStudent": "Elimina Studente",
+    "confirmDelete": "Sei sicuro di voler eliminare questo studente?",
+    "createDescription": "Crea le informazioni dello studente.",
+    "editDescription": "Aggiorna le informazioni dello studente.",
+    "viewDescription": "Visualizza le informazioni dello studente.",
+    "loading": "Caricamento studente...",
+    "table": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "birthDate": "Data di nascita",
+      "active": "Attivo",
+      "department": "Dipartimento"
+    }
+  },
+  "universities": {
+    "title": "Università",
+    "description": "Gestisci le università.",
+    "searchPlaceholder": "Cerca università",
+    "deleteUniversity": "Elimina Università",
+    "confirmDelete": "Sei sicuro di voler eliminare questa università?",
+    "table": {
+      "name": "Nome",
+      "code": "Codice",
+      "city": "Città",
+      "email": "Email"
+    }
+  },
+  "departments": {
+    "title": "Dipartimenti",
+    "description": "Gestisci i dipartimenti universitari.",
+    "searchPlaceholder": "Cerca dipartimenti",
+    "deleteDepartment": "Elimina Dipartimento",
+    "confirmDelete": "Sei sicuro di voler eliminare questo dipartimento?",
+    "table": {
+      "name": "Nome",
+      "code": "Codice",
+      "description": "Descrizione",
+      "university": "Università"
+    }
+  },
+  "enrollments": {
+    "title": "Iscrizioni",
+    "description": "Gestisci le iscrizioni degli studenti",
+    "searchPlaceholder": "Cerca iscrizioni...",
+    "viewEnrollment": "Visualizza Iscrizione",
+    "viewDescription": "Visualizza i dettagli dell'iscrizione",
+    "createEnrollment": "Crea Iscrizione",
+    "createDescription": "Crea una nuova iscrizione dello studente",
+    "editEnrollment": "Modifica Iscrizione",
+    "editDescription": "Aggiorna le informazioni dell'iscrizione",
+    "loading": "Caricamento iscrizione...",
+    "universityPlaceholder": "Seleziona un'università",
+    "departmentPlaceholder": "Seleziona un dipartimento",
+    "studentPlaceholder": "Seleziona uno studente",
+    "deleteEnrollment": "Elimina Iscrizione",
+    "confirmDelete": "Sei sicuro di voler eliminare questa iscrizione?",
+    "table": {
+      "enrollmentDate": "Data di Iscrizione",
+      "university": "Università",
+      "department": "Dipartimento",
+      "student": "Studente",
+      "studentFirstName": "Nome",
+      "studentLastName": "Cognome"
+    }
   }
 }

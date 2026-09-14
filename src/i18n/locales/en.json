@@ -6,6 +6,11 @@
     "user": "User",
     "galery": "Galery",
     "role": "Role",
+    "analytics": "Analytics",
+    "university": "University",
+    "department": "Department",
+    "student": "Student",
+    "enrollment": "Enrollment",
     "add": "Add",
     "edit": "Edit",
     "delete": "Delete",
@@ -30,7 +35,11 @@
     "forgotPassword": "Forgot Password",
     "emailPlaceholder": "Enter your email",
     "startPlaybook": "Start Playbook",
-    "updatePassword": "Update Password"
+    "updatePassword": "Update Password",
+    "yes": "Yes",
+    "no": "No",
+    "all": "-",
+    "noResults": "-"
   },
   "home": {
     "title": "Home",
@@ -119,6 +128,119 @@
     "roleDeleteSuccess": "Role deleted successfully.",
     "userDeleteSuccess": "User deleted successfully.",
     "profileUpdateSuccess": "Profile updated successfully.",
-    "profileUpdateError": "Failed to update profile."
+    "profileUpdateError": "Failed to update profile.",
+    "studentCreated": "Student created successfully.",
+    "studentUpdated": "Student updated successfully.",
+    "studentDeleteSuccess": "Student deleted successfully.",
+    "studentOperationFailed": "Student operation failed.",
+    "universityDeleteSuccess": "University deleted successfully.",
+    "departmentDeleteSuccess": "Department deleted successfully."
+  },
+  "dashboard": {
+    "title": "Analytics Dashboard",
+    "subtitle": "Overview of users, roles and authorities.",
+    "totalUsers": "Total Users",
+    "totalRoles": "Total Roles",
+    "totalAuthorities": "Total Authorities",
+    "users": "Registered users in the system",
+    "roles": "Available roles in the system",
+    "authorities": "Available permissions in the system"
+  },
+  "roleUsage": {
+    "title": "Role Usage",
+    "description": "Number of users assigned to each role.",
+    "loading": "Loading role usage...",
+    "noData": "No role usage data available.",
+    "users": "Users",
+    "role": "Role"
+  },
+  "recentUsers": {
+    "title": "Recent Users",
+    "description": "The most recently added users.",
+    "loading": "Loading recent users...",
+    "noData": "No users available.",
+    "noRoles": "No roles",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  },
+  "students": {
+    "title": "Students",
+    "description": "Manage students and their departments.",
+    "searchPlaceholder": "Search students",
+    "firstNamePlaceholder": "Enter first name",
+    "lastNamePlaceholder": "Enter last name",
+    "emailPlaceholder": "Enter email address",
+    "departmentPlaceholder": "Select department",
+    "birthDatePlaceholder": "Select birth date",
+    "createStudent": "Create Student",
+    "editStudent": "Edit Student",
+    "viewStudent": "View Student",
+    "deleteStudent": "Delete Student",
+    "confirmDelete": "Are you sure you want to delete this student?",
+    "createDescription": "Create student information.",
+    "editDescription": "Update student information.",
+    "viewDescription": "View student information.",
+    "loading": "Loading student...",
+    "table": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "birthDate": "Birth Date",
+      "active": "Active",
+      "department": "Department"
+    }
+  },
+  "universities": {
+    "title": "Universities",
+    "description": "Manage universities.",
+    "searchPlaceholder": "Search universities",
+    "deleteUniversity": "Delete University",
+    "confirmDelete": "Are you sure you want to delete this university?",
+    "table": {
+      "name": "Name",
+      "code": "Code",
+      "city": "City",
+      "email": "Email"
+    }
+  },
+  "departments": {
+    "title": "Departments",
+    "description": "Manage university departments.",
+    "searchPlaceholder": "Search departments",
+    "deleteDepartment": "Delete Department",
+    "confirmDelete": "Are you sure you want to delete this department?",
+    "table": {
+      "name": "Name",
+      "code": "Code",
+      "description": "Description",
+      "university": "University"
+    }
+  },
+  "enrollments": {
+    "title": "Enrollments",
+    "description": "Manage student enrollments",
+    "searchPlaceholder": "Search enrollments...",
+    "viewEnrollment": "View Enrollment",
+    "viewDescription": "View enrollment details",
+    "createEnrollment": "Create Enrollment",
+    "createDescription": "Create a new student enrollment",
+    "editEnrollment": "Edit Enrollment",
+    "editDescription": "Update enrollment information",
+    "loading": "Loading enrollment...",
+    "universityPlaceholder": "Select a university",
+    "departmentPlaceholder": "Select a department",
+    "studentPlaceholder": "Select a student",
+    "deleteEnrollment": "Delete Enrollment",
+    "confirmDelete": "Are you sure you want to delete this enrollment?",
+    "table": {
+      "enrollmentDate": "Enrollment Date",
+      "university": "University",
+      "department": "Department",
+      "student": "Student",
+      "studentFirstName": "First Name",
+      "studentLastName": "Last Name"
+    }
   }
 }

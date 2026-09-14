@@ -2,6 +2,7 @@ import axios, { AxiosError } from 'axios'
 
 const instance = axios.create({
   // ' '''
+  // baseURL: 'http://192.168.10.31:3000',
   baseURL: 'http://localhost:3000',
   headers: {
     'ngrok-skip-browser-warning': 'true',
