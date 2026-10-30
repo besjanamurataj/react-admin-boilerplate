@@ -1,18 +1,35 @@
-import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-import { cn } from '../../../libs/tailwind/merge-tailwind-classes'
+import {
+  LineChart,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { cn } from "../../../libs/tailwind/merge-tailwind-classes";
+import type { CurveType } from "recharts/types/shape/Curve";
 
-type LineChartProps = {
-  data: any[]
-  dataKey: string
-  children?: React.ReactNode
-  type?: string | any
-  className?: string
-  color?: string
-}
+type LineChartProps<TData extends Record<string, unknown>> = {
+  data: TData[];
+  dataKey: string;
+  children?: React.ReactNode;
+  type?: CurveType;
+  className?: string;
+  color?: string;
+};
 
-export const LineChartComponent = ({ data, dataKey, children, className }: LineChartProps) => {
+export function LineChartComponent<TData extends Record<string, unknown>>({
+  data,
+  dataKey,
+  children,
+  className,
+}: LineChartProps<TData>) {
   return (
-    <LineChart className={cn('w-full rounded-md border bg-background', className)} responsive data={data}>
+    <LineChart
+      className={cn("w-full rounded-md border bg-background", className)}
+      responsive
+      data={data}
+    >
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey={dataKey} />
       <YAxis width="auto" />
@@ -20,5 +37,5 @@ export const LineChartComponent = ({ data, dataKey, children, className }: LineC
       <Legend />
       {children}
     </LineChart>
-  )
+  );
 }
