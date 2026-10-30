@@ -15,7 +15,7 @@ export const ForgetPasswordPage = () => {
     email: '',
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors] = useState<Record<string, string>>({})
   return (
     <div>
       {' '}

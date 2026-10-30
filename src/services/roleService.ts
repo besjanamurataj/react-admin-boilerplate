@@ -1,4 +1,4 @@
-import type { RoleRequest } from "../types/role";
+import type { RoleRequest, RoleResponse } from "../types/role";
 import { HttpClient } from "../libs/https/http-client";
 
 const API_URL = "/roles";
@@ -62,9 +62,11 @@ export async function getById({
 }: {
   id: any;
   signal?: AbortSignal;
-}) {
+}): Promise<RoleResponse> {
   try {
-    const response = await HttpClient.get(API_URL + `/${id}`, { signal });
+    const response = await HttpClient.get<RoleResponse>(API_URL + `/${id}`, {
+      signal,
+    });
     return response;
   } catch (error: any) {
     throw new Error(error?.response?.data?.message || "Failed to create role");

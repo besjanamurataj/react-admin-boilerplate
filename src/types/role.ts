@@ -1,13 +1,14 @@
 export interface RoleRequest {
-  name: string
-  description: string
-  authorities: any[]
+  name: string;
+  description: string;
+  authorities: any[];
 }
 
 export interface RoleResponse {
-  id: number
-  name: string
-  displayName: string
-  description: string
-  permission: { [category: string]: string[] }
+  id: number;
+  name: string;
+  displayName: string;
+  description: string;
+  authorities: string[];
+  permission: { [category: string]: string[] };
 }

@@ -10,13 +10,14 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, getById, updateProfile } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
-import { useToast } from "../contexts/toast/ToastContex";
+
 import type { PasswordUpdate } from "../types/user";
 import { Label } from "../components/ui/Label";
 import { Dialog, DialogContent } from "../components/ui/Dialog";
 import { MultiSelect } from "../components/ui/MultiSelect";
 import { getRole } from "../services/roleService";
 import { formatToLocal } from "../utils/formatDate";
+import { useToast } from "../contexts/toast/ToastProvider";
 
 const initialPasswordState: PasswordUpdate = {
   password: "",
@@ -52,7 +53,7 @@ export const ProfilePage = () => {
     },
   });
 
-  const [errors, setErrors] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, unknown>>({});
 
   const { data } = useQuery<Profile>({
     queryKey: ["user", userId],

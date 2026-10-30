@@ -15,8 +15,8 @@ import {
 } from "../../services/departmentService";
 import type { DepartmentRequest } from "../../types/department";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { departmentSchema } from "../../types/validations/schema";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const DepartmentUpsertPage = () => {
   const [formData, setFormData] = useState<DepartmentRequest>({

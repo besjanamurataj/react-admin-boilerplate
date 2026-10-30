@@ -1,4 +1,8 @@
-import axios, { AxiosError, type AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosRequestConfig,
+  type InternalAxiosRequestConfig,
+} from "axios";
 
 const instance = axios.create({
   // ' '''
@@ -10,7 +14,7 @@ const instance = axios.create({
 });
 
 instance.interceptors.request.use(
-  (config: any) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("jwtToken");
 
     if (token) {

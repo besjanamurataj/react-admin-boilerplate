@@ -12,11 +12,11 @@ import {
   getDepartments,
 } from "../../services/departmentService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { DepartmentResponse } from "../../types/department";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const DepartmentPage = () => {
   const { t } = useTranslation();

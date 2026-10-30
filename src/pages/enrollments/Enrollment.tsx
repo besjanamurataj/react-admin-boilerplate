@@ -34,7 +34,7 @@ import {
 } from "../../services/enrollmentService";
 
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
+
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 
@@ -44,6 +44,7 @@ import type {
   BatchEnrollmentResponse,
   EnrollmentResponse,
 } from "../../types/enrollment";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const EnrollmentPage = () => {
   const { t } = useTranslation();

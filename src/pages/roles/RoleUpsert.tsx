@@ -14,10 +14,10 @@ import {
   getById,
   getAuthorities,
 } from "../../services/roleService";
-import type { RoleRequest } from "../../types/role";
+import type { RoleRequest, RoleResponse } from "../../types/role";
 import { Textarea } from "../../components/ui/Textarea";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const RoleUpsertPage = () => {
   const [formData, setFormData] = useState<RoleRequest>({
@@ -34,7 +34,7 @@ export const RoleUpsertPage = () => {
   const { addToast } = useToast();
   const title = params.id ? t("roles.editRole") : t("roles.createRole");
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<RoleResponse>({
     queryKey: ["roles", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) throw new Error("No ID provided");

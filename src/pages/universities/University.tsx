@@ -12,11 +12,11 @@ import {
   getUniversities,
 } from "../../services/universityService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { UniversityResponse } from "../../types/university";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const UniversityPage = () => {
   const { t } = useTranslation();
