@@ -8,22 +8,23 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { cn } from "../../../libs/tailwind/merge-tailwind-classes";
+import type { CurveType } from "recharts/types/shape/Curve";
 
-type AreaChartSharedProps = {
-  data: any[];
+type AreaChartSharedProps<TData extends Record<string, unknown>> = {
+  data: TData[];
   dataKey: string;
-  type?: string | any;
+  type?: CurveType;
   className?: string;
   color?: string;
 };
 
-function AreaChartShared({
+function AreaChartShared<TData extends Record<string, unknown>>({
   data,
   dataKey,
   type = "monotone",
   className,
   color,
-}: AreaChartSharedProps) {
+}: AreaChartSharedProps<TData>) {
   return (
     <div
       className={cn(" bg-white", className)}

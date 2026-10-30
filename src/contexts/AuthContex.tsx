@@ -9,8 +9,8 @@ interface AuthProviderProps {
 interface AuthContextType {
   isAuthenticated: boolean
   user: User | any
-  userId: string
-  roles: RoleRequest[]
+  userId: string | null
+  roles: RoleRequest[] | any[]
   hasRole: (roleName: string) => boolean
   hasPermission: (permissionName: string) => boolean
   authenticateUser: (user: Partial<User>) => void
@@ -22,7 +22,7 @@ interface AuthContextType {
 const initialState: AuthContextType = {
   isAuthenticated: false,
   user: null,
-  userId: '',
+  userId: null,
   roles: [],
   hasRole: () => false,
   hasPermission: () => false,
@@ -36,7 +36,7 @@ const AuthContext = createContext<AuthContextType>(initialState)
 
 const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<any>(null)
-  const [userId, setUserId] = useState<string>('')
+  const [userId, setUserId] = useState<string | null>(null)
   const [roles, setRoles] = useState<RoleRequest[]>([])
   const [permissions, setPermissions] = useState<any[]>([])
   const isAuthenticated = useMemo<boolean>(() => Boolean(user), [user])
@@ -47,7 +47,7 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
 
     setUser({ email })
     setPermissions(authorities || [])
-    setUserId(id || '')
+    setUserId(id || null)
   }
 
   const unAuthenticateUser = () => {
@@ -55,7 +55,7 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
     setUser(null)
     setRoles([])
     setPermissions([])
-    setUserId('')
+    setUserId(null)
   }
 
   const hasRole = (roleName: string): boolean => {

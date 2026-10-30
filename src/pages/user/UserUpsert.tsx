@@ -274,7 +274,7 @@ export const UserUpsertPage = () => {
           </div>
 
           <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => navigate('/user')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/user')}>
               {t('common.cancel')}
             </Button>
             <Button type="submit" variant="default" className="bg-green-700 text-white hover:bg-green-700">

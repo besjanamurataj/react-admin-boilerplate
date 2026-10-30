@@ -12,7 +12,6 @@ import { useTranslation } from "react-i18next";
 import { getRole } from "../../services/roleService";
 import { DatePicker } from "../../components/ui/DatePicker";
 import { RadioGroup } from "../../components/ui/Radion";
-import { formatToLocal } from "../../utils/formatDate";
 
 export const ViewUserPage = () => {
   const [formData, setFormData] = useState<User>({
