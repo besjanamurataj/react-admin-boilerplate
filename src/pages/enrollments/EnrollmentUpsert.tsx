@@ -20,19 +20,12 @@ import {
   updateEnrollment,
 } from "../../services/enrollmentService";
 
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 
 import type { ZodIssue } from "zod";
 
@@ -46,59 +39,44 @@ export const EnrollmentUpsertPage = () => {
 
   const isEditMode = Boolean(params.id);
 
-  const [formData, setFormData] =
-    useState<EnrollmentRequest>({
-      enrollmentDate: "",
-      universityId: 0,
-      departmentId: 0,
-      studentId: 0,
-    });
-
-  const [errors, setErrors] =
-    useState<Record<string, string>>({});
-
-  const {
-    data: enrollmentData,
-    isLoading: isEnrollmentLoading,
-  } = useQuery<EnrollmentResponse>({
-    queryKey: ["enrollments", params.id],
-
-    queryFn: ({ signal }) => {
-      if (!params.id) {
-        throw new Error(
-          "Enrollment ID is required",
-        );
-      }
-
-      return getEnrollmentById({
-        id: Number(params.id),
-        signal,
-      });
-    },
-
-    enabled: isEditMode,
+  const [formData, setFormData] = useState<EnrollmentRequest>({
+    enrollmentDate: "",
+    universityId: 0,
+    departmentId: 0,
+    studentId: 0,
   });
 
-  const {
-    data: universities,
-    isLoading: isUniversitiesLoading,
-  } = useQuery({
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const { data: enrollmentData, isLoading: isEnrollmentLoading } =
+    useQuery<EnrollmentResponse>({
+      queryKey: ["enrollments", params.id],
+
+      queryFn: ({ signal }) => {
+        if (!params.id) {
+          throw new Error("Enrollment ID is required");
+        }
+
+        return getEnrollmentById({
+          id: Number(params.id),
+          signal,
+        });
+      },
+
+      enabled: isEditMode,
+    });
+
+  const { data: universities, isLoading: isUniversitiesLoading } = useQuery({
     queryKey: ["universities-options"],
     queryFn: getUniversities,
   });
 
-  const {
-    data: departments,
-    isLoading: isDepartmentsLoading,
-  } = useQuery({
+  const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
     queryKey: ["departments-options"],
     queryFn: getDepartments,
   });
 
-  const {
-    data: students,
-    isLoading: isStudentsLoading,
-  } = useQuery({
+  const { data: students, isLoading: isStudentsLoading } = useQuery({
     queryKey: ["students-options"],
     queryFn: getStudents,
   });
@@ -109,21 +87,15 @@ export const EnrollmentUpsertPage = () => {
     }
 
     setFormData({
-      enrollmentDate:
-        enrollmentData.enrollmentDate ?? "",
-      universityId:
-        enrollmentData.universityId ?? 0,
-      departmentId:
-        enrollmentData.departmentId ?? 0,
-      studentId:
-        enrollmentData.studentId ?? 0,
+      enrollmentDate: enrollmentData.enrollmentDate ?? "",
+      universityId: enrollmentData.universityId ?? 0,
+      departmentId: enrollmentData.departmentId ?? 0,
+      studentId: enrollmentData.studentId ?? 0,
     });
   }, [enrollmentData]);
 
   const createMutation = useMutation({
-    mutationFn: (
-      enrollment: EnrollmentRequest,
-    ) => createEnrollment(enrollment),
+    mutationFn: (enrollment: EnrollmentRequest) => createEnrollment(enrollment),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -131,12 +103,8 @@ export const EnrollmentUpsertPage = () => {
       });
 
       addToast({
-        title:
-          t("messages.success") || "",
-        description:
-          t(
-            "messages.enrollmentCreated",
-          ) || "",
+        title: t("messages.success") || "",
+        description: t("messages.enrollmentCreated") || "",
         variant: "success",
       });
 
@@ -145,33 +113,21 @@ export const EnrollmentUpsertPage = () => {
 
     onError: (error: Error) => {
       addToast({
-        title:
-          t("messages.error") || "",
+        title: t("messages.error") || "",
         description:
-          error.message ||
-          t(
-            "messages.enrollmentOperationFailed",
-          ) ||
-          "",
+          error.message || t("messages.enrollmentOperationFailed") || "",
         variant: "error",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: (
-      enrollment: EnrollmentRequest,
-    ) => {
+    mutationFn: (enrollment: EnrollmentRequest) => {
       if (!params.id) {
-        throw new Error(
-          "Enrollment ID is required",
-        );
+        throw new Error("Enrollment ID is required");
       }
 
-      return updateEnrollment(
-        Number(params.id),
-        enrollment,
-      );
+      return updateEnrollment(Number(params.id), enrollment);
     },
 
     onSuccess: () => {
@@ -180,19 +136,12 @@ export const EnrollmentUpsertPage = () => {
       });
 
       queryClient.invalidateQueries({
-        queryKey: [
-          "enrollments",
-          params.id,
-        ],
+        queryKey: ["enrollments", params.id],
       });
 
       addToast({
-        title:
-          t("messages.success") || "",
-        description:
-          t(
-            "messages.enrollmentUpdated",
-          ) || "",
+        title: t("messages.success") || "",
+        description: t("messages.enrollmentUpdated") || "",
         variant: "success",
       });
 
@@ -201,70 +150,45 @@ export const EnrollmentUpsertPage = () => {
 
     onError: (error: Error) => {
       addToast({
-        title:
-          t("messages.error") || "",
+        title: t("messages.error") || "",
         description:
-          error.message ||
-          t(
-            "messages.enrollmentOperationFailed",
-          ) ||
-          "",
+          error.message || t("messages.enrollmentOperationFailed") || "",
         variant: "error",
       });
     },
   });
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const { name, value } =
-      event.target;
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
 
-    setFormData(
-      (previousFormData) => ({
-        ...previousFormData,
-        [name]: value,
-      }),
-    );
+    setFormData((previousFormData) => ({
+      ...previousFormData,
+      [name]: value,
+    }));
 
     if (errors[name]) {
-      setErrors(
-        (previousErrors) => ({
-          ...previousErrors,
-          [name]: "",
-        }),
-      );
+      setErrors((previousErrors) => ({
+        ...previousErrors,
+        [name]: "",
+      }));
     }
   };
 
-  const handleSubmit = (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const validationResult =
-      enrollmentSchema.safeParse(
-        formData,
-      );
+    const validationResult = enrollmentSchema.safeParse(formData);
 
     if (!validationResult.success) {
-      const validationErrors: Record<
-        string,
-        string
-      > = {};
+      const validationErrors: Record<string, string> = {};
 
-      validationResult.error.issues.forEach(
-        (issue: ZodIssue) => {
-          const fieldName =
-            issue.path[0];
+      validationResult.error.issues.forEach((issue: ZodIssue) => {
+        const fieldName = issue.path[0];
 
-          if (fieldName) {
-            validationErrors[
-              String(fieldName)
-            ] = issue.message;
-          }
-        },
-      );
+        if (fieldName) {
+          validationErrors[String(fieldName)] = issue.message;
+        }
+      });
 
       setErrors(validationErrors);
 
@@ -274,33 +198,20 @@ export const EnrollmentUpsertPage = () => {
     setErrors({});
 
     if (isEditMode) {
-      updateMutation.mutate(
-        validationResult.data,
-      );
+      updateMutation.mutate(validationResult.data);
 
       return;
     }
 
-    createMutation.mutate(
-      validationResult.data,
-    );
+    createMutation.mutate(validationResult.data);
   };
 
-  const isSubmitting =
-    createMutation.isPending ||
-    updateMutation.isPending;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
-  if (
-    isEditMode &&
-    isEnrollmentLoading
-  ) {
+  if (isEditMode && isEnrollmentLoading) {
     return (
       <div className="p-6">
-        <p>
-          {t(
-            "enrollments.loading",
-          )}
-        </p>
+        <p>{t("enrollments.loading")}</p>
       </div>
     );
   }
@@ -310,35 +221,24 @@ export const EnrollmentUpsertPage = () => {
       <PageTitle
         title={
           isEditMode
-            ? t(
-              "enrollments.editEnrollment",
-            )
-            : t(
-              "enrollments.createEnrollment",
-            )
+            ? t("enrollments.editEnrollment")
+            : t("enrollments.createEnrollment")
         }
         subTitle={
           isEditMode
-            ? t(
-              "enrollments.editDescription",
-            ) || ""
-            : t(
-              "enrollments.createDescription",
-            ) || ""
+            ? t("enrollments.editDescription") || ""
+            : t("enrollments.createDescription") || ""
         }
       />
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4 mt-4 grid grid-cols-12 gap-6">
-
           <div className="col-span-6">
             <Label
               htmlFor="student"
               className="block text-md font-medium text-gray-700"
             >
-              {t(
-                "enrollments.table.student",
-              )}
+              {t("enrollments.table.student")}
             </Label>
 
             <select
@@ -360,26 +260,17 @@ export const EnrollmentUpsertPage = () => {
               disabled={isStudentsLoading}
               className="w-full h-10 rounded-md border border-input bg-background px-3"
             >
-              <option value={0}>
-                {t("enrollments.studentPlaceholder")}
-              </option>
+              <option value={0}>{t("enrollments.studentPlaceholder")}</option>
 
-              {students?.map(
-                (student: { value: number; label: string }) => (
-                  <option
-                    key={student.value}
-                    value={student.value}
-                  >
-                    {student.label}
-                  </option>
-                ),
-              )}
+              {students?.map((student: { value: number; label: string }) => (
+                <option key={student.value} value={student.value}>
+                  {student.label}
+                </option>
+              ))}
             </select>
 
             {errors.studentId && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.studentId}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.studentId}</p>
             )}
           </div>
 
@@ -388,9 +279,7 @@ export const EnrollmentUpsertPage = () => {
               htmlFor="university"
               className="block text-md font-medium text-gray-700"
             >
-              {t(
-                "enrollments.table.university",
-              )}
+              {t("enrollments.table.university")}
             </Label>
 
             <select
@@ -418,10 +307,7 @@ export const EnrollmentUpsertPage = () => {
 
               {universities?.map(
                 (university: { value: number; label: string }) => (
-                  <option
-                    key={university.value}
-                    value={university.value}
-                  >
+                  <option key={university.value} value={university.value}>
                     {university.label}
                   </option>
                 ),
@@ -429,11 +315,7 @@ export const EnrollmentUpsertPage = () => {
             </select>
 
             {errors.universityId && (
-              <p className="mt-1 text-sm text-red-500">
-                {
-                  errors.universityId
-                }
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.universityId}</p>
             )}
           </div>
 
@@ -442,9 +324,7 @@ export const EnrollmentUpsertPage = () => {
               htmlFor="department"
               className="block text-md font-medium text-gray-700"
             >
-              {t(
-                "enrollments.table.department",
-              )}
+              {t("enrollments.table.department")}
             </Label>
 
             <select
@@ -472,10 +352,7 @@ export const EnrollmentUpsertPage = () => {
 
               {departments?.map(
                 (department: { value: number; label: string }) => (
-                  <option
-                    key={department.value}
-                    value={department.value}
-                  >
+                  <option key={department.value} value={department.value}>
                     {department.label}
                   </option>
                 ),
@@ -483,11 +360,7 @@ export const EnrollmentUpsertPage = () => {
             </select>
 
             {errors.departmentId && (
-              <p className="mt-1 text-sm text-red-500">
-                {
-                  errors.departmentId
-                }
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.departmentId}</p>
             )}
           </div>
 
@@ -496,45 +369,30 @@ export const EnrollmentUpsertPage = () => {
               htmlFor="enrollmentDate"
               className="block text-md font-medium text-gray-700"
             >
-              {t(
-                "enrollments.table.enrollmentDate",
-              )}
+              {t("enrollments.table.enrollmentDate")}
             </Label>
 
             <Input
               id="enrollmentDate"
               name="enrollmentDate"
               type="date"
-              value={
-                formData.enrollmentDate
-              }
-              onChange={
-                handleInputChange
-              }
+              value={formData.enrollmentDate}
+              onChange={handleInputChange}
             />
 
             {errors.enrollmentDate && (
               <p className="mt-1 text-sm text-red-500">
-                {
-                  errors.enrollmentDate
-                }
+                {errors.enrollmentDate}
               </p>
             )}
           </div>
 
           <div className="col-span-12 mt-4 flex justify-end gap-4">
-
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                navigate(
-                  "/enrollment",
-                )
-              }
-              disabled={
-                isSubmitting
-              }
+              onClick={() => navigate("/enrollment")}
+              disabled={isSubmitting}
             >
               {t("common.cancel")}
             </Button>
@@ -542,17 +400,11 @@ export const EnrollmentUpsertPage = () => {
             <Button
               type="submit"
               className="bg-green-700 text-white hover:bg-green-700"
-              disabled={
-                isSubmitting
-              }
+              disabled={isSubmitting}
             >
-              {isEditMode
-                ? t("common.update")
-                : t("common.create")}
+              {isEditMode ? t("common.update") : t("common.create")}
             </Button>
-
           </div>
-
         </div>
       </form>
     </div>

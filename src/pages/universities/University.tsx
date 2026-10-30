@@ -1,11 +1,4 @@
-import {
-  ArrowUpDown,
-  Edit,
-  Eye,
-  Plus,
-  SearchIcon,
-  Trash,
-} from "lucide-react";
+import { ArrowUpDown, Edit, Eye, Plus, SearchIcon, Trash } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DataTable } from "../../components/ui/DataTable";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +12,7 @@ import {
   getUniversities,
 } from "../../services/universityService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -120,18 +113,13 @@ export const UniversityPage = () => {
         <div className="flex items-center justify-between">
           {t("universities.table.name")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("name")}
-        </span>
+        <span className="font-medium">{row.getValue("name")}</span>
       ),
     },
     {
@@ -140,18 +128,13 @@ export const UniversityPage = () => {
         <div className="flex items-center justify-between">
           {t("universities.table.code")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("code")}
-        </span>
+        <span className="font-medium">{row.getValue("code")}</span>
       ),
     },
     {
@@ -160,18 +143,13 @@ export const UniversityPage = () => {
         <div className="flex items-center justify-between">
           {t("universities.table.city")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("city")}
-        </span>
+        <span className="font-medium">{row.getValue("city")}</span>
       ),
     },
     {
@@ -180,18 +158,13 @@ export const UniversityPage = () => {
         <div className="flex items-center justify-between">
           {t("universities.table.email")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("email")}
-        </span>
+        <span className="font-medium">{row.getValue("email")}</span>
       ),
     },
     {
@@ -204,9 +177,7 @@ export const UniversityPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/university/view/${row.original.id}`)
-              }
+              onClick={() => navigate(`/university/view/${row.original.id}`)}
             >
               <Eye size={20} className="text-green-700" />
             </Button>
@@ -216,9 +187,7 @@ export const UniversityPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/university/edit/${row.original.id}`)
-              }
+              onClick={() => navigate(`/university/edit/${row.original.id}`)}
             >
               <Edit size={20} className="text-green-700" />
             </Button>
@@ -249,7 +218,6 @@ export const UniversityPage = () => {
       />
 
       <div className="flex justify-end gap-4 my-6">
-
         {hasPermission("MANAGE_UNIVERSITY") && (
           <Button
             variant="outline"
@@ -267,9 +235,7 @@ export const UniversityPage = () => {
           <div className="flex items-center border border-input rounded-xl overflow-hidden bg-background">
             <div className="relative">
               <Search
-                placeholder={
-                  t("universities.searchPlaceholder") ?? undefined
-                }
+                placeholder={t("universities.searchPlaceholder") ?? undefined}
                 value={globalFilter}
                 onChange={(event) => {
                   const value = event.target.value;

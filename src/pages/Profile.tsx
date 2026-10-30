@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, getById, updateProfile } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
-import { useToast } from "../contexts/ToastContex";
+import { useToast } from "../contexts/toast/ToastContex";
 import type { PasswordUpdate } from "../types/user";
 import { Label } from "../components/ui/Label";
 import { Dialog, DialogContent } from "../components/ui/Dialog";
@@ -158,7 +158,7 @@ export const ProfilePage = () => {
     e.preventDefault();
 
     const result = passwordSchema.safeParse(updatePassword);
-   console.log(result,result);
+    console.log(result, result);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
 
@@ -343,7 +343,11 @@ export const ProfilePage = () => {
                 {t("common.cancel")}
               </Button>
 
-              <Button type="submit" variant="default" className="bg-green-700 text-white hover:bg-green-700">
+              <Button
+                type="submit"
+                variant="default"
+                className="bg-green-700 text-white hover:bg-green-700"
+              >
                 {t("common.updatePassword")}
               </Button>
             </div>

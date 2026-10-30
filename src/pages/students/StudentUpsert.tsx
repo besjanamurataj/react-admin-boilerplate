@@ -5,10 +5,7 @@ import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { MultiSelect } from "../../components/ui/MultiSelect";
 import { studentSchema } from "../../types/validations/schema";
-import type {
-  StudentRequest,
-  StudentResponse,
-} from "../../types/student";
+import type { StudentRequest, StudentResponse } from "../../types/student";
 import {
   createStudent,
   getDepartments,
@@ -18,7 +15,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import type { ZodIssue } from "zod";
 
 export const StudentUpsertPage = () => {
@@ -141,9 +138,7 @@ export const StudentUpsertPage = () => {
     },
   });
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setFormData((previousFormData) => ({
@@ -159,9 +154,7 @@ export const StudentUpsertPage = () => {
     }
   };
 
-  const handleActiveChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleActiveChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked } = event.target;
 
     setFormData((previousFormData) => ({
@@ -183,9 +176,7 @@ export const StudentUpsertPage = () => {
     setFormData((previousFormData) => ({
       ...previousFormData,
       departmentId:
-        selectedDepartmentId !== undefined
-          ? Number(selectedDepartmentId)
-          : 0,
+        selectedDepartmentId !== undefined ? Number(selectedDepartmentId) : 0,
     }));
 
     if (errors.departmentId) {
@@ -228,8 +219,7 @@ export const StudentUpsertPage = () => {
     createMutation.mutate(validationResult.data);
   };
 
-  const isSubmitting =
-    createMutation.isPending || updateMutation.isPending;
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
 
   if (isEditMode && isStudentLoading) {
     return (
@@ -243,9 +233,7 @@ export const StudentUpsertPage = () => {
     <div className="p-6">
       <PageTitle
         title={
-          isEditMode
-            ? t("students.editStudent")
-            : t("students.createStudent")
+          isEditMode ? t("students.editStudent") : t("students.createStudent")
         }
         subTitle={
           isEditMode
@@ -273,9 +261,7 @@ export const StudentUpsertPage = () => {
             />
 
             {errors.firstName && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.firstName}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
             )}
           </div>
 
@@ -296,9 +282,7 @@ export const StudentUpsertPage = () => {
             />
 
             {errors.lastName && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.lastName}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
             )}
           </div>
 
@@ -320,9 +304,7 @@ export const StudentUpsertPage = () => {
             />
 
             {errors.email && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.email}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
             )}
           </div>
 
@@ -343,9 +325,7 @@ export const StudentUpsertPage = () => {
             />
 
             {errors.birthDate && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.birthDate}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.birthDate}</p>
             )}
           </div>
 
@@ -360,19 +340,13 @@ export const StudentUpsertPage = () => {
             <MultiSelect
               placeholder={t("students.departmentPlaceholder") || ""}
               options={departments ?? []}
-              value={
-                formData.departmentId > 0
-                  ? [formData.departmentId]
-                  : []
-              }
+              value={formData.departmentId > 0 ? [formData.departmentId] : []}
               onChange={handleDepartmentChange}
               disabled={isDepartmentsLoading}
             />
 
             {errors.departmentId && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.departmentId}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.departmentId}</p>
             )}
           </div>
 
@@ -395,16 +369,12 @@ export const StudentUpsertPage = () => {
               />
 
               <span className="text-sm text-gray-700">
-                {formData.active
-                  ? t("common.yes")
-                  : t("common.no")}
+                {formData.active ? t("common.yes") : t("common.no")}
               </span>
             </div>
 
             {errors.active && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.active}
-              </p>
+              <p className="mt-1 text-sm text-red-500">{errors.active}</p>
             )}
           </div>
 
@@ -423,9 +393,7 @@ export const StudentUpsertPage = () => {
               className="bg-green-700 text-white hover:bg-green-700"
               disabled={isSubmitting}
             >
-              {isEditMode
-                ? t("common.update")
-                : t("common.create")}
+              {isEditMode ? t("common.update") : t("common.create")}
             </Button>
           </div>
         </div>

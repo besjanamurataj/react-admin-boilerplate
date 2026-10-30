@@ -1,11 +1,4 @@
-import {
-  ArrowUpDown,
-  Edit,
-  Eye,
-  Plus,
-  SearchIcon,
-  Trash,
-} from "lucide-react";
+import { ArrowUpDown, Edit, Eye, Plus, SearchIcon, Trash } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { DataTable } from "../../components/ui/DataTable";
 import { useEffect, useMemo, useState } from "react";
@@ -19,7 +12,7 @@ import {
   getDepartments,
 } from "../../services/departmentService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -167,9 +160,7 @@ export const DepartmentPage = () => {
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("universityName")}
-        </span>
+        <span className="font-medium">{row.getValue("universityName")}</span>
       ),
     },
     {
@@ -182,9 +173,7 @@ export const DepartmentPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/department/view/${row.original.id}`)
-              }
+              onClick={() => navigate(`/department/view/${row.original.id}`)}
             >
               <Eye size={20} className="text-green-700" />
             </Button>
@@ -194,9 +183,7 @@ export const DepartmentPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/department/edit/${row.original.id}`)
-              }
+              onClick={() => navigate(`/department/edit/${row.original.id}`)}
             >
               <Edit size={20} className="text-green-700" />
             </Button>
@@ -227,7 +214,6 @@ export const DepartmentPage = () => {
       />
 
       <div className="flex justify-end gap-4 my-6">
-
         {hasPermission("MANAGE_DEPARTMENT") && (
           <Button
             variant="outline"
@@ -245,9 +231,7 @@ export const DepartmentPage = () => {
           <div className="flex items-center border border-input rounded-xl overflow-hidden bg-background">
             <div className="relative">
               <Search
-                placeholder={
-                  t("departments.searchPlaceholder") ?? undefined
-                }
+                placeholder={t("departments.searchPlaceholder") ?? undefined}
                 value={globalFilter}
                 onChange={(event) => {
                   const value = event.target.value;

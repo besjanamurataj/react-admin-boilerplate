@@ -1,53 +1,70 @@
-import { ArrowUpDown, Download, Edit, Eye, Funnel, Plus, SearchIcon, Trash } from 'lucide-react'
-import { Button } from '../../components/ui/Button'
-import { DataTable } from '../../components/ui/DataTable'
-import React, { useMemo, useState } from 'react'
-import { Search } from '../../components/ui/Search'
-import { PageTitle } from '../../components/PageTitle'
-import { Dialog, DialogContent } from '../../components/ui/Dialog'
-import { useNavigate } from 'react-router-dom'
-import { useToast } from '../../contexts/ToastContex'
-import { Input } from '../../components/ui/Input'
-import { Label } from '../../components/ui/Label'
-import { MultiSelect } from '../../components/ui/MultiSelect'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { deleteUsers, getUsers } from '../../services/useService'
-import { useTranslation } from 'react-i18next'
-import { useAuth } from '../../hooks/useAuth'
-import { getRole } from '../../services/roleService'
-import { formatRole } from '../../utils/formatRole'
-import { formatDate } from '../../utils/formatDate'
-import type { User } from '../../types/user'
-import debounce from "debounce"
-import type { ColumnDef, SortingState } from '@tanstack/react-table'
+import {
+  ArrowUpDown,
+  Download,
+  Edit,
+  Eye,
+  Funnel,
+  Plus,
+  SearchIcon,
+  Trash,
+} from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { DataTable } from "../../components/ui/DataTable";
+import React, { useMemo, useState } from "react";
+import { Search } from "../../components/ui/Search";
+import { PageTitle } from "../../components/PageTitle";
+import { Dialog, DialogContent } from "../../components/ui/Dialog";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../../contexts/toast/ToastContex";
+import { Input } from "../../components/ui/Input";
+import { Label } from "../../components/ui/Label";
+import { MultiSelect } from "../../components/ui/MultiSelect";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteUsers, getUsers } from "../../services/useService";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../../hooks/useAuth";
+import { getRole } from "../../services/roleService";
+import { formatRole } from "../../utils/formatRole";
+import { formatDate } from "../../utils/formatDate";
+import type { User } from "../../types/user";
+import debounce from "debounce";
+import type { ColumnDef, SortingState } from "@tanstack/react-table";
 
 export const UserPage = () => {
   const initialFormData: User = {
-    name: '',
-    surname: '',
-    email: '',
-    password: '',
-    username: '',
+    name: "",
+    surname: "",
+    email: "",
+    password: "",
+    username: "",
     roles: [],
-  }
-  const [formData, setFormData] = useState<User>(initialFormData)
-  const [open, setOpen] = React.useState(false)
-  const [filter, setFilter] = React.useState(false)
-  const [deleteId, setDeleteId] = React.useState<any>()
-  const [globalFilter, setGlobalFilter] = React.useState('')
-  const [search, setSearch] = useState('')
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 })
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { t } = useTranslation()
-  const { addToast } = useToast()
-  const { hasPermission } = useAuth()
+  };
+  const [formData, setFormData] = useState<User>(initialFormData);
+  const [open, setOpen] = React.useState(false);
+  const [filter, setFilter] = React.useState(false);
+  const [deleteId, setDeleteId] = React.useState<any>();
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [search, setSearch] = useState("");
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  const { addToast } = useToast();
+  const { hasPermission } = useAuth();
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['users', pagination.pageIndex, pagination.pageSize, sorting, search],
+    queryKey: [
+      "users",
+      pagination.pageIndex,
+      pagination.pageSize,
+      sorting,
+      search,
+    ],
     queryFn: () => {
-      const sortStrings = sorting.map(s => `${s.id},${s.desc ? 'desc' : 'asc'}`)
+      const sortStrings = sorting.map(
+        (s) => `${s.id},${s.desc ? "desc" : "asc"}`,
+      );
       return getUsers(
         search,
         formData.name,
@@ -58,34 +75,34 @@ export const UserPage = () => {
         pagination.pageIndex,
         pagination.pageSize,
         sortStrings,
-      )
+      );
     },
-  })
+  });
   const { data: roles } = useQuery({
-    queryKey: ['roles'],
+    queryKey: ["roles"],
     queryFn: () => getRole(),
-  })
+  });
 
   const mutation = useMutation({
     mutationFn: () => deleteUsers(deleteId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] })
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       addToast({
-        title: t('messages.success') ?? 'Success',
-        description: t('messages.userDeleteSuccess') ?? '',
-        variant: 'success',
-      })
-      setOpen(false)
+        title: t("messages.success") ?? "Success",
+        description: t("messages.userDeleteSuccess") ?? "",
+        variant: "success",
+      });
+      setOpen(false);
     },
-  })
+  });
 
   const debouncedSetSearch = useMemo(
     () =>
       debounce((value: string) => {
-        setSearch(value)
+        setSearch(value);
       }, 500),
     [],
-  )
+  );
 
   const columns: ColumnDef<any>[] = [
     //   {
@@ -109,67 +126,92 @@ export const UserPage = () => {
     //     enableHiding: false,
     //   },
     {
-      accessorKey: 'name',
+      accessorKey: "name",
       size: 50,
       header: ({ column }) => {
         return (
           <div>
-            {t('users.table.firstName')}
-            <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+            {t("users.table.firstName")}
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
               <ArrowUpDown size={14} />
             </Button>
           </div>
-        )
+        );
       },
       cell: ({ row }) => {
-        return <span className="font-medium">{row.getValue('name')}</span>
+        return <span className="font-medium">{row.getValue("name")}</span>;
       },
     },
     {
-      accessorKey: 'surname',
-      header: () => <span>{t('users.table.lastName')}</span>,
+      accessorKey: "surname",
+      header: () => <span>{t("users.table.lastName")}</span>,
       cell: ({ row }) => {
-        return <span className="font-medium">{row.getValue('surname')}</span>
+        return <span className="font-medium">{row.getValue("surname")}</span>;
       },
       enableSorting: false,
     },
     {
-      accessorKey: 'username',
-      header: () => <span className="hidden sm:table-cell">{t('users.table.username')}</span>,
+      accessorKey: "username",
+      header: () => (
+        <span className="hidden sm:table-cell">
+          {t("users.table.username")}
+        </span>
+      ),
       cell: ({ row }) => {
-        return <span className="font-medium hidden sm:table-cell">{row.getValue('username')}</span>
+        return (
+          <span className="font-medium hidden sm:table-cell">
+            {row.getValue("username")}
+          </span>
+        );
       },
       enableSorting: false,
     },
     {
-      accessorKey: 'email',
-      header: () => <span className="hidden sm:table-cell">{t('users.table.email')}</span>,
+      accessorKey: "email",
+      header: () => (
+        <span className="hidden sm:table-cell">{t("users.table.email")}</span>
+      ),
       cell: ({ row }) => {
-        return <span className="font-medium hidden sm:table-cell">{row.getValue('email')}</span>
+        return (
+          <span className="font-medium hidden sm:table-cell">
+            {row.getValue("email")}
+          </span>
+        );
       },
       enableSorting: false,
     },
     {
-      accessorKey: 'birthDate',
-      header: () => <span className="hidden sm:table-cell">{t('users.table.birthDate')}</span>,
+      accessorKey: "birthDate",
+      header: () => (
+        <span className="hidden sm:table-cell">
+          {t("users.table.birthDate")}
+        </span>
+      ),
       cell: ({ row }) => {
         return (
           <div className="flex flex-col gap-1">
             <span className="w-fit text-gray-800">
-              {row?.original?.userInfo?.birthDate ? formatDate(row.original.userInfo.birthDate) : ''}
+              {row?.original?.userInfo?.birthDate
+                ? formatDate(row.original.userInfo.birthDate)
+                : ""}
             </span>
           </div>
-        )
+        );
       },
       enableSorting: false,
     },
     {
-      accessorFn: row => row.roles?.join(', '),
-      id: 'role',
-      header: () => <span>{t('users.table.role')}</span>,
+      accessorFn: (row) => row.roles?.join(", "),
+      id: "role",
+      header: () => <span>{t("users.table.role")}</span>,
 
       cell: ({ row }) => {
-        const roles = row.original?.roles
+        const roles = row.original?.roles;
 
         return (
           <div className="flex flex-col gap-1">
@@ -179,19 +221,19 @@ export const UserPage = () => {
               </span>
             ))}
           </div>
-        )
+        );
       },
 
       enableSorting: false,
     },
 
     {
-      id: 'actions',
+      id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
         return (
           <div>
-            {hasPermission('VIEW_USER') && (
+            {hasPermission("VIEW_USER") && (
               <Button
                 size="icon"
                 variant="ghost"
@@ -201,7 +243,7 @@ export const UserPage = () => {
                 <Eye size={20} className="text-green-700" />
               </Button>
             )}
-            {hasPermission('MANAGE_USER') && (
+            {hasPermission("MANAGE_USER") && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -211,43 +253,46 @@ export const UserPage = () => {
                 <Edit size={20} className="text-green-700" />
               </Button>
             )}
-            {hasPermission('MANAGE_USER') && (
+            {hasPermission("MANAGE_USER") && (
               <Button
                 variant="ghost"
                 size="icon"
                 className="hover:bg-white"
                 onClick={() => {
-                  setDeleteId(row.original.id)
-                  setOpen(true)
+                  setDeleteId(row.original.id);
+                  setOpen(true);
                 }}
               >
                 <Trash size={20} className="text-red-500" />
               </Button>
             )}
           </div>
-        )
+        );
       },
     },
-  ]
+  ];
   return (
     <div className="p-6">
-      <PageTitle title={t('users.title') ?? ''} subTitle={t('users.description') ?? undefined} />
+      <PageTitle
+        title={t("users.title") ?? ""}
+        subTitle={t("users.description") ?? undefined}
+      />
       <div className="flex  justify-end  items-center my-6">
         <div className="flex gap-4">
           <Button variant="outline">
-            {' '}
+            {" "}
             <Download />
-            {t('common.export')}
+            {t("common.export")}
           </Button>
 
-          {hasPermission('MANAGE_USER') && (
+          {hasPermission("MANAGE_USER") && (
             <Button
               variant="outline"
               className="bg-green-700 text-white hover:bg-green-700"
-              onClick={() => navigate('/user/upsert')}
+              onClick={() => navigate("/user/upsert")}
             >
               <Plus className="text-white" />
-              {t('common.create')}
+              {t("common.create")}
             </Button>
           )}
         </div>
@@ -257,12 +302,12 @@ export const UserPage = () => {
           <div className="flex items-center border border-input rounded-xl overflow-hidden bg-background">
             <div className="relative">
               <Search
-                placeholder={t('users.searchPlaceholder') ?? undefined}
+                placeholder={t("users.searchPlaceholder") ?? undefined}
                 value={globalFilter}
-                onChange={e => {
-                  const value = e.target.value
-                  setGlobalFilter(value)
-                  debouncedSetSearch(value)
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setGlobalFilter(value);
+                  debouncedSetSearch(value);
                 }}
                 className="w-full pl-10 pr-3 border-none py-2"
               />
@@ -273,27 +318,38 @@ export const UserPage = () => {
             </div>
           </div>
 
-          <Button variant={'outline'} className="rounded-xl" size={'default'} onClick={() => setFilter(true)}>
+          <Button
+            variant={"outline"}
+            className="rounded-xl"
+            size={"default"}
+            onClick={() => setFilter(true)}
+          >
             <Funnel />
           </Button>
 
           <Dialog open={filter} onOpenChange={setFilter}>
             <DialogContent>
-              <h4 className="text-sm font-semibold">{t('common.filters')}</h4>
+              <h4 className="text-sm font-semibold">{t("common.filters")}</h4>
               <div>
                 {/* <form> */}
                 <div className="grid w-38 gap-2">
                   <div className="grid grid-cols-6 items-center gap-3 w-full ">
-                    <Label className="col-span-2">{t('users.table.firstName')}</Label>
+                    <Label className="col-span-2">
+                      {t("users.table.firstName")}
+                    </Label>
                     <Input
                       id="maxWidth"
                       className="col-span-4 h-8 w-full"
                       value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                     />
                   </div>
                   <div className="grid grid-cols-6 items-center gap-3">
-                    <Label className="col-span-2">{t('users.table.role')}</Label>
+                    <Label className="col-span-2">
+                      {t("users.table.role")}
+                    </Label>
                     <MultiSelect
                       options={
                         roles?.content.map((role: any) => ({
@@ -303,51 +359,68 @@ export const UserPage = () => {
                       }
                       className="col-span-4 h-8"
                       value={formData.roles}
-                      onChange={values => setFormData({ ...formData, roles: values })}
+                      onChange={(values) =>
+                        setFormData({ ...formData, roles: values })
+                      }
                     ></MultiSelect>
                   </div>
                   <div className="grid grid-cols-6 items-center gap-3">
-                    <Label className="col-span-2">{t('users.table.lastName')}</Label>
+                    <Label className="col-span-2">
+                      {t("users.table.lastName")}
+                    </Label>
                     <Input
                       id="maxWidth"
                       className="col-span-4 h-8"
                       value={formData.surname}
-                      onChange={e => setFormData({ ...formData, surname: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, surname: e.target.value })
+                      }
                     />
                   </div>
                   <div className="grid grid-cols-6 items-center gap-3">
-                    <Label className="col-span-2">{t('users.table.username')}</Label>
+                    <Label className="col-span-2">
+                      {t("users.table.username")}
+                    </Label>
                     <Input
                       id="height"
                       className="col-span-4 h-8"
                       value={formData.username}
-                      onChange={e => setFormData({ ...formData, username: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
                     />
                   </div>
 
                   <div className="grid grid-cols-6 items-center gap-3">
-                    <Label className="col-span-2">{t('users.table.email')}</Label>
+                    <Label className="col-span-2">
+                      {t("users.table.email")}
+                    </Label>
                     <Input
                       id="maxHeight"
                       className="col-span-4 h-8"
                       value={formData.email}
-                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                     />
                   </div>
                 </div>
                 <div className="flex justify-end mt-3 gap-2">
-                  <Button variant="outline" onClick={() => setFormData(initialFormData)}>
-                    {t('common.reset')}
+                  <Button
+                    variant="outline"
+                    onClick={() => setFormData(initialFormData)}
+                  >
+                    {t("common.reset")}
                   </Button>
                   <Button
                     variant="default"
                     className="bg-green-700 hover:bg-green-700"
                     onClick={() => {
-                      refetch()
-                      setFilter(false)
+                      refetch();
+                      setFilter(false);
                     }}
                   >
-                    {t('common.apply')}
+                    {t("common.apply")}
                   </Button>
                 </div>
                 {/* </form> */}
@@ -357,7 +430,7 @@ export const UserPage = () => {
         </div>
       </div>
       <div className="bg-white">
-        {' '}
+        {" "}
         {data && (
           <DataTable
             data={data.content}
@@ -378,20 +451,27 @@ export const UserPage = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <div className="p-4">
-            <h2 className="text-lg font-semibold mb-4">{t('users.deleteUser')}</h2>
-            <p className="text-sm text-muted-foreground mb-4">{t('users.confirmDelete')}</p>
+            <h2 className="text-lg font-semibold mb-4">
+              {t("users.deleteUser")}
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("users.confirmDelete")}
+            </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setOpen(false)}>
-                {t('common.cancel')}
+                {t("common.cancel")}
               </Button>
-              <Button className="bg-green-700 text-white hover:bg-green-700" onClick={() => mutation.mutate()}>
-                {t('common.save')}
+              <Button
+                className="bg-green-700 text-white hover:bg-green-700"
+                onClick={() => mutation.mutate()}
+              >
+                {t("common.save")}
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
-export default UserPage
+  );
+};
+export default UserPage;

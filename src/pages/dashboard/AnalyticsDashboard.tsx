@@ -12,6 +12,8 @@ import {
   getAuthorities,
   getRole,
 } from "../../services/roleService";
+import type { User } from "../../types/user";
+import type { RoleResponse } from "../../types/role";
 
 const AnalyticsDashboard = () => {
 
@@ -57,8 +59,8 @@ const AnalyticsDashboard = () => {
   const roleUsageData = useMemo(() => {
     const roleCounter = new Map();
 
-    users.forEach((user) => {
-      user.roles?.forEach((role) => {
+    users.forEach((user:User) => {
+      user.roles?.forEach((role:RoleResponse) => {
         const currentCount = roleCounter.get(role.id)?.usersCount ?? 0;
 
         roleCounter.set(role.id, {

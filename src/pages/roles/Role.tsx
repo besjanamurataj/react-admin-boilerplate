@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteRole, getRole } from "../../services/roleService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import { formatRole } from "../../utils/formatRole";
 import debounce from "debounce";
@@ -37,7 +37,6 @@ export const RolePage = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
-
   const debouncedSetSearch = useMemo(
     () =>
       debounce((value: string) => {
@@ -46,10 +45,10 @@ export const RolePage = () => {
     [],
   );
   useEffect(() => {
-  return () => {
-    debouncedSetSearch.clear?.()
-  }
-}, [debouncedSetSearch])
+    return () => {
+      debouncedSetSearch.clear?.();
+    };
+  }, [debouncedSetSearch]);
 
   // Fetch roles me query
   const { data, isLoading } = useQuery({

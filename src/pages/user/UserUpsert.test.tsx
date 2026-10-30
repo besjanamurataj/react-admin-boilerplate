@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import UserUpsertPage from "./UserUpsert";
 import { createUser, getById, updateUsers } from "../../services/useService";
 import { getRole } from "../../services/roleService";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { userSchema } from "../../types/validations/schema";
 
 vi.mock("../../services/useService", () => ({

@@ -15,7 +15,7 @@ import {
 } from "../../services/departmentService";
 import type { DepartmentRequest } from "../../types/department";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { departmentSchema } from "../../types/validations/schema";
 
 export const DepartmentUpsertPage = () => {
@@ -136,7 +136,6 @@ export const DepartmentUpsertPage = () => {
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4 grid grid-cols-12 gap-6 mt-4">
-
           <div className="col-span-6">
             <Label
               htmlFor="name"
@@ -158,9 +157,7 @@ export const DepartmentUpsertPage = () => {
             />
 
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.name}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
             )}
           </div>
 
@@ -185,9 +182,7 @@ export const DepartmentUpsertPage = () => {
             />
 
             {errors.code && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.code}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.code}</p>
             )}
           </div>
 
@@ -207,26 +202,17 @@ export const DepartmentUpsertPage = () => {
                   value: university.value,
                 })) || []
               }
-              value={
-                formData.universityId
-                  ? [formData.universityId]
-                  : []
-              }
+              value={formData.universityId ? [formData.universityId] : []}
               onChange={(values) => {
                 setFormData({
                   ...formData,
-                  universityId:
-                    values.length > 0
-                      ? Number(values[0])
-                      : 0,
+                  universityId: values.length > 0 ? Number(values[0]) : 0,
                 });
               }}
             />
 
             {errors.universityId && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.universityId}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.universityId}</p>
             )}
           </div>
 
@@ -240,9 +226,7 @@ export const DepartmentUpsertPage = () => {
 
             <Textarea
               id="description"
-              placeholder={
-                t("departments.descriptionPlaceholder") || ""
-              }
+              placeholder={t("departments.descriptionPlaceholder") || ""}
               value={formData.description}
               onChange={(event) =>
                 setFormData({
@@ -253,9 +237,7 @@ export const DepartmentUpsertPage = () => {
             />
 
             {errors.description && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.description}
-              </p>
+              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
             )}
           </div>
 
@@ -274,9 +256,7 @@ export const DepartmentUpsertPage = () => {
               className="bg-green-700 text-white hover:bg-green-700"
               disabled={mutation.isPending}
             >
-              {params.id
-                ? t("common.update")
-                : t("common.create")}
+              {params.id ? t("common.update") : t("common.create")}
             </Button>
           </div>
         </div>

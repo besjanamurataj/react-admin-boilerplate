@@ -13,7 +13,7 @@ import {
 } from "../../services/universityService";
 import type { UniversityRequest } from "../../types/university";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 
 export const UniversityUpsertPage = () => {
   const [formData, setFormData] = useState<UniversityRequest>({

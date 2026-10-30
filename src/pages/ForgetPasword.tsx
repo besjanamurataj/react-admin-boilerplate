@@ -11,7 +11,7 @@ import Header from '../layouts/Header'
 export const ForgetPasswordPage = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<{ email: string }>({
     email: '',
   })
 
@@ -28,7 +28,9 @@ export const ForgetPasswordPage = () => {
             <div>
               <Label>{t('common.emailPlaceholder')}</Label>
               <Input
-                type="text"
+                type="email"
+                autoComplete="email"
+                required
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
               />

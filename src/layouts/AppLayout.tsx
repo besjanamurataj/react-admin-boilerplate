@@ -14,7 +14,6 @@ export type AppShellLayoutProps = {
 };
 
 export const AppShellLayout: React.FC<AppShellLayoutProps> = ({
-  children,
   menuItems,
   menuTitle,
   menuWidth,

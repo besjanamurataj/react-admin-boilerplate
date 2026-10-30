@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +13,7 @@ import { login } from "../services/authService";
 import { loginSchema } from "../types/validations/schema";
 import type { LoginRequest } from "../types/auth";
 
-import { useToast } from "../contexts/ToastContex";
+import { useToast } from "../contexts/toast/ToastContex";
 import { useAuth } from "../hooks/useAuth";
 
 export const LoginPage = () => {
@@ -37,9 +36,7 @@ export const LoginPage = () => {
     onSuccess: (response) => {
       localStorage.setItem("jwtToken", response.token);
 
-      const decoded = JSON.parse(
-        atob(response.token.split(".")[1])
-      );
+      const decoded = JSON.parse(atob(response.token.split(".")[1]));
 
       const user = {
         email: decoded.sub,
@@ -71,9 +68,7 @@ export const LoginPage = () => {
     },
   });
 
-  const handleSubmit = (
-    event: React.FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const result = loginSchema.safeParse(formData);
@@ -108,9 +103,7 @@ export const LoginPage = () => {
 
             <form onSubmit={handleSubmit} noValidate>
               <div>
-                <Label htmlFor="email">
-                  {t("common.emailPlaceholder")}
-                </Label>
+                <Label htmlFor="email">{t("common.emailPlaceholder")}</Label>
 
                 <Input
                   id="email"
@@ -123,9 +116,7 @@ export const LoginPage = () => {
                     })
                   }
                   aria-invalid={Boolean(errors.email)}
-                  aria-describedby={
-                    errors.email ? "email-error" : undefined
-                  }
+                  aria-describedby={errors.email ? "email-error" : undefined}
                 />
 
                 {errors.email && (
@@ -156,9 +147,7 @@ export const LoginPage = () => {
                   }
                   aria-invalid={Boolean(errors.password)}
                   aria-describedby={
-                    errors.password
-                      ? "password-error"
-                      : undefined
+                    errors.password ? "password-error" : undefined
                   }
                 />
 
@@ -180,9 +169,7 @@ export const LoginPage = () => {
                   disabled={mutation.isPending}
                   className="flex w-full mt-4 bg-green-700 hover:bg-green-700"
                 >
-                  {mutation.isPending
-                    ? t("common.loading")
-                    : t("common.login")}
+                  {mutation.isPending ? t("common.loading") : t("common.login")}
                 </Button>
               </div>
 
@@ -191,9 +178,7 @@ export const LoginPage = () => {
                   variant="link"
                   type="button"
                   className="mt-4"
-                  onClick={() =>
-                    navigate("/forgot-password")
-                  }
+                  onClick={() => navigate("/forgot-password")}
                 >
                   {t("login.forgotPassword")}
                 </Button>

@@ -17,7 +17,7 @@ import {
 import type { RoleRequest } from "../../types/role";
 import { Textarea } from "../../components/ui/Textarea";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 
 export const RoleUpsertPage = () => {
   const [formData, setFormData] = useState<RoleRequest>({

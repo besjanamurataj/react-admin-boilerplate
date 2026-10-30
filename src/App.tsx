@@ -1,13 +1,12 @@
+import { BrowserRouter } from "react-router-dom";
+import { Navigator } from "./navigator";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "./i18n/config";
+import { AuthProvider } from "./contexts/AuthContex";
+import { ToastProvider } from "./contexts/toast/ToastContex";
+import { ToastViewport } from "./components/ui/toast/ToastView";
 
-import { BrowserRouter } from 'react-router-dom'
-import { Navigator } from './navigator'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import './i18n/config'
-import { AuthProvider } from './contexts/AuthContex'
-import { ToastProvider } from './contexts/ToastContex'
-import { ToastViewport } from './components/ui/toast/ToastView'
-
-const queryCient = new QueryClient()
+const queryCient = new QueryClient();
 const App = () => {
   return (
     <AuthProvider>
@@ -20,7 +19,7 @@ const App = () => {
         </QueryClientProvider>
       </ToastProvider>
     </AuthProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

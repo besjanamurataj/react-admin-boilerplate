@@ -22,10 +22,10 @@ import {
   deleteStudent,
   getDepartments,
   getStudents,
-  exportStudentsPdf
+  exportStudentsPdf,
 } from "../../services/studentService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/ToastContex";
+import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -157,18 +157,13 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.firstName")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("firstName")}
-        </span>
+        <span className="font-medium">{row.getValue("firstName")}</span>
       ),
     },
     {
@@ -177,18 +172,13 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.lastName")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("lastName")}
-        </span>
+        <span className="font-medium">{row.getValue("lastName")}</span>
       ),
     },
     {
@@ -197,18 +187,13 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.email")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("email")}
-        </span>
+        <span className="font-medium">{row.getValue("email")}</span>
       ),
     },
     {
@@ -217,18 +202,13 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.birthDate")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("birthDate")}
-        </span>
+        <span className="font-medium">{row.getValue("birthDate")}</span>
       ),
     },
     {
@@ -237,19 +217,14 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.active")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
         <span className="font-medium">
-          {row.original.active
-            ? t("common.yes")
-            : t("common.no")}
+          {row.original.active ? t("common.yes") : t("common.no")}
         </span>
       ),
     },
@@ -259,18 +234,13 @@ export const StudentPage = () => {
         <div className="flex items-center justify-between">
           {t("students.table.department")}
 
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting()}
-          >
+          <Button variant="ghost" onClick={() => column.toggleSorting()}>
             <ArrowUpDown size={14} />
           </Button>
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">
-          {row.getValue("departmentName")}
-        </span>
+        <span className="font-medium">{row.getValue("departmentName")}</span>
       ),
     },
     {
@@ -283,9 +253,7 @@ export const StudentPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/student/view/${row.original.id}`)
-              }
+              onClick={() => navigate(`/student/view/${row.original.id}`)}
             >
               <Eye size={20} className="text-green-700" />
             </Button>
@@ -295,9 +263,7 @@ export const StudentPage = () => {
             <Button
               size="icon"
               variant="ghost"
-              onClick={() =>
-                navigate(`/student/edit/${row.original.id}`)
-              }
+              onClick={() => navigate(`/student/edit/${row.original.id}`)}
             >
               <Edit size={20} className="text-green-700" />
             </Button>
@@ -370,10 +336,7 @@ export const StudentPage = () => {
       />
 
       <div className="flex justify-end gap-4 my-6">
-        <Button 
-        variant="outline"
-        onClick={handleExportPdf}
-        >
+        <Button variant="outline" onClick={handleExportPdf}>
           <Download />
           {t("common.export")}
         </Button>
@@ -423,9 +386,7 @@ export const StudentPage = () => {
 
           <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
             <DialogContent>
-              <h4 className="text-sm font-semibold">
-                {t("common.filters")}
-              </h4>
+              <h4 className="text-sm font-semibold">{t("common.filters")}</h4>
 
               <div className="grid gap-4 mt-4">
                 <div className="grid grid-cols-6 items-center gap-3">
@@ -502,23 +463,14 @@ export const StudentPage = () => {
                       })
                     }
                   >
-                    <option value="">
-                      {t("common.all")}
-                    </option>
-                    <option value="true">
-                      {t("common.yes")}
-                    </option>
-                    <option value="false">
-                      {t("common.no")}
-                    </option>
+                    <option value="">{t("common.all")}</option>
+                    <option value="true">{t("common.yes")}</option>
+                    <option value="false">{t("common.no")}</option>
                   </select>
                 </div>
 
                 <div className="grid grid-cols-6 items-center gap-3">
-                  <Label
-                    htmlFor="departmentFilter"
-                    className="col-span-2"
-                  >
+                  <Label htmlFor="departmentFilter" className="col-span-2">
                     {t("students.table.department")}
                   </Label>
 
@@ -533,26 +485,17 @@ export const StudentPage = () => {
                       })
                     }
                   >
-                    <option value={0}>
-                      {t("common.all")}
-                    </option>
+                    <option value={0}>{t("common.all")}</option>
 
                     {departments?.map(
-                      (department: {
-                        value: number;
-                        label: string;
-                      }) => (
-                        <option
-                          key={department.value}
-                          value={department.value}
-                        >
+                      (department: { value: number; label: string }) => (
+                        <option key={department.value} value={department.value}>
                           {department.label}
                         </option>
                       ),
                     )}
                   </select>
                 </div>
-
               </div>
 
               <div className="flex justify-end mt-4 gap-2">

@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import LoginPage from "./Login";
 import { login } from "../services/authService";
-import { useToast } from "../contexts/ToastContex";
+import { useToast } from "../contexts/toast/ToastContex";
 import { useAuth } from "../hooks/useAuth";
 
 const { mockNavigate } = vi.hoisted(() => ({
