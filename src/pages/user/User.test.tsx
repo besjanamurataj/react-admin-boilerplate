@@ -3,9 +3,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getUsers, deleteUsers } from "../../services/useService";
 import { getRole } from "../../services/roleService";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { useAuth } from "../../hooks/useAuth";
 import UserPage from "./User";
+import { useToast } from "../../contexts/toast/ToastProvider";
+import type { User } from "../../types/user";
 
 vi.mock("../../services/useService", () => ({
   getUsers: vi.fn(),
@@ -88,7 +89,7 @@ vi.mock("../../components/ui/Dialog", () => ({
 describe("UserPage", () => {
   let queryClient: QueryClient;
 
-  const mockUsers = {
+  const mockUsers:any = {
     content: [
       {
         id: 1,

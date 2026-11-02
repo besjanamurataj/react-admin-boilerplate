@@ -82,9 +82,9 @@ export async function getById({
 }: {
   id: string;
   signal?: AbortSignal;
-}): Promise<UserResponse[]> {
+}): Promise<UserResponse> {
   try {
-    const response = await HttpClient.get<UserResponse[]>(API_URL + `/${id}`, {
+    const response = await HttpClient.get<UserResponse>(API_URL + `/${id}`, {
       signal,
     });
     return response;

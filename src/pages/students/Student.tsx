@@ -20,7 +20,6 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteStudent,
-  getDepartments,
   getStudents,
   exportStudentsPdf,
 } from "../../services/studentService";
@@ -30,6 +29,8 @@ import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import type { StudentResponse } from "../../types/student";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import { getDepartments } from "../../services/departmentService";
+import type { DepartmentResponse } from "../../types/department";
 
 export const StudentPage = () => {
   const { t } = useTranslation();
@@ -82,8 +83,12 @@ export const StudentPage = () => {
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: getDepartments,
+    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
   });
+  const departmentOptions = departments?.map((department) => ({
+    value: department.id,
+    label: department.name,
+  }));
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -487,13 +492,11 @@ export const StudentPage = () => {
                   >
                     <option value={0}>{t("common.all")}</option>
 
-                    {departments?.map(
-                      (department: { value: number; label: string }) => (
-                        <option key={department.value} value={department.value}>
-                          {department.label}
-                        </option>
-                      ),
-                    )}
+                    {departmentOptions?.map((department) => (
+                      <option key={department.value} value={department.value}>
+                        {department.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

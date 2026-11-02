@@ -8,15 +8,16 @@ import { studentSchema } from "../../types/validations/schema";
 import type { StudentRequest, StudentResponse } from "../../types/student";
 import {
   createStudent,
-  getDepartments,
   getStudentById,
   updateStudent,
 } from "../../services/studentService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
 import type { ZodIssue } from "zod";
+import { getDepartments } from "../../services/departmentService";
+import type { DepartmentResponse } from "../../types/department";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const StudentUpsertPage = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export const StudentUpsertPage = () => {
 
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: getDepartments,
+    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
   });
 
   useEffect(() => {

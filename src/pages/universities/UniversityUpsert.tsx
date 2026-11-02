@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -15,13 +15,8 @@ import type { UniversityRequest } from "../../types/university";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../../contexts/toast/ToastProvider";
 export const UniversityUpsertPage = () => {
-  const [formData, setFormData] = useState<UniversityRequest>({
-    name: "",
-    code: "",
-    city: "",
-    email: "",
-  });
-
+  const [editedFormData, setEditedFormData] =
+    useState<UniversityRequest | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const queryClient = useQueryClient();
@@ -49,16 +44,12 @@ export const UniversityUpsertPage = () => {
     enabled: !!params.id,
   });
 
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        name: data.name ?? "",
-        code: data.code ?? "",
-        city: data.city ?? "",
-        email: data.email ?? "",
-      });
-    }
-  }, [data]);
+  const formData: UniversityRequest = editedFormData ?? {
+    name: data?.name ?? "",
+    code: data?.code ?? "",
+    city: data?.city ?? "",
+    email: data?.email ?? "",
+  };
 
   const mutation = useMutation({
     mutationFn: (data: UniversityRequest) =>
@@ -115,6 +106,13 @@ export const UniversityUpsertPage = () => {
     mutation.mutate(formData);
   };
 
+  const updateFormData = (field: keyof UniversityRequest, value: string) => {
+    setEditedFormData({
+      ...formData,
+      [field]: value,
+    });
+  };
+
   return (
     <div className="p-6">
       <PageTitle
@@ -136,12 +134,7 @@ export const UniversityUpsertPage = () => {
               id="name"
               placeholder={t("universities.namePlaceholder") || ""}
               value={formData.name}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  name: event.target.value,
-                })
-              }
+              onChange={(event) => updateFormData("name", event.target.value)}
             />
 
             {errors.name && (
@@ -161,12 +154,7 @@ export const UniversityUpsertPage = () => {
               id="code"
               placeholder={t("universities.codePlaceholder") || ""}
               value={formData.code}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  code: event.target.value,
-                })
-              }
+              onChange={(event) => updateFormData("name", event.target.value)}
             />
 
             {errors.code && (
@@ -186,12 +174,7 @@ export const UniversityUpsertPage = () => {
               id="city"
               placeholder={t("universities.cityPlaceholder") || ""}
               value={formData.city}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  city: event.target.value,
-                })
-              }
+              onChange={(event) => updateFormData("city", event.target.value)}
             />
 
             {errors.city && (
@@ -212,12 +195,7 @@ export const UniversityUpsertPage = () => {
               type="email"
               placeholder={t("universities.emailPlaceholder") || ""}
               value={formData.email}
-              onChange={(event) =>
-                setFormData({
-                  ...formData,
-                  email: event.target.value,
-                })
-              }
+              onChange={(event) => updateFormData("email", event.target.value)}
             />
 
             {errors.email && (

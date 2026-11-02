@@ -5,18 +5,18 @@ import { Label } from "../../components/ui/Label";
 import { MultiSelect } from "../../components/ui/MultiSelect";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  getDepartments,
-  getStudentById,
-} from "../../services/studentService";
+import { getStudentById } from "../../services/studentService";
 import { useTranslation } from "react-i18next";
+import type { DepartmentResponse } from "../../types/department";
+import { getDepartments } from "../../services/departmentService";
+import type { StudentResponse } from "../../types/student";
 
 export const ViewStudentPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<StudentResponse>({
     queryKey: ["students", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) {
@@ -44,7 +44,7 @@ export const ViewStudentPage = () => {
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: getDepartments,
+    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
   });
 
   return (
@@ -153,9 +153,9 @@ export const ViewStudentPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                departments?.map((department: any) => ({
-                  label: department.label,
-                  value: department.value,
+                departments?.map((department: DepartmentResponse) => ({
+                  label: department.name,
+                  value: department.id,
                 })) || []
               }
               value={

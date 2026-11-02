@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { MultiSelect } from "../../components/ui/MultiSelect";
-import type { User } from "../../types/user";
+import type { User, UserResponse } from "../../types/user";
 import { userSchema } from "../../types/validations/schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
@@ -41,7 +41,7 @@ export const UserUpsertPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data } = useQuery<User>({
+  const { data } = useQuery<UserResponse>({
     queryKey: ["user", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) throw new Error("No ID provided");
@@ -54,6 +54,10 @@ export const UserUpsertPage = () => {
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
+  const rolesOptions = roles?.map((role) => ({
+    label: role.name,
+    value: role.id,
+  }));
 
   useEffect(() => {
     if (data) {
@@ -107,7 +111,7 @@ export const UserUpsertPage = () => {
     const result = userSchema.safeParse(formData);
     console.log(result, "result");
     if (!result.success) {
-      const fieldErrors: any = {};
+      const fieldErrors: Record<string, string> = {};
 
       result.error.issues.forEach((issue) => {
         if (issue.path.length === 2) {
@@ -243,10 +247,7 @@ export const UserUpsertPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || "Select Options"}
               options={
-                roles?.content?.map((role: any) => ({
-                  label: role.name,
-                  value: role.id,
-                })) || []
+                rolesOptions || []
               }
               value={formData.roles}
               onChange={(values) => setFormData({ ...formData, roles: values })}

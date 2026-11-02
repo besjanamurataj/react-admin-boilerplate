@@ -120,7 +120,7 @@ export async function getStudentById({
   signal?: AbortSignal;
 }) {
   try {
-    const response = await HttpClient.get(`${API_URL}/${id}`, {
+    const response = await HttpClient.get<StudentResponse>(`${API_URL}/${id}`, {
       signal,
     });
 

@@ -90,6 +90,10 @@ export const UserPage = () => {
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
+  const rolesOptions = roles?.map((role) => ({
+    label: role.name,
+    value: role.id,
+  }));
 
   const mutation = useMutation({
     mutationFn: (id: number) => deleteUsers(id),
@@ -223,8 +227,8 @@ export const UserPage = () => {
 
         return (
           <div className="flex flex-col gap-1">
-            {roles?.map((role: any) => (
-              <span key={role} className="w-fit text-gray-800">
+            {roles?.map((role: { name: string }) => (
+              <span key={role.name} className="w-fit text-gray-800">
                 {formatRole(role.name)}
               </span>
             ))}
@@ -360,10 +364,7 @@ export const UserPage = () => {
                     </Label>
                     <MultiSelect
                       options={
-                        roles?.map((role: any) => ({
-                          label: role.name,
-                          value: role.id,
-                        })) || []
+                        rolesOptions   || []
                       }
                       className="col-span-4 h-8"
                       value={formData.roles}
