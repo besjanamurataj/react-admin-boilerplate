@@ -1,4 +1,7 @@
-import type { UniversityRequest, UniversityResponse } from "../types/university";
+import type {
+  UniversityRequest,
+  UniversityResponse,
+} from "../types/university";
 import { HttpClient } from "../libs/https/http-client";
 
 const API_URL = "/universities";
@@ -22,7 +25,7 @@ export async function getUniversities(
   page?: number,
   size?: number,
   sorting?: string[],
-): Promise<UniversityResponse[]> {
+): Promise<UniversityResponse> {
   try {
     const query = new URLSearchParams();
 
@@ -47,7 +50,7 @@ export async function getUniversities(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<UniversityResponse[]>(urlWithQuery);
+    const response = await HttpClient.get<UniversityResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {
@@ -95,9 +98,12 @@ export async function getUniversityById({
   signal?: AbortSignal;
 }): Promise<UniversityResponse> {
   try {
-    const response = await HttpClient.get<UniversityResponse>(`${API_URL}/${id}`, {
-      signal,
-    });
+    const response = await HttpClient.get<UniversityResponse>(
+      `${API_URL}/${id}`,
+      {
+        signal,
+      },
+    );
 
     return response;
   } catch (error: unknown) {

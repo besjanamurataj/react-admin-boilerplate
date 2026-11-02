@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { UniversityResponse } from "../../types/university";
+import type { University } from "../../types/university";
 import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const UniversityPage = () => {
@@ -106,7 +106,7 @@ export const UniversityPage = () => {
     },
   });
 
-  const columns: ColumnDef<UniversityResponse>[] = [
+  const columns: ColumnDef<University>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (

@@ -31,7 +31,7 @@ export async function getEnrollments(
   universityId?: number,
   departmentId?: number,
   studentId?: number,
-) {
+): Promise<EnrollmentResponse> {
   try {
     const query = new URLSearchParams();
 
@@ -73,7 +73,7 @@ export async function getEnrollments(
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
     const response =
-      await HttpClient.get<BatchEnrollmentResponse>(urlWithQuery);
+      await HttpClient.get<EnrollmentResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {

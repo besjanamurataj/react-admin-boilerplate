@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { StudentResponse } from "../../types/student";
+import type { Student } from "../../types/student";
 import { useToast } from "../../contexts/toast/ToastProvider";
 import { getDepartments } from "../../services/departmentService";
 import type { DepartmentResponse } from "../../types/department";
@@ -83,9 +83,9 @@ export const StudentPage = () => {
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
+    queryFn: (): Promise<DepartmentResponse> => getDepartments(),
   });
-  const departmentOptions = departments?.map((department) => ({
+  const departmentOptions = departments?.content?.map((department) => ({
     value: department.id,
     label: department.name,
   }));
@@ -155,7 +155,7 @@ export const StudentPage = () => {
     },
   });
 
-  const columns: ColumnDef<StudentResponse>[] = [
+  const columns: ColumnDef<Student>[] = [
     {
       accessorKey: "firstName",
       header: ({ column }) => (

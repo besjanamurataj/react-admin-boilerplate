@@ -27,7 +27,7 @@ export async function getStudents(
   birthDate?: string,
   active?: boolean,
   departmentId?: number,
-): Promise<StudentResponse[]> {
+): Promise<StudentResponse> {
   try {
     const query = new URLSearchParams();
 
@@ -72,7 +72,7 @@ export async function getStudents(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<StudentResponse[]>(urlWithQuery);
+    const response = await HttpClient.get<StudentResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {

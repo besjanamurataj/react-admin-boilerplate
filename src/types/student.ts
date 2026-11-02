@@ -7,7 +7,7 @@ export interface StudentRequest {
   departmentId: number;
 }
 
-export interface StudentResponse {
+export interface Student{
   id: number;
   firstName: string;
   lastName: string;
@@ -16,4 +16,12 @@ export interface StudentResponse {
   active: boolean;
   departmentId: number;
   departmentName: string;
+}
+export interface StudentResponse {
+  content: Student[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }

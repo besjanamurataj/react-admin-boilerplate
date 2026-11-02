@@ -39,6 +39,7 @@ import type { ColumnDef, SortingState } from "@tanstack/react-table";
 
 import type {
   BatchEnrollmentResponse,
+  Enrollment,
   EnrollmentResponse,
 } from "../../types/enrollment";
 import { useToast } from "../../contexts/toast/ToastProvider";
@@ -118,27 +119,27 @@ export const EnrollmentPage = () => {
 
   const { data: universities } = useQuery({
     queryKey: ["universities-options"],
-    queryFn: (): Promise<UniversityResponse[]> => getUniversities(),
+    queryFn: (): Promise<UniversityResponse> => getUniversities(),
   });
-  const universitiesOptions = universities?.map((university) => ({
+  const universitiesOptions = universities?.content.map((university) => ({
     value: university.id,
     label: university.name,
   }));
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
+    queryFn: (): Promise<DepartmentResponse> => getDepartments(),
   });
-  const departmentsOptions = departments?.map((department) => ({
+  const departmentsOptions = departments?.content.map((department) => ({
     value: department.id,
     label: department.name,
   }));
 
   const { data: students } = useQuery({
     queryKey: ["students-options"],
-    queryFn: (): Promise<StudentResponse[]> => getStudents(),
+    queryFn: (): Promise<StudentResponse> => getStudents(),
   });
-  const studentsOptions = students?.map((student) => ({
+  const studentsOptions = students?.content?.map((student) => ({
     value: student.id,
     label: `${student.firstName} ${student.lastName}`,
   }));
@@ -243,7 +244,7 @@ export const EnrollmentPage = () => {
     },
   });
 
-  const columns: ColumnDef<EnrollmentResponse>[] = [
+  const columns: ColumnDef<Enrollment>[] = [
     {
       accessorKey: "studentFirstName",
 

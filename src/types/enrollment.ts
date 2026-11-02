@@ -3,9 +3,9 @@ export interface EnrollmentRequest {
   universityId: number;
   departmentId: number;
   studentId: number;
-};
+}
 
-export interface EnrollmentResponse {
+export interface Enrollment {
   id: number;
   enrollmentDate: string;
 
@@ -18,11 +18,11 @@ export interface EnrollmentResponse {
   studentId: number;
   studentFirstName: string;
   studentLastName: string;
-};
+}
 
 export type BatchEnrollmentRequest = {
   departmentId: number;
-  enrollmentDate:  string;
+  enrollmentDate: string;
 };
 
 export type BatchEnrollmentResponse = {
@@ -36,4 +36,13 @@ export type BatchEnrollmentResponse = {
   alreadyEnrolled: number;
   successfullyEnrolled: number;
   failed: number;
+};
+
+export interface EnrollmentResponse {
+  content: Enrollment[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }
