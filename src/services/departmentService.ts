@@ -3,7 +3,6 @@ import type {
   DepartmentResponse,
 } from "../types/department";
 import { HttpClient } from "../libs/https/http-client";
-import type { UniversityResponse } from "../types/university";
 
 const API_URL = "/departments";
 
@@ -26,7 +25,7 @@ export async function getDepartments(
   page?: number,
   size?: number,
   sorting?: string[],
-) {
+): Promise<DepartmentResponse[]> {
   try {
     const query = new URLSearchParams();
 
@@ -111,27 +110,6 @@ export async function getDepartmentById({
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data
         ?.message || "Failed to fetch department",
-      { cause: error },
-    );
-  }
-}
-
-export async function getUniversities() {
-  try {
-    const response = await HttpClient.get<UniversityResponse[]>(
-      "/universities?number=1&size=100",
-    );
-
-    const universities = Array.isArray(response) ? response : response || [];
-
-    return universities.map((university: UniversityResponse) => ({
-      value: university.id,
-      label: university.name,
-    }));
-  } catch (error: unknown) {
-    throw new Error(
-      (error as { response?: { data?: { message?: string } } })?.response?.data
-        ?.message || "Failed to fetch universities",
       { cause: error },
     );
   }

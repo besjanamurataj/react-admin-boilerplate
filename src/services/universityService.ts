@@ -22,7 +22,7 @@ export async function getUniversities(
   page?: number,
   size?: number,
   sorting?: string[],
-) {
+): Promise<UniversityResponse[]> {
   try {
     const query = new URLSearchParams();
 
@@ -47,7 +47,7 @@ export async function getUniversities(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<UniversityResponse>(urlWithQuery);
+    const response = await HttpClient.get<UniversityResponse[]>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {

@@ -1,4 +1,4 @@
-import type { PasswordUpdate, User } from "../types/user";
+import type { PasswordUpdate, User, UserResponse } from "../types/user";
 import { HttpClient } from "../libs/https/http-client";
 import type { Profile } from "../types/profile";
 
@@ -16,7 +16,7 @@ export async function getUsers(
   surname?: string,
   email?: string,
   roles?: string[],
-  page?: any,
+  page?: number,
   size?: number,
   sorting?: string[],
 ) {
@@ -41,10 +41,14 @@ export async function getUsers(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response = await HttpClient.get<UserResponse>(urlWithQuery);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to fetch users");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch users",
+      { cause: error },
+    );
   }
 }
 
@@ -52,8 +56,12 @@ export async function deleteUsers(id: number) {
   try {
     const response = await HttpClient.delete(API_URL + `/${id}`);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to delete user");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete user",
+      { cause: error },
+    );
   }
 }
 export async function updateUsers(id: string, user: User) {

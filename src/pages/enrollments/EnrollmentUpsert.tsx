@@ -13,17 +13,20 @@ import type {
 
 import {
   createEnrollment,
-  getDepartments,
   getEnrollmentById,
-  getStudents,
-  getUniversities,
   updateEnrollment,
 } from "../../services/enrollmentService";
+import { getDepartments } from "../../services/departmentService";
+import { getStudents } from "../../services/studentService";
+import { getUniversities } from "../../services/universityService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import type { ZodIssue } from "zod";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import type { UniversityResponse } from "../../types/university";
+import type { DepartmentResponse } from "../../types/department";
+import type { StudentResponse } from "../../types/student";
 
 export const EnrollmentUpsertPage = () => {
   const navigate = useNavigate();
@@ -64,18 +67,37 @@ export const EnrollmentUpsertPage = () => {
 
   const { data: universities, isLoading: isUniversitiesLoading } = useQuery({
     queryKey: ["universities-options"],
-    queryFn: getUniversities,
+    queryFn: () => getUniversities(),
   });
+
+  const universityOptions =
+    universities?.map((university: UniversityResponse | undefined) => ({
+      label: university?.name,
+      value: university?.id,
+    })) ?? [];
 
   const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: getDepartments,
+    queryFn: () => getDepartments(),
   });
+  const departmentOptions =
+    departments?.map((department: DepartmentResponse | undefined) => ({
+      label: department?.name,
+      value: department?.id,
+    })) ?? [];
 
   const { data: students, isLoading: isStudentsLoading } = useQuery({
     queryKey: ["students-options"],
-    queryFn: getStudents,
+    queryFn: () => getStudents(),
   });
+
+  const studentOptions =
+    students
+      ?.filter((student): student is StudentResponse => student !== undefined)
+      .map((student) => ({
+        label: `${student.firstName} ${student.lastName}`,
+        value: student.id,
+      })) ?? [];
 
   useEffect(() => {
     if (!enrollmentData) {
@@ -258,7 +280,7 @@ export const EnrollmentUpsertPage = () => {
             >
               <option value={0}>{t("enrollments.studentPlaceholder")}</option>
 
-              {students?.map((student: { value: number; label: string }) => (
+              {studentOptions?.map((student) => (
                 <option key={student.value} value={student.value}>
                   {student.label}
                 </option>
@@ -301,13 +323,11 @@ export const EnrollmentUpsertPage = () => {
                 {t("enrollments.universityPlaceholder")}
               </option>
 
-              {universities?.map(
-                (university: { value: number; label: string }) => (
-                  <option key={university.value} value={university.value}>
-                    {university.label}
-                  </option>
-                ),
-              )}
+              {universityOptions?.map((university) => (
+                <option key={university.value} value={university.value}>
+                  {university.label}
+                </option>
+              ))}
             </select>
 
             {errors.universityId && (
@@ -346,13 +366,11 @@ export const EnrollmentUpsertPage = () => {
                 {t("enrollments.departmentPlaceholder")}
               </option>
 
-              {departments?.map(
-                (department: { value: number; label: string }) => (
-                  <option key={department.value} value={department.value}>
-                    {department.label}
-                  </option>
-                ),
-              )}
+              {departmentOptions?.map((department) => (
+                <option key={department?.value} value={department?.value}>
+                  {department?.label}
+                </option>
+              ))}
             </select>
 
             {errors.departmentId && (

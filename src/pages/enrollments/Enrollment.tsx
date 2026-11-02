@@ -27,10 +27,7 @@ import {
   deleteEnrollment,
   exportEnrollmentsCsv,
   exportEnrollmentsPdf,
-  getDepartments,
   getEnrollments,
-  getStudents,
-  getUniversities,
 } from "../../services/enrollmentService";
 
 import { useTranslation } from "react-i18next";
@@ -45,6 +42,12 @@ import type {
   EnrollmentResponse,
 } from "../../types/enrollment";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import { getDepartments } from "../../services/departmentService";
+import { getStudents } from "../../services/studentService";
+import type { DepartmentResponse } from "../../types/department";
+import type { UniversityResponse } from "../../types/university";
+import type { StudentResponse } from "../../types/student";
+import { getUniversities } from "../../services/universityService";
 
 export const EnrollmentPage = () => {
   const { t } = useTranslation();
@@ -115,18 +118,30 @@ export const EnrollmentPage = () => {
 
   const { data: universities } = useQuery({
     queryKey: ["universities-options"],
-    queryFn: getUniversities,
+    queryFn: (): Promise<UniversityResponse[]> => getUniversities(),
   });
+  const universitiesOptions = universities?.map((university) => ({
+    value: university.id,
+    label: university.name,
+  }));
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: getDepartments,
+    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
   });
+  const departmentsOptions = departments?.map((department) => ({
+    value: department.id,
+    label: department.name,
+  }));
 
   const { data: students } = useQuery({
     queryKey: ["students-options"],
-    queryFn: getStudents,
+    queryFn: (): Promise<StudentResponse[]> => getStudents(),
   });
+  const studentsOptions = students?.map((student) => ({
+    value: student.id,
+    label: `${student.firstName} ${student.lastName}`,
+  }));
 
   const { data, isLoading } = useQuery({
     queryKey: [
@@ -596,13 +611,11 @@ export const EnrollmentPage = () => {
                   >
                     <option value={0}>{t("common.all")}</option>
 
-                    {universities?.map(
-                      (university: { value: number; label: string }) => (
-                        <option key={university.value} value={university.value}>
-                          {university.label}
-                        </option>
-                      ),
-                    )}
+                    {universitiesOptions?.map((university) => (
+                      <option key={university.value} value={university.value}>
+                        {university.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -624,13 +637,11 @@ export const EnrollmentPage = () => {
                   >
                     <option value={0}>{t("common.all")}</option>
 
-                    {departments?.map(
-                      (department: { value: number; label: string }) => (
-                        <option key={department.value} value={department.value}>
-                          {department.label}
-                        </option>
-                      ),
-                    )}
+                    {departmentsOptions?.map((department) => (
+                      <option key={department.value} value={department.value}>
+                        {department.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -652,13 +663,11 @@ export const EnrollmentPage = () => {
                   >
                     <option value={0}>{t("common.all")}</option>
 
-                    {students?.map(
-                      (student: { value: number; label: string }) => (
-                        <option key={student.value} value={student.value}>
-                          {student.label}
-                        </option>
-                      ),
-                    )}
+                    {studentsOptions?.map((student) => (
+                      <option key={student.value} value={student.value}>
+                        {student.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -745,8 +754,8 @@ export const EnrollmentPage = () => {
                 >
                   <option value={0}>Select department</option>
 
-                  {departments?.map(
-                    (department: { value: number; label: string }) => (
+                  {departmentsOptions?.map(
+                    (department) => (
                       <option key={department.value} value={department.value}>
                         {department.label}
                       </option>

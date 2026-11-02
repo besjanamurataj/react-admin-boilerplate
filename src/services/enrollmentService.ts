@@ -72,7 +72,8 @@ export async function getEnrollments(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response =
+      await HttpClient.get<BatchEnrollmentResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {
@@ -132,73 +133,6 @@ export async function getEnrollmentById({
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data
         ?.message || "Failed to fetch enrollment",
-      { cause: error },
-    );
-  }
-}
-
-export async function getUniversities() {
-  try {
-    const response = await HttpClient.get<any>(
-      "/universities?number=1&size=100",
-    );
-
-    const universities = Array.isArray(response)
-      ? response
-      : response?.content || [];
-
-    return universities.map((university: any) => ({
-      value: university.id,
-      label: university.name,
-    }));
-  } catch (error: unknown) {
-    throw new Error(
-      (error as { response?: { data?: { message?: string } } })?.response?.data
-        ?.message || "Failed to fetch universities",
-      { cause: error },
-    );
-  }
-}
-
-export async function getDepartments() {
-  try {
-    const response = await HttpClient.get<any>(
-      "/departments?number=1&size=100",
-    );
-
-    const departments = Array.isArray(response)
-      ? response
-      : response?.content || [];
-
-    return departments.map((department: any) => ({
-      value: department.id,
-      label: department.name,
-    }));
-  } catch (error: unknown) {
-    throw new Error(
-      (error as { response?: { data?: { message?: string } } })?.response?.data
-        ?.message || "Failed to fetch departments",
-      { cause: error },
-    );
-  }
-}
-
-export async function getStudents() {
-  try {
-    const response = await HttpClient.get<any>("/students?number=1&size=100");
-
-    const students = Array.isArray(response)
-      ? response
-      : response?.content || [];
-
-    return students.map((student: any) => ({
-      value: student.id,
-      label: `${student.firstName} ${student.lastName}`,
-    }));
-  } catch (error: unknown) {
-    throw new Error(
-      (error as { response?: { data?: { message?: string } } })?.response?.data
-        ?.message || "Failed to fetch students",
       { cause: error },
     );
   }

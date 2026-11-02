@@ -1,4 +1,4 @@
-import type { StudentRequest } from "../types/student";
+import type { StudentRequest, StudentResponse } from "../types/student";
 import { HttpClient } from "../libs/https/http-client";
 
 const API_URL = "/students";
@@ -8,9 +8,10 @@ export async function createStudent(data: StudentRequest) {
     const response = await HttpClient.post(API_URL, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to create student",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to create student",
       { cause: error },
     );
   }
@@ -26,7 +27,7 @@ export async function getStudents(
   birthDate?: string,
   active?: boolean,
   departmentId?: number,
-) {
+): Promise<StudentResponse[]> {
   try {
     const query = new URLSearchParams();
 
@@ -69,11 +70,9 @@ export async function getStudents(
     }
 
     const urlWithQuery =
-      query.toString().length > 0
-        ? `${API_URL}?${query.toString()}`
-        : API_URL;
+      query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response = await HttpClient.get<StudentResponse[]>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {
@@ -99,10 +98,7 @@ export async function deleteStudent(id: number) {
   }
 }
 
-export async function updateStudent(
-  id: number,
-  data: StudentRequest,
-) {
+export async function updateStudent(id: number, data: StudentRequest) {
   try {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
@@ -133,29 +129,6 @@ export async function getStudentById({
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data
         ?.message || "Failed to fetch student",
-      { cause: error },
-    );
-  }
-}
-
-export async function getDepartments() {
-  try {
-    const response = await HttpClient.get<any>(
-      "/departments?number=1&size=100",
-    );
-
-    const departments = Array.isArray(response)
-      ? response
-      : response?.content || [];
-
-    return departments.map((department: any) => ({
-      value: department.id,
-      label: department.name,
-    }));
-  } catch (error: unknown) {
-    throw new Error(
-      (error as { response?: { data?: { message?: string } } })?.response?.data
-        ?.message || "Failed to fetch departments",
       { cause: error },
     );
   }
@@ -222,9 +195,7 @@ export async function exportStudentsPdf(
     return blob;
   } catch (error) {
     throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Failed to export students PDF",
+      error instanceof Error ? error.message : "Failed to export students PDF",
       { cause: error },
     );
   }
