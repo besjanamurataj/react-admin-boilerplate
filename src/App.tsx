@@ -3,8 +3,8 @@ import { Navigator } from "./navigator";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./i18n/config";
 import { AuthProvider } from "./contexts/AuthContex";
-import { ToastProvider } from "./contexts/toast/ToastContex";
 import { ToastViewport } from "./components/ui/toast/ToastView";
+import { ToastProvider } from "./contexts/toast/ToastProvider";
 
 const queryCient = new QueryClient();
 const App = () => {

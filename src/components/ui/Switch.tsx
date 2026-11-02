@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { cn } from '../../libs/tailwind/merge-tailwind-classes'
 
 type SwitchProps = {

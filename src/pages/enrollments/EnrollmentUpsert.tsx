@@ -1,9 +1,7 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { ZodIssue } from "zod";
-
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
@@ -28,7 +26,7 @@ interface EnrollmentFormProps {
   isSubmitting: boolean;
 }
 
-export const EnrollmentForm = ({
+export const EnrollmentUpsert = ({
   enrollmentData,
   onSubmit,
   onCancel,
@@ -77,18 +75,13 @@ export const EnrollmentForm = ({
 
   const studentOptions =
     students
-      ?.filter(
-        (student): student is StudentResponse =>
-          student !== undefined
-      )
+      ?.filter((student): student is StudentResponse => student !== undefined)
       .map((student) => ({
         label: `${student.firstName} ${student.lastName}`,
         value: student.id,
       })) ?? [];
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
 
     setFormData((previousFormData) => ({
@@ -131,12 +124,9 @@ export const EnrollmentForm = ({
   return (
     <form onSubmit={handleSubmit}>
       <div className="mb-4 mt-4 grid grid-cols-12 gap-6">
-
         {/* Student */}
         <div className="col-span-6">
-          <Label htmlFor="student">
-            {t("enrollments.table.student")}
-          </Label>
+          <Label htmlFor="student">{t("enrollments.table.student")}</Label>
 
           <select
             id="student"
@@ -155,9 +145,7 @@ export const EnrollmentForm = ({
             disabled={isStudentsLoading}
             className="w-full h-10 rounded-md border border-input bg-background px-3"
           >
-            <option value={0}>
-              {t("enrollments.studentPlaceholder")}
-            </option>
+            <option value={0}>{t("enrollments.studentPlaceholder")}</option>
 
             {studentOptions.map((student) => (
               <option key={student.value} value={student.value}>
@@ -167,9 +155,7 @@ export const EnrollmentForm = ({
           </select>
 
           {errors.studentId && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.studentId}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.studentId}</p>
           )}
         </div>
 
@@ -196,9 +182,7 @@ export const EnrollmentForm = ({
             disabled={isUniversitiesLoading}
             className="w-full h-10 rounded-md border border-input bg-background px-3"
           >
-            <option value={0}>
-              {t("enrollments.universityPlaceholder")}
-            </option>
+            <option value={0}>{t("enrollments.universityPlaceholder")}</option>
 
             {universityOptions.map((university) => (
               <option key={university.value} value={university.value}>
@@ -208,9 +192,7 @@ export const EnrollmentForm = ({
           </select>
 
           {errors.universityId && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.universityId}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.universityId}</p>
           )}
         </div>
 
@@ -237,9 +219,7 @@ export const EnrollmentForm = ({
             disabled={isDepartmentsLoading}
             className="w-full h-10 rounded-md border border-input bg-background px-3"
           >
-            <option value={0}>
-              {t("enrollments.departmentPlaceholder")}
-            </option>
+            <option value={0}>{t("enrollments.departmentPlaceholder")}</option>
 
             {departmentOptions.map((department) => (
               <option key={department.value} value={department.value}>
@@ -249,9 +229,7 @@ export const EnrollmentForm = ({
           </select>
 
           {errors.departmentId && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.departmentId}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.departmentId}</p>
           )}
         </div>
 
@@ -270,9 +248,7 @@ export const EnrollmentForm = ({
           />
 
           {errors.enrollmentDate && (
-            <p className="mt-1 text-sm text-red-500">
-              {errors.enrollmentDate}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{errors.enrollmentDate}</p>
           )}
         </div>
 

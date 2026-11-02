@@ -1,5 +1,14 @@
 import { useRoutes } from "react-router-dom";
-import { HomeIcon, LayoutGrid, Users, ChartNoAxesCombined, GraduationCap, University, Building2, BookOpenCheck } from "lucide-react";
+import {
+  HomeIcon,
+  LayoutGrid,
+  Users,
+  ChartNoAxesCombined,
+  GraduationCap,
+  University,
+  Building2,
+  BookOpenCheck,
+} from "lucide-react";
 import AppLayout from "../layouts/AppLayout";
 import { ProfilePage } from "../pages/Profile";
 import { PrivateGuard } from "../guards/PrivateGuard";
@@ -7,29 +16,41 @@ import { useTranslation } from "react-i18next";
 import { PermissionGuard } from "../guards/RoleGuard";
 import { GeneralPage } from "../pages/GeneralePage";
 import { lazy, Suspense } from "react";
+import { EnrollmentUpsertPage } from "../pages/enrollments/EnrollmentUpsert";
 
 const HomePage = lazy(() => import("../pages/Home"));
 const UserPage = lazy(() => import("../pages/user/User"));
 const UserUpsertPage = lazy(() => import("../pages/user/UserUpsert"));
 const RolePage = lazy(() => import("../pages/roles/Role"));
 const RoleUpsertPage = lazy(() => import("../pages/roles/RoleUpsert"));
-const UniversityPage = lazy(() => import("../pages/universities/University"),);
-const UniversityUpsertPage = lazy(() => import("../pages/universities/UniversityUpsert"),);
-const ViewUniversityPage = lazy(() => import("../pages/universities/ViewUniversity"),);
-const DepartmentPage = lazy(() => import("../pages/departments/Department"),);
-const DepartmentUpsertPage = lazy(() => import("../pages/departments/DepartmentUpsert"),);
-const ViewDepartmentPage = lazy(() => import("../pages/departments/ViewDepartment"),);
-const StudentPage = lazy(() => import("../pages/students/Student"),);
-const StudentUpsertPage = lazy(() => import("../pages/students/StudentUpsert"),);
-const ViewStudentPage = lazy(() => import("../pages/students/ViewStudent"),);
+const UniversityPage = lazy(() => import("../pages/universities/University"));
+const UniversityUpsertPage = lazy(
+  () => import("../pages/universities/UniversityUpsert"),
+);
+const ViewUniversityPage = lazy(
+  () => import("../pages/universities/ViewUniversity"),
+);
+const DepartmentPage = lazy(() => import("../pages/departments/Department"));
+const DepartmentUpsertPage = lazy(
+  () => import("../pages/departments/DepartmentUpsert"),
+);
+const ViewDepartmentPage = lazy(
+  () => import("../pages/departments/ViewDepartment"),
+);
+const StudentPage = lazy(() => import("../pages/students/Student"));
+const StudentUpsertPage = lazy(() => import("../pages/students/StudentUpsert"));
+const ViewStudentPage = lazy(() => import("../pages/students/ViewStudent"));
 const EnrollmentPage = lazy(() => import("../pages/enrollments/Enrollment"));
-const EnrollmentUpsertPage = lazy(() => import("../pages/enrollments/EnrollmentUpsert"),);
-const ViewEnrollmentPage = lazy(() => import("../pages/enrollments/ViewEnrollment"),);
+const ViewEnrollmentPage = lazy(
+  () => import("../pages/enrollments/ViewEnrollment"),
+);
 const ViewUserPage = lazy(() => import("../pages/user/ViewUser"));
 const ViewRolePage = lazy(() => import("../pages/roles/ViewRoles"));
 const LoginPage = lazy(() => import("../pages/Login"));
 const ForgetPasswordPage = lazy(() => import("../pages/ForgetPasword"));
-const AnalyticsDashboard = lazy(() => import("../pages/dashboard/AnalyticsDashboard"),);
+const AnalyticsDashboard = lazy(
+  () => import("../pages/dashboard/AnalyticsDashboard"),
+);
 
 export const Navigator = () => {
   const { t } = useTranslation();

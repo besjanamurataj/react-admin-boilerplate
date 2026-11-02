@@ -2,19 +2,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
 import { Button } from "../components/ui/Button";
 import { Card, CardContent } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
 import Header from "../layouts/Header";
-
 import { login } from "../services/authService";
 import { loginSchema } from "../types/validations/schema";
 import type { LoginRequest } from "../types/auth";
-
-import { useToast } from "../contexts/toast/ToastContex";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../contexts/toast/ToastProvider";
 
 export const LoginPage = () => {
   const queryClient = useQueryClient();

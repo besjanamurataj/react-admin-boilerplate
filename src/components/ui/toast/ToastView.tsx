@@ -1,4 +1,4 @@
-import { useToast } from "../../../contexts/toast/ToastContex";
+import { useToast } from "../../../contexts/toast/ToastProvider";
 import { Toast } from "./Toast";
 
 export function ToastViewport() {

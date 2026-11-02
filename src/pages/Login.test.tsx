@@ -1,15 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-
 import { render, screen, waitFor } from "@testing-library/react";
-
 import userEvent from "@testing-library/user-event";
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 import LoginPage from "./Login";
 import { login } from "../services/authService";
-import { useToast } from "../contexts/toast/ToastContex";
 import { useAuth } from "../hooks/useAuth";
+import { useToast } from "../contexts/toast/ToastProvider";
 
 const { mockNavigate } = vi.hoisted(() => ({
   mockNavigate: vi.fn(),
