@@ -1,4 +1,3 @@
-import type { RoleResponse} from "./role";
 import type { UserInfo } from "./user";
 
 export interface Profile {
@@ -8,6 +7,6 @@ export interface Profile {
   username?: string;
   password?: string;
   confirmPassword?: string;
-  roles: RoleResponse[];
+  roles: string[];
   userInfo: UserInfo;
 }

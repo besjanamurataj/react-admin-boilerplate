@@ -1,13 +1,12 @@
-import type { RoleRequest, RoleResponse } from "../types/role";
+import type { Role, RoleRequest, RoleResponse } from "../types/role";
 import { HttpClient } from "../libs/https/http-client";
 import type { AuthorityResponse } from "./authoritiesService";
 
 const API_URL = "/roles";
 
-export async function createRole(data: RoleRequest) {
+export async function createRole(data: RoleRequest): Promise<void> {
   try {
-    const response = await HttpClient.post(API_URL, data);
-    return response;
+    await HttpClient.post<void>(API_URL, data);
   } catch (error: unknown) {
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data
@@ -22,7 +21,7 @@ export async function getRole(
   page?: number,
   size?: number,
   sorting?: string[],
-): Promise<RoleResponse[]> {
+): Promise<RoleResponse> {
   try {
     const query = new URLSearchParams();
 
@@ -36,7 +35,7 @@ export async function getRole(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<RoleResponse[]>(urlWithQuery);
+    const response = await HttpClient.get<RoleResponse>(urlWithQuery);
     return response;
   } catch (error: unknown) {
     throw new Error(
@@ -47,9 +46,9 @@ export async function getRole(
   }
 }
 
-export async function deleteRole(id: string) {
+export async function deleteRole(id: number) {
   try {
-    const response = await HttpClient.delete(API_URL + `/${id}`);
+    const response = await HttpClient.delete<RoleResponse>(API_URL + `/${id}`);
     return response;
   } catch (error: unknown) {
     throw new Error(
@@ -60,10 +59,12 @@ export async function deleteRole(id: string) {
   }
 }
 
-export async function updateRole(id: string, user: RoleRequest) {
+export async function updateRole(
+  id: number | string,
+  data: RoleRequest,
+): Promise<void> {
   try {
-    const response = await HttpClient.put(API_URL + `/${id}`, user);
-    return response;
+    await HttpClient.put<void>(`${API_URL}/${id}`, data);
   } catch (error: unknown) {
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data
@@ -77,14 +78,11 @@ export async function getById({
   id,
   signal,
 }: {
-  id: string;
+  id: number | string;
   signal?: AbortSignal;
-}): Promise<RoleResponse> {
+}): Promise<Role> {
   try {
-    const response = await HttpClient.get<RoleResponse>(API_URL + `/${id}`, {
-      signal,
-    });
-    return response;
+    return await HttpClient.get<Role>(`${API_URL}/${id}`, { signal });
   } catch (error: unknown) {
     throw new Error(
       (error as { response?: { data?: { message?: string } } })?.response?.data

@@ -1,15 +1,20 @@
-
+import type { RoleRequest, RoleResponse } from "./role";
 
 export interface User {
+  id?: number;
   name: string;
   surname: string;
-  username: string;
   email: string;
   password: string;
-  roles: unknown[];
-  userInfo?: UserInfo;
-  id: number;
+  username: string;
+  roles: string[];
   authorities: string[];
+  userInfo: {
+    phoneNumber: string;
+    birthDate: string;
+    gender: string;
+    street: string;
+  };
 }
 
 export interface UserInfo {
@@ -24,8 +29,23 @@ export interface PasswordUpdate {
   confirmPassword?: string;
 }
 
-export interface UserResponse {
-  id: string;
+export interface UserRequest {
+  search?: string;
+  name: string;
+  surname: string;
   email: string;
-  authorities: string[];
+  username: string;
+  roles?: RoleRequest[];
+  page?: number;
+  size?: number;
+  sorting?: string[];
+}
+
+export interface UserResponse {
+  content: User[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  last: boolean;
 }

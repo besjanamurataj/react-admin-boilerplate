@@ -22,7 +22,7 @@ import { formatRole } from "../../utils/formatRole";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { useToast } from "../../contexts/toast/ToastProvider";
-import type { RoleResponse, RoleSelection } from "../../types/role";
+import type { Role, RoleResponse, RoleSelection } from "../../types/role";
 
 export const RolePage = () => {
   const { t } = useTranslation();
@@ -52,7 +52,7 @@ export const RolePage = () => {
   }, [debouncedSetSearch]);
 
   // Fetch roles me query
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<RoleResponse>({
     queryKey: [
       "roles",
       pagination.pageIndex,
@@ -60,7 +60,7 @@ export const RolePage = () => {
       sorting,
       search,
     ],
-    queryFn: () => {
+    queryFn: (): Promise<RoleResponse> => {
       const sortStrings = sorting.map(
         (s) => `${s.id},${s.desc ? "desc" : "asc"}`,
       );
@@ -75,7 +75,7 @@ export const RolePage = () => {
 
   // Delete role mutation
   const mutation = useMutation({
-    mutationFn: () => deleteRole(deleteId),
+    mutationFn: (id: number) => deleteRole(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
       addToast({
@@ -126,12 +126,12 @@ export const RolePage = () => {
       enableSorting: false,
     },
     {
-      accessorFn: (row: RoleResponse) => row.authorities?.join(", "),
+      accessorFn: (row: Role) => row.authorities?.join(", "),
       id: "permission",
       header: () => <span>{t("roles.table.permission")}</span>,
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          {row.original.authorities?.map((role:RoleSelection) => (
+          {row.original.authorities?.map((role: RoleSelection) => (
             <span key={role.name} className="w-fit text-gray-800">
               {formatRole(role.name)}
             </span>
@@ -265,7 +265,7 @@ export const RolePage = () => {
               </Button>
               <Button
                 className="bg-green-700 text-white hover:bg-green-700"
-                onClick={() => mutation.mutate()}
+                onClick={() => mutation.mutate(deleteId!)}
               >
                 {t("common.save")}
               </Button>

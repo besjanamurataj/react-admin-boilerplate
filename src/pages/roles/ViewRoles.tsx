@@ -8,7 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getById, getAuthorities } from "../../services/roleService";
 import { Textarea } from "../../components/ui/Textarea";
 import { useTranslation } from "react-i18next";
-import type { RoleResponse } from "../../types/role";
+import type { Role, RoleResponse } from "../../types/role";
 
 export const ViewRolePage = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const ViewRolePage = () => {
   const { t } = useTranslation();
   const title = "View Role";
 
-  const { data } = useQuery<RoleResponse>({
+  const { data } = useQuery<Role>({
     queryKey: ["roles", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) throw new Error("No ID provided");

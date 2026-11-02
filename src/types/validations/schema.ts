@@ -67,9 +67,9 @@ export const passwordSchema = z
   });
 
 export const roleSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
-  authorities: z.array(z.number()).min(1, "Select at least one authority"),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  authorities: z.array(z.number()).min(1, "Select at least one permission"),
 });
 
 export const universitySchema = z.object({
@@ -87,12 +87,8 @@ export const universitySchema = z.object({
 export const departmentSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   code: z.string().min(2, "Code must be at least 2 characters"),
-  universityId: z
-    .number()
-    .min(1, "Select a university"),
-  description: z
-    .string()
-    .min(2, "Description must be at least 2 characters"),
+  universityId: z.number().min(1, "Select a university"),
+  description: z.string().min(2, "Description must be at least 2 characters"),
 });
 
 export const studentSchema = z.object({
@@ -106,30 +102,18 @@ export const studentSchema = z.object({
     ),
   birthDate: z.string().min(1, "Birth date is required"),
   active: z.boolean(),
-  departmentId: z
-    .number()
-    .min(1, "Select a department"),
+  departmentId: z.number().min(1, "Select a department"),
 });
-
 
 export const enrollmentSchema = z.object({
-  enrollmentDate: z
-    .string()
-    .min(1, "Enrollment date is required"),
+  enrollmentDate: z.string().min(1, "Enrollment date is required"),
 
-  universityId: z
-    .number()
-    .min(1, "Select a university"),
+  universityId: z.number().min(1, "Select a university"),
 
-  departmentId: z
-    .number()
-    .min(1, "Select a department"),
+  departmentId: z.number().min(1, "Select a department"),
 
-  studentId: z
-    .number()
-    .min(1, "Select a student"),
+  studentId: z.number().min(1, "Select a student"),
 });
-
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
 export type UserFormValues = z.infer<typeof userSchema>;

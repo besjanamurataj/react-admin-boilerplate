@@ -12,7 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getRole } from "../../services/roleService";
 import { DatePicker } from "../../components/ui/DatePicker";
 import { RadioGroup } from "../../components/ui/Radion";
-import type { RoleResponse } from "../../types/role";
+import type { Role, RoleResponse } from "../../types/role";
 
 export const ViewUserPage = () => {
   const [formData, setFormData] = useState<User>({
@@ -45,7 +45,7 @@ export const ViewUserPage = () => {
     enabled: !!params?.id,
   });
 
-  const { data: roles } = useQuery({
+  const { data: roles } = useQuery<RoleResponse[]>({
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
@@ -58,7 +58,7 @@ export const ViewUserPage = () => {
         email: data.email ?? "",
         username: data.username ?? "",
         password: data.password ?? "",
-        roles: data.roles.map((el: RoleResponse) => el.id) ?? [],
+        roles: data.roles.map((el: Role) => el.id) ?? [],
         userInfo: {
           phoneNumber: data.userInfo?.phoneNumber ?? "",
           birthDate: data.userInfo?.birthDate ?? "",
@@ -142,10 +142,10 @@ export const ViewUserPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || "Select Options"}
               options={
-                roles?.content?.map((role: any) => ({
+                role ? roles?.map((role: Role) => ({
                   label: role.name,
                   value: role.id,
-                })) || []
+                })) : []
               }
               value={formData.roles}
               disabled={true}

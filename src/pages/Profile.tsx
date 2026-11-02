@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, getById, updateProfile } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
-import type { PasswordUpdate } from "../types/user";
+import type { PasswordUpdate, User, UserResponse } from "../types/user";
 import { Label } from "../components/ui/Label";
 import { Dialog, DialogContent } from "../components/ui/Dialog";
 import { MultiSelect } from "../components/ui/MultiSelect";
@@ -54,9 +54,9 @@ export const ProfilePage = () => {
 
   const [errors, setErrors] = useState<Record<string, unknown>>({});
 
-  const { data } = useQuery<Profile>({
+  const { data } = useQuery<UserResponse>({
     queryKey: ["user", userId],
-    queryFn: ({ signal }): Promise<Profile> => {
+    queryFn: ({ signal }): Promise<UserResponse> => {
       if (!userId) throw new Error("No ID provided");
       return getById({ id: userId, signal });
     },
@@ -70,18 +70,18 @@ export const ProfilePage = () => {
 
   useEffect(() => {
     if (!data) return;
-
+    const user = data as unknown as User;
     setFormData({
-      name: data?.name ?? "",
-      surname: data?.surname ?? "",
-      email: data?.email ?? "",
-      username: data?.username ?? "",
-      roles: data?.roles?.map((r) => r.id) ?? [],
+      name: user?.name ?? "",
+      surname: user?.surname ?? "",
+      email: user?.email ?? "",
+      username: user?.username ?? "",
+      roles: user.roles?.map(String) ?? [],
       userInfo: {
-        phoneNumber: data?.userInfo?.phoneNumber ?? "",
-        birthDate: data?.userInfo?.birthDate ?? "",
-        street: data?.userInfo?.street ?? "",
-        gender: data?.userInfo?.gender ?? "",
+        phoneNumber: user?.userInfo?.phoneNumber ?? "",
+        birthDate: user?.userInfo?.birthDate ?? "",
+        street: user?.userInfo?.street ?? "",
+        gender: user?.userInfo?.gender ?? "",
       },
     });
   }, [data]);
@@ -230,14 +230,17 @@ export const ProfilePage = () => {
             <MultiSelect
               value={formData.roles}
               options={
-                roles?.content?.map((r: any) => ({
-                  label: r.name,
-                  value: r.id,
-                })) || []
+                roles?.content.map((role) => ({
+                  label: role.name,
+                  value: String(role.id),
+                })) ?? []
               }
               disabled={!isEditing}
               onChange={(values) =>
-                setFormData((p) => ({ ...p, roles: values }))
+                setFormData((previous) => ({
+                  ...previous,
+                  roles: values.map(String),
+                }))
               }
             />
           </div>
