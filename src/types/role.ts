@@ -1,14 +1,16 @@
+import type { AuthorityResponse } from "./authorities.service";
+
 export interface RoleRequest {
   name: string;
   description: string;
-  authorities: number[];
+  authorities: AuthorityResponse[];
 }
 
 export interface Role {
   id: number;
   name: string;
   description: string;
-  authorities: number[];
+  authorities: AuthorityResponse[];
   // permission: { [category: string]: string[] };
 }
 export interface RoleSelection {

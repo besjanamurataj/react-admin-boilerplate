@@ -5,13 +5,11 @@ import { Label } from "../../components/ui/Label";
 import { Textarea } from "../../components/ui/Textarea";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  getDepartmentById,
-  getUniversities,
-} from "../../services/departmentService";
+import { getDepartmentById } from "../../services/departmentService";
 import { useTranslation } from "react-i18next";
 import { MultiSelect } from "../../components/ui/MultiSelect";
 import type { DepartmentResponse } from "../../types/department";
+import { getUniversities } from "../../services/universityService";
 
 export const ViewDepartmentPage = () => {
   const navigate = useNavigate();
@@ -44,7 +42,7 @@ export const ViewDepartmentPage = () => {
 
   const { data: universities } = useQuery({
     queryKey: ["universities"],
-    queryFn: getUniversities,
+    queryFn: () => getUniversities(),
   });
 
   return (
@@ -99,9 +97,9 @@ export const ViewDepartmentPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                universities?.map((university: any) => ({
-                  label: university.label,
-                  value: university.value,
+                universities?.map((university) => ({
+                  label: university.name,
+                  value: university.id,
                 })) || []
               }
               value={department?.universityId ? [department.universityId] : []}

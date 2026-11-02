@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { MultiSelect } from "../../components/ui/MultiSelect";
-import type { User } from "../../types/user";
+import type { User, UserResponse } from "../../types/user";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getById } from "../../services/useService";
@@ -12,184 +12,129 @@ import { useTranslation } from "react-i18next";
 import { getRole } from "../../services/roleService";
 import { DatePicker } from "../../components/ui/DatePicker";
 import { RadioGroup } from "../../components/ui/Radion";
-import type { Role, RoleResponse } from "../../types/role";
+import type { RoleResponse } from "../../types/role";
 
 export const ViewUserPage = () => {
   const [formData, setFormData] = useState<User>({
+    id: 0,
     name: "",
     surname: "",
     email: "",
     username: "",
-    password: "1234565",
+    password: "",
     roles: [],
+    authorities: [],
     userInfo: {
       phoneNumber: "",
       birthDate: "",
       gender: "",
       street: "",
     },
-    authorities: [],
-    id: 0,
   });
+
   const params = useParams();
   const { t } = useTranslation();
-  const title = "View User";
   const navigate = useNavigate();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<UserResponse>({
     queryKey: ["user", params.id],
     queryFn: ({ signal }) => {
-      if (!params?.id) throw new Error("No ID provided");
+      if (!params.id) {
+        throw new Error("No ID provided");
+      }
+
       return getById({ id: params.id, signal });
     },
-    enabled: !!params?.id,
+    enabled: !!params.id,
   });
 
-  const { data: roles } = useQuery<RoleResponse[]>({
+  const { data: roles } = useQuery<RoleResponse>({
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
 
   useEffect(() => {
-    if (data) {
-      setFormData({
-        name: data.name ?? "",
-        surname: data.surname ?? "",
-        email: data.email ?? "",
-        username: data.username ?? "",
-        password: data.password ?? "",
-        roles: data.roles.map((el: Role) => el.id) ?? [],
-        userInfo: {
-          phoneNumber: data.userInfo?.phoneNumber ?? "",
-          birthDate: data.userInfo?.birthDate ?? "",
-          gender: data.userInfo?.gender ?? "",
-          street: data.userInfo?.street ?? "",
-        },
-        authorities: data.authorities ?? [],
-        id: data.id ?? 0,
-      });
-    }
+    if (!data) return;
+
+    const user = data as unknown as User;
+
+    setFormData({
+      id: user.id ?? 0,
+      name: user.name ?? "",
+      surname: user.surname ?? "",
+      email: user.email ?? "",
+      username: user.username ?? "",
+      password: user.password ?? "",
+      roles: user.roles ?? [],
+      authorities: user.authorities ?? [],
+      userInfo: {
+        phoneNumber: user.userInfo?.phoneNumber ?? "",
+        birthDate: user.userInfo?.birthDate ?? "",
+        gender: user.userInfo?.gender ?? "",
+        street: user.userInfo?.street ?? "",
+      },
+    });
   }, [data]);
+
+  const rolesOptions =
+    roles?.content.map((role) => ({
+      label: role.name,
+      value: String(role.id),
+    })) ?? [];
 
   return (
     <div className="p-6">
-      <PageTitle title={title} subTitle="Create or update user information" />
+      <PageTitle title="View User" subTitle="View user information" />
+
       <form>
-        <div className="mb-4 grid grid-cols-12 gap-6 mt-4">
+        <div className="mb-4 mt-4 grid grid-cols-12 gap-6">
           <div className="col-span-6">
-            <Label
-              htmlFor="name"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.table.firstName")}
-            </Label>
-            <Input
-              id="name"
-              placeholder={t("users.namePlaceholder") || ""}
-              value={formData.name}
-              disabled={true}
-            />
+            <Label htmlFor="name">{t("users.table.firstName")}</Label>
+            <Input id="name" value={formData.name} disabled />
           </div>
+
           <div className="col-span-6">
-            <Label
-              htmlFor="lastName"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.table.lastName")}
-            </Label>
-            <Input
-              id="lastName"
-              placeholder={t("users.lastNamePlaceholder") || ""}
-              value={formData.surname}
-              disabled={true}
-            />
+            <Label htmlFor="surname">{t("users.table.lastName")}</Label>
+            <Input id="surname" value={formData.surname} disabled />
           </div>
+
           <div className="col-span-6">
-            <Label
-              htmlFor="username"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.table.username")}
-            </Label>
-            <Input
-              id="username"
-              placeholder={t("users.usernamePlaceholder") || ""}
-              value={formData.username}
-              disabled={true}
-            />
+            <Label htmlFor="username">{t("users.table.username")}</Label>
+            <Input id="username" value={formData.username} disabled />
           </div>
+
           <div className="col-span-6">
-            <Label
-              htmlFor="profile"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.table.email")}
-            </Label>
-            <Input
-              id="profile"
-              placeholder={t("users.emailPlaceholder") || ""}
-              value={formData.email}
-              disabled={true}
-            />
+            <Label htmlFor="email">{t("users.table.email")}</Label>
+            <Input id="email" value={formData.email} disabled />
           </div>
+
           <div className="col-span-6">
-            <Label
-              htmlFor="roles"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.table.role")}
-            </Label>
+            <Label htmlFor="roles">{t("users.table.role")}</Label>
             <MultiSelect
               placeholder={t("common.selectOptions") || "Select Options"}
-              options={
-                role ? roles?.map((role: Role) => ({
-                  label: role.name,
-                  value: role.id,
-                })) : []
-              }
+              options={rolesOptions}
               value={formData.roles}
-              disabled={true}
+              disabled
               onChange={() => {}}
             />
           </div>
 
           <div className="col-span-6">
-            <Label
-              htmlFor="profile"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.phoneNumber")}
-            </Label>
+            <Label htmlFor="phoneNumber">{t("users.phoneNumber")}</Label>
             <Input
-              type="text"
-              placeholder={t("users.phonePlaceholder") || ""}
-              value={formData.userInfo?.phoneNumber}
-              disabled={true}
+              id="phoneNumber"
+              value={formData.userInfo.phoneNumber}
+              disabled
             />
           </div>
 
           <div className="col-span-6">
-            <Label
-              htmlFor="profile"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.streetLabel")}
-            </Label>
-            <Input
-              type="text"
-              placeholder={t("users.streetPlaceholder") || ""}
-              value={formData.userInfo?.street}
-              disabled={true}
-            />
+            <Label htmlFor="street">{t("users.streetLabel")}</Label>
+            <Input id="street" value={formData.userInfo.street} disabled />
           </div>
 
           <div className="col-span-6">
-            <Label
-              htmlFor="profile"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.genderPlaceholder")}
-            </Label>
+            <Label>{t("users.genderPlaceholder")}</Label>
             <RadioGroup
               value={formData.userInfo?.gender ?? ""}
               disabled={true}
@@ -208,23 +153,23 @@ export const ViewUserPage = () => {
           </div>
 
           <div className="col-span-6">
-            <Label
-              htmlFor="profile"
-              className="block text-md font-medium text-gray-700"
-            >
-              {t("users.birthDate")}
-            </Label>
+            <Label>{t("users.birthDate")}</Label>
             <DatePicker
               value={
-                formData.userInfo?.birthDate
+                formData.userInfo.birthDate
                   ? new Date(formData.userInfo.birthDate)
                   : null
               }
-              disabled={true}
+              disabled
             />
           </div>
-          <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => navigate("/user")}>
+
+          <div className="col-span-12 mt-4 flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/user")}
+            >
               {t("common.cancel")}
             </Button>
           </div>
@@ -233,4 +178,5 @@ export const ViewUserPage = () => {
     </div>
   );
 };
+
 export default ViewUserPage;

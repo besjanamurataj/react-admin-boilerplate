@@ -8,7 +8,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getById, getAuthorities } from "../../services/roleService";
 import { Textarea } from "../../components/ui/Textarea";
 import { useTranslation } from "react-i18next";
-import type { Role, RoleResponse } from "../../types/role";
+import type { Role } from "../../types/role";
+import type { AuthorityResponse } from "../../types/authorities.service";
 
 export const ViewRolePage = () => {
   const navigate = useNavigate();
@@ -29,7 +30,8 @@ export const ViewRolePage = () => {
     ? {
         name: data.name,
         description: data.description,
-        authorities: data.authorities?.map((a: any) => a.id) || [],
+        authorities:
+          data.authorities?.map((a: AuthorityResponse) => a.id) || [],
       }
     : null;
   const { data: permission } = useQuery({
@@ -67,7 +69,7 @@ export const ViewRolePage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                permission?.map((role: any) => ({
+                permission?.map((role) => ({
                   label: role.label,
                   value: role.value,
                 })) || []

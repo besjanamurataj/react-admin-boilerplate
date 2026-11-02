@@ -6,13 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUniversityById } from "../../services/universityService";
 import { useTranslation } from "react-i18next";
+import type { UniversityResponse } from "../../types/university";
 
 export const ViewUniversityPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<UniversityResponse>({
     queryKey: ["universities", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) throw new Error("No ID provided");

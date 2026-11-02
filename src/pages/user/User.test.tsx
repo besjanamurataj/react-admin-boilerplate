@@ -6,7 +6,6 @@ import { getRole } from "../../services/roleService";
 import { useAuth } from "../../hooks/useAuth";
 import UserPage from "./User";
 import { useToast } from "../../contexts/toast/ToastProvider";
-import type { User } from "../../types/user";
 
 vi.mock("../../services/useService", () => ({
   getUsers: vi.fn(),
@@ -89,7 +88,7 @@ vi.mock("../../components/ui/Dialog", () => ({
 describe("UserPage", () => {
   let queryClient: QueryClient;
 
-  const mockUsers:any = {
+  const mockUsers: any = {
     content: [
       {
         id: 1,

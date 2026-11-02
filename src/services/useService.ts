@@ -1,9 +1,4 @@
-import type {
-  PasswordUpdate,
-  User,
-  UserRequest,
-  UserResponse,
-} from "../types/user";
+import type { PasswordUpdate, User, UserResponse } from "../types/user";
 import { HttpClient } from "../libs/https/http-client";
 import type { Profile } from "../types/profile";
 

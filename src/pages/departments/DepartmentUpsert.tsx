@@ -10,13 +10,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
   createDepartment,
   getDepartmentById,
-  getUniversities,
   updateDepartment,
 } from "../../services/departmentService";
 import type { DepartmentRequest, DepartmentResponse } from "../../types/department";
 import { useTranslation } from "react-i18next";
 import { departmentSchema } from "../../types/validations/schema";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import { getUniversities } from "../../services/universityService";
 
 export const DepartmentUpsertPage = () => {
   const [formData, setFormData] = useState<DepartmentRequest>({
@@ -55,7 +55,7 @@ export const DepartmentUpsertPage = () => {
 
   const { data: universities } = useQuery({
     queryKey: ["universities-options"],
-    queryFn: getUniversities,
+    queryFn: () => getUniversities(),
   });
 
   useEffect(() => {

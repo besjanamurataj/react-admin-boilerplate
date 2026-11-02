@@ -1,4 +1,4 @@
-import type { RoleRequest, RoleResponse } from "./role";
+import type { RoleRequest } from "./role";
 
 export interface User {
   id?: number;
