@@ -1,7 +1,7 @@
 export interface RoleRequest {
   name: string;
   description: string;
-  authorities: any[];
+  authorities: string[];
 }
 
 export interface RoleResponse {
@@ -13,6 +13,6 @@ export interface RoleResponse {
   permission: { [category: string]: string[] };
 }
 export interface RoleSelection {
-  name: any;
-  id: any;
+  name: string;
+  id: number;
 }

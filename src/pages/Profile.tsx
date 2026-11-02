@@ -17,7 +17,6 @@ import { MultiSelect } from "../components/ui/MultiSelect";
 import { getRole } from "../services/roleService";
 import { formatToLocal } from "../utils/formatDate";
 import { useToast } from "../contexts/toast/ToastProvider";
-import type { RoleSelection } from "../types/role";
 
 const initialPasswordState: PasswordUpdate = {
   password: "",

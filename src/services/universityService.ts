@@ -1,4 +1,4 @@
-import type { UniversityRequest } from "../types/university";
+import type { UniversityRequest, UniversityResponse } from "../types/university";
 import { HttpClient } from "../libs/https/http-client";
 
 const API_URL = "/universities";
@@ -47,7 +47,7 @@ export async function getUniversities(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response = await HttpClient.get<UniversityResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {

@@ -1,10 +1,12 @@
+import type { RoleResponse } from "./role";
+
 export interface User {
   name: string;
   surname: string;
   username: string;
   email: string;
   password: string;
-  roles: any[];
+  roles: RoleResponse[];
   userInfo?: UserInfo;
   id: number;
   authorities: string[];

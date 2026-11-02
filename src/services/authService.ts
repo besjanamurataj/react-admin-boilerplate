@@ -5,11 +5,13 @@ const auth = "auth/authenticate";
 
 export async function login(data: LoginRequest) {
   try {
-    const response = await HttpClient.post<{ token: string }>(`${auth}`,
-      data,
-    );
+    const response = await HttpClient.post<{ token: string }>(`${auth}`, data);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to login");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to login",
+      { cause: error },
+    );
   }
 }

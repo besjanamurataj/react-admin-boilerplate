@@ -13,9 +13,10 @@ export async function createEnrollment(data: EnrollmentRequest) {
     const response = await HttpClient.post(API_URL, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to create enrollment",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to batch enroll students",
       { cause: error },
     );
   }
@@ -69,16 +70,15 @@ export async function getEnrollments(
     }
 
     const urlWithQuery =
-      query.toString().length > 0
-        ? `${API_URL}?${query.toString()}`
-        : API_URL;
+      query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
     const response = await HttpClient.get<any>(urlWithQuery);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch enrollments",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch enrollments",
       { cause: error },
     );
   }
@@ -89,25 +89,24 @@ export async function deleteEnrollment(id: number) {
     const response = await HttpClient.delete(`${API_URL}/${id}`);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to delete enrollment",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete enrollment",
       { cause: error },
     );
   }
 }
 
-export async function updateEnrollment(
-  id: number,
-  data: EnrollmentRequest,
-) {
+export async function updateEnrollment(id: number, data: EnrollmentRequest) {
   try {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to update enrollment",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update enrollment",
       { cause: error },
     );
   }
@@ -119,16 +118,20 @@ export async function getEnrollmentById({
 }: {
   id: number;
   signal?: AbortSignal;
-}) :Promise<EnrollmentResponse>{
+}): Promise<EnrollmentResponse> {
   try {
-    const response = await HttpClient.get<EnrollmentResponse>(`${API_URL}/${id}`, {
-      signal,
-    });
+    const response = await HttpClient.get<EnrollmentResponse>(
+      `${API_URL}/${id}`,
+      {
+        signal,
+      },
+    );
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch enrollment",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch enrollment",
       { cause: error },
     );
   }
@@ -148,9 +151,10 @@ export async function getUniversities() {
       value: university.id,
       label: university.name,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch universities",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch universities",
       { cause: error },
     );
   }
@@ -170,9 +174,10 @@ export async function getDepartments() {
       value: department.id,
       label: department.name,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch departments",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch departments",
       { cause: error },
     );
   }
@@ -180,9 +185,7 @@ export async function getDepartments() {
 
 export async function getStudents() {
   try {
-    const response = await HttpClient.get<any>(
-      "/students?number=1&size=100",
-    );
+    const response = await HttpClient.get<any>("/students?number=1&size=100");
 
     const students = Array.isArray(response)
       ? response
@@ -192,9 +195,10 @@ export async function getStudents() {
       value: student.id,
       label: `${student.firstName} ${student.lastName}`,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch students",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch students",
       { cause: error },
     );
   }
@@ -254,11 +258,10 @@ export async function exportEnrollmentsCsv(
     const blob = await response.blob();
 
     return blob;
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Failed to export enrollments CSV",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to export enrollments CSV",
       { cause: error },
     );
   }
@@ -318,11 +321,10 @@ export async function exportEnrollmentsPdf(
     const blob = await response.blob();
 
     return blob;
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Failed to export enrollments PDF",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to export enrollments PDF",
       { cause: error },
     );
   }
@@ -338,9 +340,10 @@ export async function batchEnrollByDepartment(
     );
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to batch enroll students",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to batch enroll students",
       { cause: error },
     );
   }

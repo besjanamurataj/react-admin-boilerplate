@@ -1,5 +1,6 @@
 import type { RoleRequest, RoleResponse } from "../types/role";
 import { HttpClient } from "../libs/https/http-client";
+import type { AuthorityResponse } from "./authoritiesService";
 
 const API_URL = "/roles";
 
@@ -95,10 +96,10 @@ export async function getById({
 
 export async function getAuthorities() {
   try {
-    const response = await HttpClient.get<any>("/authorities");
-    return response.map((element: any) => ({
+    const response = await HttpClient.get<AuthorityResponse[]>("/authorities");
+    return response.map((element: AuthorityResponse) => ({
       value: element.id,
-      label: element.name || element.label,
+      label: element.name,
     }));
   } catch (error: unknown) {
     throw new Error(
