@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";

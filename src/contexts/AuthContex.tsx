@@ -1,6 +1,5 @@
 import {
   createContext,
-  useEffect,
   useMemo,
   useState,
   type FunctionComponent,
@@ -30,6 +29,56 @@ interface AuthContextType {
   loading: boolean;
 }
 
+interface AuthState {
+  user: AuthenticatedUser | null;
+  userId: string | null;
+  permissions: string[];
+  loading: boolean;
+}
+
+const getInitialAuthState = (): AuthState => {
+  const token = localStorage.getItem("jwtToken");
+
+  if (!token) {
+    return {
+      user: null,
+      userId: null,
+      permissions: [],
+      loading: false,
+    };
+  }
+
+  try {
+    const payload = token.split(".")[1];
+
+    if (!payload) {
+      throw new Error("Invalid JWT token");
+    }
+
+    const decoded = JSON.parse(atob(payload));
+
+    const storedUser = decoded?.sub;
+    const authorities: string[] = decoded?.authorities ?? [];
+
+    return {
+      user: storedUser ? { email: storedUser } : null,
+      userId: decoded?.id ? String(decoded.id) : null,
+      permissions: authorities,
+      loading: false,
+    };
+  } catch (error) {
+    console.error("Failed to decode authentication token:", error);
+    localStorage.removeItem("jwtToken");
+
+    return {
+      user: null,
+      userId: null,
+      permissions: [],
+      loading: false,
+    };
+  }
+};
+
 const initialState: AuthContextType = {
   isAuthenticated: false,
   user: null,
@@ -46,31 +95,35 @@ const initialState: AuthContextType = {
 const AuthContext = createContext<AuthContextType>(initialState);
 
 const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<AuthenticatedUser | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [authState, setAuthState] = useState<AuthState>(getInitialAuthState);
   const [roles, setRoles] = useState<RoleRequest[]>([]);
-  const [permissions, setPermissions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(() =>
-    Boolean(localStorage.getItem("jwtToken")),
-  );
+
+  const { user, userId, permissions, loading } = authState;
 
   const isAuthenticated = useMemo(() => Boolean(user), [user]);
 
   const authenticateUser = (userData: AuthUser): void => {
     const { email, authorities, id } = userData;
 
-    setUser({ email });
-    setPermissions(authorities ?? []);
-    setUserId(id || null);
+    setAuthState({
+      user: { email },
+      userId: String(id),
+      permissions: authorities ?? [],
+      loading: false,
+    });
   };
 
   const unAuthenticateUser = (): void => {
     localStorage.removeItem("jwtToken");
-    setUser(null);
+
+    setAuthState({
+      user: null,
+      userId: null,
+      permissions: [],
+      loading: false,
+    });
+
     setRoles([]);
-    setPermissions([]);
-    setUserId(null);
-    setLoading(false);
   };
 
   const hasRole = (roleName: string): boolean => {
@@ -86,36 +139,6 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
   const updateUser = (): void => {
     // Implement user update logic when needed.
   };
-
-  useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
-
-    if (!token) {
-      // setLoading(false);
-      return;
-    }
-
-    try {
-      const decoded = JSON.parse(atob(token.split(".")[1] || ""));
-
-      const storedUser = decoded?.sub;
-      const authorities: string[] = decoded?.authorities ?? [];
-
-      setUserId(decoded?.id || null);
-
-      if (storedUser) {
-        setUser({
-          email: storedUser,
-        });
-        setPermissions(authorities);
-      }
-    } catch (error) {
-      console.error("Failed to decode authentication token:", error);
-      unAuthenticateUser();
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   return (
     <AuthContext.Provider

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -12,19 +12,24 @@ import {
   getDepartmentById,
   updateDepartment,
 } from "../../services/departmentService";
-import type { DepartmentRequest, DepartmentResponse } from "../../types/department";
+import type {
+  DepartmentRequest,
+  DepartmentResponse,
+} from "../../types/department";
 import { useTranslation } from "react-i18next";
 import { departmentSchema } from "../../types/validations/schema";
 import { useToast } from "../../contexts/toast/ToastProvider";
 import { getUniversities } from "../../services/universityService";
 
+const initialFormData: DepartmentRequest = {
+  name: "",
+  code: "",
+  universityId: 0,
+  description: "",
+};
+
 export const DepartmentUpsertPage = () => {
-  const [formData, setFormData] = useState<DepartmentRequest>({
-    name: "",
-    code: "",
-    universityId: 0,
-    description: "",
-  });
+  const [formData, setFormData] = useState<DepartmentRequest>(initialFormData);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -58,16 +63,19 @@ export const DepartmentUpsertPage = () => {
     queryFn: () => getUniversities(),
   });
 
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        name: data.name ?? "",
-        code: data.code ?? "",
-        universityId: data.universityId ?? 0,
-        description: data.description ?? "",
-      });
-    }
-  }, [data]);
+  const displayedFormData: DepartmentRequest =
+    params.id && data ? data : formData;
+
+  // useEffect(() => {
+  //   if (data) {
+  //     setFormData({
+  //       name: data.name ?? "",
+  //       code: data.code ?? "",
+  //       universityId: data.universityId ?? 0,
+  //       description: data.description ?? "",
+  //     });
+  //   }
+  // }, [data]);
 
   const mutation = useMutation({
     mutationFn: (departmentData: DepartmentRequest) =>
@@ -147,7 +155,7 @@ export const DepartmentUpsertPage = () => {
             <Input
               id="name"
               placeholder={t("departments.namePlaceholder") || ""}
-              value={formData.name}
+              value={displayedFormData.name}
               onChange={(event) =>
                 setFormData({
                   ...formData,
@@ -172,7 +180,7 @@ export const DepartmentUpsertPage = () => {
             <Input
               id="code"
               placeholder={t("departments.codePlaceholder") || ""}
-              value={formData.code}
+              value={displayedFormData.code}
               onChange={(event) =>
                 setFormData({
                   ...formData,
@@ -202,7 +210,11 @@ export const DepartmentUpsertPage = () => {
                   value: university.value,
                 })) || []
               }
-              value={formData.universityId ? [formData.universityId] : []}
+              value={
+                displayedFormData.universityId
+                  ? [displayedFormData.universityId]
+                  : []
+              }
               onChange={(values) => {
                 setFormData({
                   ...formData,
@@ -227,7 +239,7 @@ export const DepartmentUpsertPage = () => {
             <Textarea
               id="description"
               placeholder={t("departments.descriptionPlaceholder") || ""}
-              value={formData.description}
+              value={displayedFormData.description}
               onChange={(event) =>
                 setFormData({
                   ...formData,

@@ -13,6 +13,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+
 import { Select } from "./Select";
 import { Button } from "./Button";
 import { useTranslation } from "react-i18next";
@@ -22,14 +23,15 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData, unknown>[];
   loading?: boolean;
   length?: number;
+
   sorting: {
     state: SortingState;
-    onChange: (s: SortingState) => void;
+    onChange: (sorting: SortingState) => void;
   };
 
   pagination: PaginationState & {
     total: number;
-    onChange: (p: PaginationState) => void;
+    onChange: (pagination: PaginationState) => void;
   };
 
   globalFilter?: string;
@@ -39,7 +41,7 @@ interface DataTableProps<TData> {
 export function DataTable<TData>({
   data,
   columns,
-  loading,
+  loading = false,
   length,
   sorting,
   pagination,
@@ -47,6 +49,10 @@ export function DataTable<TData>({
   setGlobalFilter,
 }: DataTableProps<TData>) {
   const { t } = useTranslation();
+
+  const pageCount = Math.ceil(pagination.total / pagination.pageSize);
+
+  const currentPage = pagination.pageIndex + 1;
 
   const table = useReactTable({
     data,
@@ -63,35 +69,64 @@ export function DataTable<TData>({
 
     manualPagination: true,
     manualSorting: true,
+    manualFiltering: true,
 
-    pageCount: Math.ceil(pagination.total / pagination.pageSize),
+    pageCount,
+
     onSortingChange: (updater) => {
       const next =
         typeof updater === "function" ? updater(sorting.state) : updater;
+
       sorting.onChange(next);
     },
+
     onPaginationChange: (updater) => {
+      const currentPagination: PaginationState = {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+      };
+
       const next =
-        typeof updater === "function"
-          ? updater({
-              pageIndex: pagination.pageIndex,
-              pageSize: pagination.pageSize,
-            })
-          : updater;
+        typeof updater === "function" ? updater(currentPagination) : updater;
 
       pagination.onChange(next);
     },
-    onGlobalFilterChange: (val) => setGlobalFilter?.(String(val)),
+
+    onGlobalFilterChange: (value) => {
+      setGlobalFilter?.(String(value));
+    },
+
     getCoreRowModel: getCoreRowModel(),
   });
+
+  const handlePageSizeChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    pagination.onChange({
+      pageIndex: 0,
+      pageSize: Number(event.target.value),
+    });
+  };
+
+  const goToPage = (pageIndex: number) => {
+    const safePageIndex = Math.max(
+      0,
+      Math.min(pageIndex, Math.max(0, pageCount - 1)),
+    );
+
+    pagination.onChange({
+      pageIndex: safePageIndex,
+      pageSize: pagination.pageSize,
+    });
+  };
 
   return (
     <div className="space-y-4">
       <table className="w-full border">
         <thead className="bg-gray-100">
-          {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id}>
-              {hg.headers.map((header) => (
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
@@ -114,7 +149,7 @@ export function DataTable<TData>({
                 Loading...
               </td>
             </tr>
-          ) : table.getRowModel().rows.length ? (
+          ) : table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map((row) => (
               <tr key={row.id} className="border-t">
                 {row.getVisibleCells().map((cell) => (
@@ -138,13 +173,7 @@ export function DataTable<TData>({
       <div className="flex items-center justify-end gap-2">
         <Select
           value={pagination.pageSize}
-          onChange={(e) =>
-            pagination.onChange({
-              ...pagination,
-              pageSize: Number(e.target.value),
-              pageIndex: 0,
-            })
-          }
+          onChange={handlePageSizeChange}
           options={[
             { value: 5, label: "5" },
             { value: 10, label: "10" },
@@ -154,57 +183,45 @@ export function DataTable<TData>({
         />
 
         <Button
+          type="button"
           size="icon"
           variant="ghost"
-          onClick={() => pagination.onChange({ ...pagination, pageIndex: 0 })}
+          onClick={() => goToPage(0)}
+          disabled={pagination.pageIndex === 0 || pageCount === 0}
         >
           <ChevronsLeft />
         </Button>
 
         <Button
+          type="button"
           size="icon"
           variant="ghost"
-          onClick={() =>
-            pagination.onChange({
-              ...pagination,
-              pageIndex: pagination.pageIndex - 1,
-            })
-          }
-          disabled={pagination.pageIndex === 0}
+          onClick={() => goToPage(pagination.pageIndex - 1)}
+          disabled={pagination.pageIndex === 0 || pageCount === 0}
         >
           <ChevronLeft />
         </Button>
 
         <span>
-          Page {pagination.pageIndex + 1} of {length}
+          Page {currentPage} of {length ?? pageCount}
         </span>
 
         <Button
+          type="button"
           size="icon"
           variant="ghost"
-          onClick={() =>
-            pagination.onChange({
-              ...pagination,
-              pageIndex: pagination.pageIndex + 1,
-            })
-          }
-          disabled={
-            pagination.pageIndex >=
-            Math.ceil(pagination.total / pagination.pageSize) - 1
-          }
+          onClick={() => goToPage(pagination.pageIndex + 1)}
+          disabled={pageCount === 0 || pagination.pageIndex >= pageCount - 1}
         >
           <ChevronRight />
         </Button>
 
         <Button
+          type="button"
           size="icon"
           variant="ghost"
-          onClick={() =>
-            pagination.onChange({
-              ...pagination,
-              pageIndex: Math.ceil(pagination.total / pagination.pageSize) - 1,
-            })
-          }
+          onClick={() => goToPage(pageCount - 1)}
+          disabled={pageCount === 0 || pagination.pageIndex >= pageCount - 1}
         >
           <ChevronsRight />
         </Button>

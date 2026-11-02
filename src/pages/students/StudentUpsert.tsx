@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -19,6 +19,15 @@ import { getDepartments } from "../../services/departmentService";
 import type { DepartmentResponse } from "../../types/department";
 import { useToast } from "../../contexts/toast/ToastProvider";
 
+const initialFormData: StudentRequest = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  birthDate: "",
+  active: true,
+  departmentId: 0,
+};
+
 export const StudentUpsertPage = () => {
   const navigate = useNavigate();
   const params = useParams();
@@ -28,14 +37,7 @@ export const StudentUpsertPage = () => {
 
   const isEditMode = Boolean(params.id);
 
-  const [formData, setFormData] = useState<StudentRequest>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    birthDate: "",
-    active: true,
-    departmentId: 0,
-  });
+  const [formData, setFormData] = useState<StudentRequest>(initialFormData);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -60,20 +62,8 @@ export const StudentUpsertPage = () => {
     queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
   });
 
-  useEffect(() => {
-    if (!studentData) {
-      return;
-    }
-
-    setFormData({
-      firstName: studentData.firstName ?? "",
-      lastName: studentData.lastName ?? "",
-      email: studentData.email ?? "",
-      birthDate: studentData.birthDate ?? "",
-      active: studentData.active ?? true,
-      departmentId: studentData.departmentId ?? 0,
-    });
-  }, [studentData]);
+  const displayedFormData: StudentRequest =
+    isEditMode && studentData ? studentData : formData;
 
   const createMutation = useMutation({
     mutationFn: (student: StudentRequest) => createStudent(student),
@@ -256,7 +246,7 @@ export const StudentUpsertPage = () => {
             <Input
               id="firstName"
               name="firstName"
-              value={formData.firstName}
+              value={displayedFormData.firstName}
               placeholder={t("students.firstNamePlaceholder") || ""}
               onChange={handleInputChange}
             />
@@ -277,7 +267,7 @@ export const StudentUpsertPage = () => {
             <Input
               id="lastName"
               name="lastName"
-              value={formData.lastName}
+              value={displayedFormData.lastName}
               placeholder={t("students.lastNamePlaceholder") || ""}
               onChange={handleInputChange}
             />
@@ -299,7 +289,7 @@ export const StudentUpsertPage = () => {
               id="email"
               name="email"
               type="email"
-              value={formData.email}
+              value={displayedFormData.email}
               placeholder={t("students.emailPlaceholder") || ""}
               onChange={handleInputChange}
             />
@@ -321,7 +311,7 @@ export const StudentUpsertPage = () => {
               id="birthDate"
               name="birthDate"
               type="date"
-              value={formData.birthDate}
+              value={displayedFormData.birthDate}
               onChange={handleInputChange}
             />
 
@@ -340,8 +330,14 @@ export const StudentUpsertPage = () => {
 
             <MultiSelect
               placeholder={t("students.departmentPlaceholder") || ""}
-              options={departments ?? []}
-              value={formData.departmentId > 0 ? [formData.departmentId] : []}
+              options={
+                departments?.map((d) => ({ value: d.id, label: d.name })) ?? []
+              }
+              value={
+                displayedFormData.departmentId > 0
+                  ? [displayedFormData.departmentId]
+                  : []
+              }
               onChange={handleDepartmentChange}
               disabled={isDepartmentsLoading}
             />
@@ -364,13 +360,13 @@ export const StudentUpsertPage = () => {
                 id="active"
                 name="active"
                 type="checkbox"
-                checked={formData.active}
+                checked={displayedFormData.active}
                 onChange={handleActiveChange}
                 className="h-4 w-4"
               />
 
               <span className="text-sm text-gray-700">
-                {formData.active ? t("common.yes") : t("common.no")}
+                {displayedFormData.active ? t("common.yes") : t("common.no")}
               </span>
             </div>
 
