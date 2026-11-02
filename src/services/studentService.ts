@@ -76,9 +76,10 @@ export async function getStudents(
     const response = await HttpClient.get<any>(urlWithQuery);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch students",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch students",
       { cause: error },
     );
   }
@@ -89,9 +90,10 @@ export async function deleteStudent(id: number) {
     const response = await HttpClient.delete(`${API_URL}/${id}`);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to delete student",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete student",
       { cause: error },
     );
   }
@@ -105,9 +107,10 @@ export async function updateStudent(
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to update student",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update student",
       { cause: error },
     );
   }
@@ -126,9 +129,10 @@ export async function getStudentById({
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch student",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch student",
       { cause: error },
     );
   }
@@ -148,9 +152,10 @@ export async function getDepartments() {
       value: department.id,
       label: department.name,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch departments",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch departments",
       { cause: error },
     );
   }

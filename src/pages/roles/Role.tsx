@@ -22,6 +22,7 @@ import { formatRole } from "../../utils/formatRole";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import type { RoleResponse, RoleSelection } from "../../types/role";
 
 export const RolePage = () => {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export const RolePage = () => {
   const queryClient = useQueryClient();
 
   const [open, setOpen] = useState(false);
-  const [deleteId, setDeleteId] = useState<any>();
+  const [deleteId, setDeleteId] = useState<number>();
   const [globalFilter, setGlobalFilter] = useState("");
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -84,7 +85,7 @@ export const RolePage = () => {
       });
       setOpen(false);
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       addToast({
         title: t("messages.error") || "",
         description: err.message,
@@ -125,12 +126,12 @@ export const RolePage = () => {
       enableSorting: false,
     },
     {
-      accessorFn: (row: any) => row.authorities?.join(", "),
+      accessorFn: (row: RoleResponse) => row.authorities?.join(", "),
       id: "permission",
       header: () => <span>{t("roles.table.permission")}</span>,
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          {row.original.authorities?.map((role: any) => (
+          {row.original.authorities?.map((role:RoleSelection) => (
             <span key={role.name} className="w-fit text-gray-800">
               {formatRole(role.name)}
             </span>

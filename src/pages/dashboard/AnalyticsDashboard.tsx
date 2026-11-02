@@ -8,59 +8,34 @@ import RecentUsers from "../../components/dashboard/RecentUsers";
 import RoleSummary from "../../components/dashboard/RoleSummary";
 
 import { getUsers } from "../../services/useService";
-import {
-  getAuthorities,
-  getRole,
-} from "../../services/roleService";
+import { getAuthorities, getRole } from "../../services/roleService";
 import type { User } from "../../types/user";
 import type { RoleResponse } from "../../types/role";
 
 const AnalyticsDashboard = () => {
-
   const { t } = useTranslation();
 
-  const {
-    data: usersData,
-    isLoading: isUsersLoading,
-  } = useQuery({
+  const { data: usersData, isLoading: isUsersLoading } = useQuery({
     queryKey: ["dashboard-users"],
-    queryFn: () =>
-      getUsers(
-        "",
-        "",
-        "",
-        "",
-        "",
-        [],
-        0,
-        100,
-        [],
-      ),
+    queryFn: () => getUsers("", "", "", "", "", [], 0, 100, []),
   });
 
-  const {
-    data: rolesData,
-    isLoading: isRolesLoading,
-  } = useQuery({
+  const { data: rolesData, isLoading: isRolesLoading } = useQuery({
     queryKey: ["dashboard-roles-total"],
     queryFn: () => getRole(),
   });
 
-  const {
-    data: authoritiesData,
-    isLoading: isAuthoritiesLoading,
-  } = useQuery({
+  const { data: authoritiesData, isLoading: isAuthoritiesLoading } = useQuery({
     queryKey: ["dashboard-authorities-total"],
     queryFn: () => getAuthorities(),
   });
 
-  const users = usersData?.content ?? [];
-
+  const users = useMemo(() => usersData?.content ?? [], [usersData?.content]);
   const roleUsageData = useMemo(() => {
     const roleCounter = new Map();
 
-    users.forEach((user:User) => {
-      user.roles?.forEach((role:RoleResponse) => {
+    users.forEach((user: User) => {
+      user.roles?.forEach((role: RoleResponse) => {
         const currentCount = roleCounter.get(role.id)?.usersCount ?? 0;
 
         roleCounter.set(role.id, {
@@ -88,48 +63,30 @@ const AnalyticsDashboard = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatisticsCard
           title={t("dashboard.totalUsers")}
-          value={
-            isUsersLoading
-              ? 0
-              : usersData?.totalElements ?? 0
-          }
+          value={isUsersLoading ? 0 : (usersData?.totalElements ?? 0)}
           description={t("dashboard.users")}
           icon={<UserRound size={22} />}
         />
 
         <StatisticsCard
           title={t("dashboard.totalRoles")}
-          value={
-            isRolesLoading
-              ? 0
-              : rolesData?.totalElements ?? 0
-          }
+          value={isRolesLoading ? 0 : (rolesData?.totalElements ?? 0)}
           description={t("dashboard.roles")}
           icon={<UsersRound size={22} />}
         />
 
         <StatisticsCard
           title={t("dashboard.totalAuthorities")}
-          value={
-            isAuthoritiesLoading
-              ? 0
-              : authoritiesData?.length ?? 0
-          }
+          value={isAuthoritiesLoading ? 0 : (authoritiesData?.length ?? 0)}
           description={t("dashboard.authorities")}
           icon={<ShieldCheck size={22} />}
         />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RoleSummary
-          data={roleUsageData}
-          isLoading={isUsersLoading}
-        />
+        <RoleSummary data={roleUsageData} isLoading={isUsersLoading} />
 
-        <RecentUsers
-          users={users}
-          isLoading={isUsersLoading}
-        />
+        <RecentUsers users={users} isLoading={isUsersLoading} />
       </div>
     </div>
   );

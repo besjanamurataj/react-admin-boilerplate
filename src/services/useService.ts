@@ -5,7 +5,7 @@ import type { Profile } from "../types/profile";
 const API_URL = "/users";
 
 export async function createUser(data: User) {
-  const response =  await HttpClient.post(API_URL, data);
+  const response = await HttpClient.post(API_URL, data);
   return response;
 }
 
@@ -48,7 +48,7 @@ export async function getUsers(
   }
 }
 
-export async function deleteUsers(id: number ) {
+export async function deleteUsers(id: number) {
   try {
     const response = await HttpClient.delete(API_URL + `/${id}`);
     return response;
@@ -56,20 +56,36 @@ export async function deleteUsers(id: number ) {
     throw new Error(error?.response?.data?.message || "Failed to delete user");
   }
 }
-export async function updateUsers(id: any, user: User) {
+export async function updateUsers(id: string, user: User) {
   try {
     const response = await HttpClient.put(API_URL + `/${id}`, user);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to update user");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update user",
+      { cause: error },
+    );
   }
 }
-export async function getById({ id, signal }: { id: any; signal?: AbortSignal }): Promise<Profile> {
+export async function getById({
+  id,
+  signal,
+}: {
+  id: string;
+  signal?: AbortSignal;
+}): Promise<Profile> {
   try {
-    const response = await HttpClient.get<Profile>(API_URL + `/${id}`, { signal });
+    const response = await HttpClient.get<Profile>(API_URL + `/${id}`, {
+      signal,
+    });
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to fetch user");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch user",
+      { cause: error },
+    );
   }
 }
 export async function getByEmail(email: string) {
@@ -83,8 +99,12 @@ export async function changePassword(changePasswordData: PasswordUpdate) {
       changePasswordData,
     );
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to change password");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to change password",
+      { cause: error },
+    );
   }
 }
 
@@ -92,9 +112,11 @@ export async function updateProfile(updateProfileData: Profile) {
   try {
     const response = await HttpClient.put(API_URL, updateProfileData);
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to update user"
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update user",
+      { cause: error },
     );
   }
 }

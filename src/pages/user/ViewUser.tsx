@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { getRole } from "../../services/roleService";
 import { DatePicker } from "../../components/ui/DatePicker";
 import { RadioGroup } from "../../components/ui/Radion";
+import type { RoleResponse } from "../../types/role";
 
 export const ViewUserPage = () => {
   const [formData, setFormData] = useState<User>({
@@ -27,6 +28,8 @@ export const ViewUserPage = () => {
       gender: "",
       street: "",
     },
+    authorities: [],
+    id: 0,
   });
   const params = useParams();
   const { t } = useTranslation();
@@ -49,20 +52,21 @@ export const ViewUserPage = () => {
 
   useEffect(() => {
     if (data) {
-      console.log(data, "formdata");
       setFormData({
         name: data.name ?? "",
         surname: data.surname ?? "",
         email: data.email ?? "",
         username: data.username ?? "",
         password: data.password ?? "",
-        roles: data.roles.map((el: any) => el.id) ?? [],
+        roles: data.roles.map((el: RoleResponse) => el.id) ?? [],
         userInfo: {
           phoneNumber: data.userInfo?.phoneNumber ?? "",
           birthDate: data.userInfo?.birthDate ?? "",
           gender: data.userInfo?.gender ?? "",
           street: data.userInfo?.street ?? "",
         },
+        authorities: data.authorities ?? [],
+        id: data.id ?? 0,
       });
     }
   }, [data]);

@@ -2,6 +2,7 @@ import type {
   BatchEnrollmentRequest,
   BatchEnrollmentResponse,
   EnrollmentRequest,
+  EnrollmentResponse,
 } from "../types/enrollment";
 import { HttpClient } from "../libs/https/http-client";
 
@@ -118,9 +119,9 @@ export async function getEnrollmentById({
 }: {
   id: number;
   signal?: AbortSignal;
-}) {
+}) :Promise<EnrollmentResponse>{
   try {
-    const response = await HttpClient.get(`${API_URL}/${id}`, {
+    const response = await HttpClient.get<EnrollmentResponse>(`${API_URL}/${id}`, {
       signal,
     });
 

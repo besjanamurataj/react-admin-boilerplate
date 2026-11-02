@@ -4,19 +4,18 @@ import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-
 import {
   getEnrollmentById,
 } from "../../services/enrollmentService";
-
 import { useTranslation } from "react-i18next";
+import type { EnrollmentResponse } from "../../types/enrollment";
 
 export const ViewEnrollmentPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<EnrollmentResponse>({
     queryKey: ["enrollments", params.id],
 
     queryFn: ({ signal }) => {

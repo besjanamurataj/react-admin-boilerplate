@@ -6,7 +6,7 @@ export interface User {
   password: string;
   roles: any[];
   userInfo?: UserInfo;
-  id: string;
+  id: number;
   authorities: string[];
 }
 

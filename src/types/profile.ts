@@ -1,3 +1,4 @@
+import type { RoleSelection } from "./role";
 import type { UserInfo } from "./user";
 
 export interface Profile {

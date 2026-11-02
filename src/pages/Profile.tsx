@@ -10,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { changePassword, getById, updateProfile } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
-
 import type { PasswordUpdate } from "../types/user";
 import { Label } from "../components/ui/Label";
 import { Dialog, DialogContent } from "../components/ui/Dialog";
@@ -18,6 +17,7 @@ import { MultiSelect } from "../components/ui/MultiSelect";
 import { getRole } from "../services/roleService";
 import { formatToLocal } from "../utils/formatDate";
 import { useToast } from "../contexts/toast/ToastProvider";
+import type { RoleSelection } from "../types/role";
 
 const initialPasswordState: PasswordUpdate = {
   password: "",
@@ -77,7 +77,7 @@ export const ProfilePage = () => {
       surname: data?.surname ?? "",
       email: data?.email ?? "",
       username: data?.username ?? "",
-      roles: data?.roles?.map((r: any) => r.id) ?? [],
+      roles: data?.roles?.map((r) => r.id) ?? [],
       userInfo: {
         phoneNumber: data?.userInfo?.phoneNumber ?? "",
         birthDate: data?.userInfo?.birthDate ?? "",

@@ -12,3 +12,7 @@ export interface RoleResponse {
   authorities: string[];
   permission: { [category: string]: string[] };
 }
+export interface RoleSelection {
+  name: any;
+  id: any;
+}

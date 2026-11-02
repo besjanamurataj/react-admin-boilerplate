@@ -15,7 +15,6 @@ import { Search } from "../../components/ui/Search";
 import { PageTitle } from "../../components/PageTitle";
 import { Dialog, DialogContent } from "../../components/ui/Dialog";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { MultiSelect } from "../../components/ui/MultiSelect";
@@ -29,15 +28,24 @@ import { formatDate } from "../../utils/formatDate";
 import type { User } from "../../types/user";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const UserPage = () => {
   const initialFormData: User = {
+    id: 0,
     name: "",
     surname: "",
     email: "",
     password: "",
     username: "",
     roles: [],
+    authorities: [],
+    userInfo: {
+      phoneNumber: "",
+      birthDate: "",
+      gender: "",
+      street: "",
+    },
   };
   const [formData, setFormData] = useState<User>(initialFormData);
   const [open, setOpen] = React.useState(false);

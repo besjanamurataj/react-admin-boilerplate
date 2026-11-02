@@ -7,8 +7,12 @@ export async function createRole(data: RoleRequest) {
   try {
     const response = await HttpClient.post(API_URL, data);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to create user");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to create role",
+      { cause: error },
+    );
   }
 }
 
@@ -33,26 +37,38 @@ export async function getRole(
 
     const response = await HttpClient.get<any>(urlWithQuery);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to fetch roles");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch roles",
+      { cause: error },
+    );
   }
 }
 
-export async function deleteRole(id: any) {
+export async function deleteRole(id: string) {
   try {
     const response = await HttpClient.delete(API_URL + `/${id}`);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to delete role");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete role",
+      { cause: error },
+    );
   }
 }
 
-export async function updateRole(id: any, user: RoleRequest) {
+export async function updateRole(id: string, user: RoleRequest) {
   try {
     const response = await HttpClient.put(API_URL + `/${id}`, user);
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to update role");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update role",
+      { cause: error },
+    );
   }
 }
 
@@ -60,7 +76,7 @@ export async function getById({
   id,
   signal,
 }: {
-  id: any;
+  id: string;
   signal?: AbortSignal;
 }): Promise<RoleResponse> {
   try {
@@ -68,8 +84,12 @@ export async function getById({
       signal,
     });
     return response;
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to create role");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch role",
+      { cause: error },
+    );
   }
 }
 
@@ -80,7 +100,11 @@ export async function getAuthorities() {
       value: element.id,
       label: element.name || element.label,
     }));
-  } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to create role");
+  } catch (error: unknown) {
+    throw new Error(
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch authorities",
+      { cause: error },
+    );
   }
 }

@@ -50,7 +50,9 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
   const [userId, setUserId] = useState<string | null>(null);
   const [roles, setRoles] = useState<RoleRequest[]>([]);
   const [permissions, setPermissions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() =>
+    Boolean(localStorage.getItem("jwtToken")),
+  );
 
   const isAuthenticated = useMemo(() => Boolean(user), [user]);
 
@@ -68,6 +70,7 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
     setRoles([]);
     setPermissions([]);
     setUserId(null);
+    setLoading(false);
   };
 
   const hasRole = (roleName: string): boolean => {
@@ -88,7 +91,7 @@ const AuthProvider: FunctionComponent<AuthProviderProps> = ({ children }) => {
     const token = localStorage.getItem("jwtToken");
 
     if (!token) {
-      setLoading(false);
+      // setLoading(false);
       return;
     }
 

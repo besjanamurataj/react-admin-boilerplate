@@ -19,15 +19,11 @@ import {
   getUniversities,
   updateEnrollment,
 } from "../../services/enrollmentService";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-
 import { useNavigate, useParams } from "react-router-dom";
-
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
-
 import type { ZodIssue } from "zod";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const EnrollmentUpsertPage = () => {
   const navigate = useNavigate();

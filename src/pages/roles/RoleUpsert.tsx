@@ -53,7 +53,7 @@ export const RoleUpsertPage = () => {
       setFormData({
         name: data.name ?? "",
         description: data.description ?? "",
-        authorities: data.authorities?.map((auth: any) => auth.id) || [],
+        authorities: data.authorities?.map((auth:any) => auth.id) || [],
       });
     }
   }, [data]);

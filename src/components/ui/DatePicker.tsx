@@ -1,71 +1,88 @@
-'use client'
-import * as React from 'react'
-import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import { cn } from '../../libs/tailwind/merge-tailwind-classes'
-import { Button } from './Button'
-import { Select } from './Select'
+"use client";
+import * as React from "react";
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+import { cn } from "../../libs/tailwind/merge-tailwind-classes";
+import { Button } from "./Button";
+import { Select } from "./Select";
 
 type CalendarSelectProps = {
-  value?: Date | null
-  onChange?: (date: Date | null) => void
-  label?: string
-  placeholder?: string
-  className?: string
-  yearRange?: { from: number; to: number }
-  disabled?: boolean
-}
+  value?: Date | null;
+  onChange?: (date: Date | null) => void;
+  label?: string;
+  placeholder?: string;
+  className?: string;
+  yearRange?: { from: number; to: number };
+  disabled?: boolean;
+};
 
-const WEEK_DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const WEEK_DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export const DatePicker = ({
   value,
   onChange,
   label,
-  placeholder = 'Select date',
+  placeholder = "Select date",
   className,
   yearRange = { from: 1970, to: new Date().getFullYear() + 10 },
   disabled = false,
 }: CalendarSelectProps) => {
-  const [open, setOpen] = React.useState(false)
-  const wrapperRef = React.useRef<HTMLDivElement>(null)
+  const [open, setOpen] = React.useState(false);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false)
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
-  const today = new Date()
+  const today = new Date();
 
   const [month, setMonth] = React.useState(
-    new Date(value?.getFullYear() ?? today.getFullYear(), value?.getMonth() ?? today.getMonth(), 1),
-  )
+    new Date(
+      value?.getFullYear() ?? today.getFullYear(),
+      value?.getMonth() ?? today.getMonth(),
+      1,
+    ),
+  );
 
-  // keep calendar in sync with selected value
-  React.useEffect(() => {
-    if (value) {
-      setMonth(new Date(value.getFullYear(), value.getMonth(), 1))
-    }
-  }, [value])
+  const year = month.getFullYear();
+  const monthIndex = month.getMonth();
 
-  const year = month.getFullYear()
-  const monthIndex = month.getMonth()
-
-  const firstDayOfMonth = new Date(year, monthIndex, 1)
-  const startDay = (firstDayOfMonth.getDay() + 6) % 7
-  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate()
+  const firstDayOfMonth = new Date(year, monthIndex, 1);
+  const startDay = (firstDayOfMonth.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
 
   const formatDate = (date: Date) => {
-    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
-  }
+    return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+  };
 
   return (
-    <div ref={wrapperRef} className={cn('flex flex-col gap-2', className)}>
+    <div ref={wrapperRef} className={cn("flex flex-col gap-2", className)}>
       {label && <label className="px-1 text-sm font-medium">{label}</label>}
 
       {/* Input box */}
@@ -74,10 +91,18 @@ export const DatePicker = ({
         aria-expanded={open}
         aria-disabled={disabled}
         tabIndex={0}
-        onClick={() => !disabled && setOpen(o => !o)}
+        onClick={() => {
+          if (disabled) return;
+          if (!open && value) {
+            setMonth(new Date(value.getFullYear(), value.getMonth(), 1));
+          }
+          setOpen((prev) => !prev);
+        }}
         className={cn(
-          'flex h-10 items-center justify-between rounded-md px-3 text-sm border bg-gray-100',
-          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer border-gray-300',
+          "flex h-10 items-center justify-between rounded-md px-3 text-sm border bg-gray-100",
+          disabled
+            ? "cursor-not-allowed opacity-50"
+            : "cursor-pointer border-gray-300",
         )}
       >
         <span>{value ? formatDate(value) : placeholder}</span>
@@ -102,7 +127,9 @@ export const DatePicker = ({
 
               <Select
                 value={monthIndex}
-                onChange={e => setMonth(new Date(year, Number(e.target.value), 1))}
+                onChange={(e) =>
+                  setMonth(new Date(year, Number(e.target.value), 1))
+                }
                 className="h-8 flex-1 rounded-md border px-2 text-sm"
                 options={MONTHS.map((m, i) => ({ label: m, value: i }))}
                 disabled={disabled}
@@ -110,12 +137,15 @@ export const DatePicker = ({
 
               <Select
                 value={year}
-                onChange={e => setMonth(new Date(Number(e.target.value), monthIndex, 1))}
+                onChange={(e) =>
+                  setMonth(new Date(Number(e.target.value), monthIndex, 1))
+                }
                 className="h-8 w-24 rounded-md border px-2 text-sm"
                 disabled={disabled}
-                options={Array.from({ length: yearRange.to - yearRange.from + 1 }, (_, i) => yearRange.from + i).map(
-                  y => ({ label: String(y), value: y }),
-                )}
+                options={Array.from(
+                  { length: yearRange.to - yearRange.from + 1 },
+                  (_, i) => yearRange.from + i,
+                ).map((y) => ({ label: String(y), value: y }))}
               />
 
               <Button
@@ -131,7 +161,7 @@ export const DatePicker = ({
 
             {/* Week days */}
             <div className="mb-1 grid grid-cols-7 text-center text-xs text-gray-500">
-              {WEEK_DAYS.map(d => (
+              {WEEK_DAYS.map((d) => (
                 <div key={d}>{d}</div>
               ))}
             </div>
@@ -143,33 +173,33 @@ export const DatePicker = ({
               ))}
 
               {Array.from({ length: daysInMonth }).map((_, i) => {
-                const day = new Date(year, monthIndex, i + 1)
-                const selected = value?.toDateString() === day.toDateString()
+                const day = new Date(year, monthIndex, i + 1);
+                const selected = value?.toDateString() === day.toDateString();
 
                 return (
                   <Button
                     key={i}
                     variant="ghost"
                     onClick={() => {
-                      if (disabled) return
-                      onChange?.(day)
-                      setOpen(false)
+                      if (disabled) return;
+                      onChange?.(day);
+                      setOpen(false);
                     }}
                     className={cn(
-                      'h-8 rounded-md text-sm hover:bg-gray-200',
-                      selected && 'bg-black text-white',
-                      disabled && 'cursor-not-allowed opacity-50',
+                      "h-8 rounded-md text-sm hover:bg-gray-200",
+                      selected && "bg-black text-white",
+                      disabled && "cursor-not-allowed opacity-50",
                     )}
                     disabled={disabled}
                   >
                     {i + 1}
                   </Button>
-                )
+                );
               })}
             </div>
           </div>
         </div>
       )}
     </div>
-  )
-}
+  );
+};

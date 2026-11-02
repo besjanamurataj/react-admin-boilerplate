@@ -13,7 +13,7 @@ import {
   getUniversities,
   updateDepartment,
 } from "../../services/departmentService";
-import type { DepartmentRequest } from "../../types/department";
+import type { DepartmentRequest, DepartmentResponse } from "../../types/department";
 import { useTranslation } from "react-i18next";
 import { departmentSchema } from "../../types/validations/schema";
 import { useToast } from "../../contexts/toast/ToastProvider";
@@ -38,7 +38,7 @@ export const DepartmentUpsertPage = () => {
     ? t("departments.editDepartment")
     : t("departments.createDepartment");
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<DepartmentResponse>({
     queryKey: ["departments", params.id],
     queryFn: ({ signal }) => {
       if (!params.id) {

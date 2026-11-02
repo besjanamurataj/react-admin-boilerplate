@@ -8,9 +8,10 @@ export async function createUniversity(data: UniversityRequest) {
     const response = await HttpClient.post(API_URL, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to create university",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to create university",
       { cause: error },
     );
   }
@@ -49,9 +50,10 @@ export async function getUniversities(
     const response = await HttpClient.get<any>(urlWithQuery);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch universities",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch universities",
       { cause: error },
     );
   }
@@ -62,9 +64,10 @@ export async function deleteUniversity(id: number) {
     const response = await HttpClient.delete(`${API_URL}/${id}`);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to delete university",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete university",
       { cause: error },
     );
   }
@@ -75,9 +78,10 @@ export async function updateUniversity(id: number, data: UniversityRequest) {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to update university",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update university",
       { cause: error },
     );
   }
@@ -96,9 +100,10 @@ export async function getUniversityById({
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch university",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch university",
       { cause: error },
     );
   }

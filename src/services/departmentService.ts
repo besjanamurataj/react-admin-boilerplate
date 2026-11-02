@@ -1,5 +1,9 @@
-import type { DepartmentRequest } from "../types/department";
+import type {
+  DepartmentRequest,
+  DepartmentResponse,
+} from "../types/department";
 import { HttpClient } from "../libs/https/http-client";
+import type { UniversityResponse } from "../types/university";
 
 const API_URL = "/departments";
 
@@ -8,9 +12,10 @@ export async function createDepartment(data: DepartmentRequest) {
     const response = await HttpClient.post(API_URL, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to create department",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to create department",
       { cause: error },
     );
   }
@@ -46,12 +51,13 @@ export async function getDepartments(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response = await HttpClient.get<DepartmentResponse[]>(urlWithQuery);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch departments",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch departments",
       { cause: error },
     );
   }
@@ -62,9 +68,10 @@ export async function deleteDepartment(id: number) {
     const response = await HttpClient.delete(`${API_URL}/${id}`);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to delete department",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to delete department",
       { cause: error },
     );
   }
@@ -75,9 +82,10 @@ export async function updateDepartment(id: number, data: DepartmentRequest) {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to update department",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to update department",
       { cause: error },
     );
   }
@@ -89,16 +97,20 @@ export async function getDepartmentById({
 }: {
   id: string;
   signal?: AbortSignal;
-}) {
+}): Promise<DepartmentResponse> {
   try {
-    const response = await HttpClient.get(`${API_URL}/${id}`, {
-      signal,
-    });
+    const response = await HttpClient.get<DepartmentResponse>(
+      `${API_URL}/${id}`,
+      {
+        signal,
+      },
+    );
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch department",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch department",
       { cause: error },
     );
   }
@@ -106,21 +118,20 @@ export async function getDepartmentById({
 
 export async function getUniversities() {
   try {
-    const response = await HttpClient.get<any>(
+    const response = await HttpClient.get<UniversityResponse[]>(
       "/universities?number=1&size=100",
     );
 
-    const universities = Array.isArray(response)
-      ? response
-      : response?.content || [];
+    const universities = Array.isArray(response) ? response : response || [];
 
-    return universities.map((university: any) => ({
+    return universities.map((university: UniversityResponse) => ({
       value: university.id,
       label: university.name,
     }));
-  } catch (error: any) {
+  } catch (error: unknown) {
     throw new Error(
-      error?.response?.data?.message || "Failed to fetch universities",
+      (error as { response?: { data?: { message?: string } } })?.response?.data
+        ?.message || "Failed to fetch universities",
       { cause: error },
     );
   }

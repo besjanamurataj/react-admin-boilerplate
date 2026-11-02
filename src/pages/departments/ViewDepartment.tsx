@@ -11,13 +11,14 @@ import {
 } from "../../services/departmentService";
 import { useTranslation } from "react-i18next";
 import { MultiSelect } from "../../components/ui/MultiSelect";
+import type { DepartmentResponse } from "../../types/department";
 
 export const ViewDepartmentPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<DepartmentResponse>({
     queryKey: ["departments", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) {
@@ -103,11 +104,7 @@ export const ViewDepartmentPage = () => {
                   value: university.value,
                 })) || []
               }
-              value={
-                department?.universityId
-                  ? [department.universityId]
-                  : []
-              }
+              value={department?.universityId ? [department.universityId] : []}
               onChange={() => {}}
             />
           </div>
@@ -122,19 +119,14 @@ export const ViewDepartmentPage = () => {
 
             <Textarea
               id="description"
-              placeholder={
-                t("departments.descriptionPlaceholder") || ""
-              }
+              placeholder={t("departments.descriptionPlaceholder") || ""}
               value={department?.description}
               disabled
             />
           </div>
 
           <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/department")}
-            >
+            <Button variant="outline" onClick={() => navigate("/department")}>
               {t("common.cancel")}
             </Button>
           </div>
