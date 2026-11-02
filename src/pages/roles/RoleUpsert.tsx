@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -22,13 +22,15 @@ import {
 
 import { useToast } from "../../contexts/toast/ToastProvider";
 
+const initialFormData: RoleRequest = {
+  name: "",
+  description: "",
+  authorities: [],
+};
+
 export const RoleUpsertPage = () => {
   // Form state
-  const [formData, setFormData] = useState<RoleRequest>({
-    name: "",
-    description: "",
-    authorities: [],
-  });
+  const [formData, setFormData] = useState<RoleRequest>(initialFormData);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -59,21 +61,19 @@ export const RoleUpsertPage = () => {
   });
 
   // Fetch available permissions
-  const { data: permission = [] } = useQuery({
+  const { data: permission } = useQuery({
     queryKey: ["permission"],
     queryFn: getAuthorities,
   });
-
-  // Populate form when editing
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        name: data.name ?? "",
-        description: data.description ?? "",
-        authorities: data.authorities ?? [],
-      });
-    }
-  }, [data]);
+  const role = data as unknown as Role | undefined;
+  const displayedFormData: RoleRequest =
+    isEditMode && role
+      ? {
+          name: role.name ?? "",
+          description: role.description ?? "",
+          authorities: role.authorities ?? [],
+        }
+      : formData;
 
   // Create / Update mutation
   const mutation = useMutation({
@@ -106,26 +106,26 @@ export const RoleUpsertPage = () => {
   });
 
   // Form submit
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  const result = roleSchema.safeParse(formData);
+    const result = roleSchema.safeParse(formData);
 
-  if (!result.success) {
-    const fieldErrors: Record<string, string> = {};
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
 
-    result.error.issues.forEach((issue) => {
-      const field = issue.path[0] as string;
-      fieldErrors[field] = issue.message;
-    });
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string;
+        fieldErrors[field] = issue.message;
+      });
 
-    setErrors(fieldErrors);
-    return;
-  }
+      setErrors(fieldErrors);
+      return;
+    }
 
-  setErrors({});
-  mutation.mutate(result.data);
-};
+    setErrors({});
+    mutation.mutate(formData);
+  };
 
   // Update individual form fields
   const handleChange = (field: keyof RoleRequest, value: string | string[]) => {
@@ -168,7 +168,7 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
             <Input
               id="name"
               placeholder={t("roles.namePlaceholder")}
-              value={formData.name}
+              value={displayedFormData.name}
               onChange={(e) => handleChange("name", e.target.value)}
             />
 
@@ -188,11 +188,13 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 
             <MultiSelect
               placeholder={t("common.selectOptions")}
-              options={permission.map((role) => ({
+              options={(permission ?? []).map((role) => ({
                 label: role.label,
                 value: role.value,
               }))}
-              value={formData.authorities}
+              value={displayedFormData.authorities.map(
+                (authority) => authority.id,
+              )}
               onChange={(values) =>
                 handleChange("authorities", values.map(String))
               }
@@ -215,7 +217,7 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
             <Textarea
               id="description"
               placeholder={t("roles.descriptionPlaceholder")}
-              value={formData.description}
+              value={displayedFormData.description}
               onChange={(e) => handleChange("description", e.target.value)}
             />
 

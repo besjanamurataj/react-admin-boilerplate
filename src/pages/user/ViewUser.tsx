@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -14,24 +13,23 @@ import { DatePicker } from "../../components/ui/DatePicker";
 import { RadioGroup } from "../../components/ui/Radion";
 import type { RoleResponse } from "../../types/role";
 
-export const ViewUserPage = () => {
-  const [formData, setFormData] = useState<User>({
-    id: 0,
-    name: "",
-    surname: "",
-    email: "",
-    username: "",
-    password: "",
-    roles: [],
-    authorities: [],
-    userInfo: {
-      phoneNumber: "",
-      birthDate: "",
-      gender: "",
-      street: "",
-    },
-  });
+const initialData: User = {
+  name: "",
+  surname: "",
+  email: "",
+  username: "",
+  password: "",
+  roles: [],
+  authorities: [],
+  userInfo: {
+    phoneNumber: "",
+    birthDate: "",
+    gender: "",
+    street: "",
+  },
+};
 
+export const ViewUserPage = () => {
   const params = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -52,29 +50,23 @@ export const ViewUserPage = () => {
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
-
-  useEffect(() => {
-    if (!data) return;
-
-    const user = data as unknown as User;
-
-    setFormData({
-      id: user.id ?? 0,
-      name: user.name ?? "",
-      surname: user.surname ?? "",
-      email: user.email ?? "",
-      username: user.username ?? "",
-      password: user.password ?? "",
-      roles: user.roles ?? [],
-      authorities: user.authorities ?? [],
-      userInfo: {
-        phoneNumber: user.userInfo?.phoneNumber ?? "",
-        birthDate: user.userInfo?.birthDate ?? "",
-        gender: user.userInfo?.gender ?? "",
-        street: user.userInfo?.street ?? "",
-      },
-    });
-  }, [data]);
+  const user = data as unknown as User | undefined;
+  const displayedFormData: User = {
+    ...initialData,
+    name: user?.name ?? "",
+    surname: user?.surname ?? "",
+    email: user?.email ?? "",
+    username: user?.username ?? "",
+    password: user?.password ?? "",
+    roles: user?.roles ?? [],
+    authorities: user?.authorities ?? [],
+    userInfo: {
+      phoneNumber: user?.userInfo?.phoneNumber ?? "",
+      birthDate: user?.userInfo?.birthDate ?? "",
+      gender: user?.userInfo?.gender ?? "",
+      street: user?.userInfo?.street ?? "",
+    },
+  };
 
   const rolesOptions =
     roles?.content.map((role) => ({
@@ -90,22 +82,22 @@ export const ViewUserPage = () => {
         <div className="mb-4 mt-4 grid grid-cols-12 gap-6">
           <div className="col-span-6">
             <Label htmlFor="name">{t("users.table.firstName")}</Label>
-            <Input id="name" value={formData.name} disabled />
+            <Input id="name" value={displayedFormData.name} disabled />
           </div>
 
           <div className="col-span-6">
             <Label htmlFor="surname">{t("users.table.lastName")}</Label>
-            <Input id="surname" value={formData.surname} disabled />
+            <Input id="surname" value={displayedFormData.surname} disabled />
           </div>
 
           <div className="col-span-6">
             <Label htmlFor="username">{t("users.table.username")}</Label>
-            <Input id="username" value={formData.username} disabled />
+            <Input id="username" value={displayedFormData.username} disabled />
           </div>
 
           <div className="col-span-6">
             <Label htmlFor="email">{t("users.table.email")}</Label>
-            <Input id="email" value={formData.email} disabled />
+            <Input id="email" value={displayedFormData.email} disabled />
           </div>
 
           <div className="col-span-6">
@@ -113,7 +105,7 @@ export const ViewUserPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || "Select Options"}
               options={rolesOptions}
-              value={formData.roles}
+              value={displayedFormData.roles}
               disabled
               onChange={() => {}}
             />
@@ -123,27 +115,26 @@ export const ViewUserPage = () => {
             <Label htmlFor="phoneNumber">{t("users.phoneNumber")}</Label>
             <Input
               id="phoneNumber"
-              value={formData.userInfo.phoneNumber}
+              value={displayedFormData.userInfo.phoneNumber}
               disabled
             />
           </div>
 
           <div className="col-span-6">
             <Label htmlFor="street">{t("users.streetLabel")}</Label>
-            <Input id="street" value={formData.userInfo.street} disabled />
+            <Input
+              id="street"
+              value={displayedFormData.userInfo.street}
+              disabled
+            />
           </div>
 
           <div className="col-span-6">
             <Label>{t("users.genderPlaceholder")}</Label>
             <RadioGroup
-              value={formData.userInfo?.gender ?? ""}
+              value={displayedFormData.userInfo?.gender ?? ""}
               disabled={true}
-              onValueChange={(value: string) =>
-                setFormData({
-                  ...formData,
-                  userInfo: { ...formData.userInfo, gender: value },
-                })
-              }
+              onValueChange={() => {}}
               options={[
                 { label: "Male", value: "M" },
                 { label: "Female", value: "F" },
@@ -156,8 +147,8 @@ export const ViewUserPage = () => {
             <Label>{t("users.birthDate")}</Label>
             <DatePicker
               value={
-                formData.userInfo.birthDate
-                  ? new Date(formData.userInfo.birthDate)
+                displayedFormData.userInfo.birthDate
+                  ? new Date(displayedFormData.userInfo.birthDate)
                   : null
               }
               disabled

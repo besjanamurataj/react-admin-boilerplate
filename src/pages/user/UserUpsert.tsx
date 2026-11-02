@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -77,31 +77,26 @@ export const UserUpsertPage = () => {
       value: String(role.id),
     })) ?? [];
 
-  useEffect(() => {
-    if (!data) return;
+  const user = data as unknown as User | undefined;
 
-    const user = data as unknown as User;
-    const userRoles = user.roles as unknown as Array<string | Role> | undefined;
-
-    setFormData({
-      name: user.name ?? "",
-      surname: user.surname ?? "",
-      email: user.email ?? "",
-      username: user.username ?? "",
-      password: user.password ?? "",
-      roles:
-        userRoles?.map((role) =>
-          typeof role === "string" ? role : String(role.id),
-        ) ?? [],
-      authorities: user.authorities ?? [],
-      userInfo: {
-        phoneNumber: user.userInfo?.phoneNumber ?? "",
-        birthDate: user.userInfo?.birthDate ?? "",
-        gender: user.userInfo?.gender ?? "",
-        street: user.userInfo?.street ?? "",
-      },
-    });
-  }, [data]);
+  const displayFormData: User = isEditing
+    ? formData
+    : {
+        ...initialFormData,
+        name: user?.name ?? "",
+        surname: user?.surname ?? "",
+        email: user?.email ?? "",
+        username: user?.username ?? "",
+        password: user?.password ?? "",
+        roles: user?.roles ?? [],
+        authorities: user?.authorities ?? [],
+        userInfo: {
+          phoneNumber: user?.userInfo?.phoneNumber ?? "",
+          birthDate: user?.userInfo?.birthDate ?? "",
+          gender: user?.userInfo?.gender ?? "",
+          street: user?.userInfo?.street ?? "",
+        },
+      };
 
   const updateField = (field: keyof User, value: User[keyof User]) => {
     setFormData((previous) => ({
@@ -193,7 +188,7 @@ export const UserUpsertPage = () => {
             <Input
               id="name"
               placeholder={t("users.namePlaceholder") || ""}
-              value={formData.name}
+              value={displayFormData.name}
               onChange={(e) => updateField("name", e.target.value)}
             />
 
@@ -208,7 +203,7 @@ export const UserUpsertPage = () => {
             <Input
               id="surname"
               placeholder={t("users.lastNamePlaceholder") || ""}
-              value={formData.surname}
+              value={displayFormData.surname}
               onChange={(e) => updateField("surname", e.target.value)}
             />
 
@@ -223,7 +218,7 @@ export const UserUpsertPage = () => {
             <Input
               id="username"
               placeholder={t("users.usernamePlaceholder") || ""}
-              value={formData.username}
+              value={displayFormData.username}
               disabled={isEditing}
               onChange={(e) => updateField("username", e.target.value)}
             />
@@ -239,7 +234,7 @@ export const UserUpsertPage = () => {
             <Input
               id="email"
               placeholder={t("users.emailPlaceholder") || ""}
-              value={formData.email}
+              value={displayFormData.email}
               onChange={(e) => updateField("email", e.target.value)}
             />
 
@@ -256,7 +251,7 @@ export const UserUpsertPage = () => {
                 id="password"
                 type="password"
                 placeholder={t("users.passwordPlaceholder") || ""}
-                value={formData.password}
+                value={displayFormData.password}
                 onChange={(e) => updateField("password", e.target.value)}
               />
 
@@ -272,7 +267,7 @@ export const UserUpsertPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || "Select Options"}
               options={rolesOptions}
-              value={formData.roles}
+              value={displayFormData.roles}
               onChange={(values) => updateField("roles", values.map(String))}
             />
 
@@ -287,7 +282,7 @@ export const UserUpsertPage = () => {
             <Input
               id="phoneNumber"
               placeholder={t("users.phonePlaceholder") || ""}
-              value={formData.userInfo?.phoneNumber ?? ""}
+              value={displayFormData.userInfo?.phoneNumber ?? ""}
               onChange={(e) => updateUserInfo("phoneNumber", e.target.value)}
             />
 
@@ -304,7 +299,7 @@ export const UserUpsertPage = () => {
             <Input
               id="street"
               placeholder={t("users.streetPlaceholder") || ""}
-              value={formData.userInfo?.street ?? ""}
+              value={displayFormData.userInfo?.street ?? ""}
               onChange={(e) => updateUserInfo("street", e.target.value)}
             />
 
@@ -319,7 +314,7 @@ export const UserUpsertPage = () => {
             <Label htmlFor="gender">{t("users.genderPlaceholder")}</Label>
 
             <RadioGroup
-              value={formData.userInfo?.gender ?? ""}
+              value={displayFormData.userInfo?.gender ?? ""}
               onValueChange={(value: string) => updateUserInfo("gender", value)}
               options={[
                 { label: "Male", value: "M" },
@@ -340,7 +335,7 @@ export const UserUpsertPage = () => {
 
             <DatePicker
               value={
-                formData.userInfo?.birthDate
+                displayFormData.userInfo?.birthDate
                   ? new Date(formData.userInfo.birthDate)
                   : null
               }

@@ -95,7 +95,7 @@ export const RolePage = () => {
   });
 
   // Columns for DataTable
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (

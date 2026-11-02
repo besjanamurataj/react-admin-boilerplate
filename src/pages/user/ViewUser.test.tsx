@@ -8,6 +8,7 @@ import ViewUserPage from "./ViewUser";
 import { getById } from "../../services/useService";
 import { getRole } from "../../services/roleService";
 
+
 vi.mock("../../services/useService", () => ({
   getById: vi.fn(),
 }));
@@ -142,6 +143,7 @@ const mockUser = {
     gender: "F",
     street: "Tirana",
   },
+  authorities: [{ id: "read", label: "Read" }, { id: "write", label: "Write" }],
 };
 
 const mockRoles = {
