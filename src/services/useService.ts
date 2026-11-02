@@ -19,7 +19,7 @@ export async function getUsers(
   page?: number,
   size?: number,
   sorting?: string[],
-) {
+): Promise<UserResponse> {
   try {
     const query = new URLSearchParams();
 
@@ -82,9 +82,9 @@ export async function getById({
 }: {
   id: string;
   signal?: AbortSignal;
-}): Promise<Profile> {
+}): Promise<UserResponse[]> {
   try {
-    const response = await HttpClient.get<Profile>(API_URL + `/${id}`, {
+    const response = await HttpClient.get<UserResponse[]>(API_URL + `/${id}`, {
       signal,
     });
     return response;

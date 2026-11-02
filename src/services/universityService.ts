@@ -93,9 +93,9 @@ export async function getUniversityById({
 }: {
   id: string;
   signal?: AbortSignal;
-}) {
+}): Promise<UniversityResponse> {
   try {
-    const response = await HttpClient.get(`${API_URL}/${id}`, {
+    const response = await HttpClient.get<UniversityResponse>(`${API_URL}/${id}`, {
       signal,
     });
 

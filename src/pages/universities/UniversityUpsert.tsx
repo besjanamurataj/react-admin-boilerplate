@@ -34,7 +34,7 @@ export const UniversityUpsertPage = () => {
     ? t("universities.editUniversity")
     : t("universities.createUniversity");
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<UniversityRequest>({
     queryKey: ["universities", params.id],
     queryFn: ({ signal }) => {
       if (!params.id) {

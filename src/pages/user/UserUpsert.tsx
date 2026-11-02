@@ -11,11 +11,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { createUser, getById, updateUsers } from "../../services/useService";
 import { useTranslation } from "react-i18next";
-import { useToast } from "../../contexts/toast/ToastContex";
 import { getRole } from "../../services/roleService";
 import { RadioGroup } from "../../components/ui/Radion";
 import { DatePicker } from "../../components/ui/DatePicker";
 import { formatToLocal } from "../../utils/formatDate";
+import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const UserUpsertPage = () => {
   const [formData, setFormData] = useState<User>({
@@ -37,11 +37,11 @@ export const UserUpsertPage = () => {
   const { addToast } = useToast();
 
   const title = params.id ? t("users.editUser") : t("users.createUser");
-  const [errors, setErrors] = useState<Record<string, any>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { data } = useQuery<any>({
+  const { data } = useQuery<User>({
     queryKey: ["user", params.id],
     queryFn: ({ signal }) => {
       if (!params?.id) throw new Error("No ID provided");
@@ -88,14 +88,14 @@ export const UserUpsertPage = () => {
       });
       navigate("/user");
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error(error, "error");
-      const data = error?.response?.data;
+      const data = (error as { response?: { data?: { message?: string } } })?.response?.data;
 
       console.log(data, "backend error");
       addToast({
         title: t("messages.error") || "",
-        description: t(error?.response?.data?.message) || "",
+        description: t(data?.message) || "",
         variant: "error",
       });
     },

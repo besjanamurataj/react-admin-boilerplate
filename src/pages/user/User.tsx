@@ -50,7 +50,7 @@ export const UserPage = () => {
   const [formData, setFormData] = useState<User>(initialFormData);
   const [open, setOpen] = React.useState(false);
   const [filter, setFilter] = React.useState(false);
-  const [deleteId, setDeleteId] = React.useState<any>();
+  const [deleteId, setDeleteId] = React.useState<number | undefined>(undefined);
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [search, setSearch] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -92,7 +92,7 @@ export const UserPage = () => {
   });
 
   const mutation = useMutation({
-    mutationFn: () => deleteUsers(deleteId),
+    mutationFn: (id: number) => deleteUsers(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       addToast({
@@ -112,7 +112,7 @@ export const UserPage = () => {
     [],
   );
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<User>[] = [
     //   {
     //     id: 'select',
     //     size: 10,
@@ -360,7 +360,7 @@ export const UserPage = () => {
                     </Label>
                     <MultiSelect
                       options={
-                        roles?.content.map((role: any) => ({
+                        roles?.map((role: any) => ({
                           label: role.name,
                           value: role.id,
                         })) || []
@@ -441,7 +441,7 @@ export const UserPage = () => {
         {" "}
         {data && (
           <DataTable
-            data={data.content}
+            data={data}
             columns={columns}
             loading={isLoading}
             length={data.totalElements}
@@ -471,7 +471,9 @@ export const UserPage = () => {
               </Button>
               <Button
                 className="bg-green-700 text-white hover:bg-green-700"
-                onClick={() => mutation.mutate()}
+                onClick={() => {
+                  if (deleteId !== undefined) mutation.mutate(deleteId);
+                }}
               >
                 {t("common.save")}
               </Button>

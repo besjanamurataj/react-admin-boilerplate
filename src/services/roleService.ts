@@ -22,7 +22,7 @@ export async function getRole(
   page?: number,
   size?: number,
   sorting?: string[],
-) {
+): Promise<RoleResponse[]> {
   try {
     const query = new URLSearchParams();
 
@@ -36,7 +36,7 @@ export async function getRole(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response = await HttpClient.get<any>(urlWithQuery);
+    const response = await HttpClient.get<RoleResponse[]>(urlWithQuery);
     return response;
   } catch (error: unknown) {
     throw new Error(
