@@ -6,7 +6,7 @@ import { getRole } from "../../services/roleService";
 import { useAuth } from "../../hooks/useAuth";
 import UserPage from "./User";
 import { useToast } from "../../contexts/toast/ToastProvider";
-import type { User } from "../../types/user";
+import type { User, UserResponse } from "../../types/user";
 import type { ComponentProps, ReactNode } from "react";
 
 vi.mock("../../services/useService", () => ({
@@ -105,7 +105,15 @@ describe("UserPage", () => {
         surname: "Hoxha",
         username: "ana.hoxha",
         email: "ana@test.com",
+        password: "",
         roles: [],
+        authorities: [],
+        userInfo: {
+          phoneNumber: "0691111111",
+          birthDate: "1998-01-12",
+          gender: "F",
+          street: "Tirana",
+        },
       },
       {
         id: 2,
@@ -113,12 +121,23 @@ describe("UserPage", () => {
         surname: "Kola",
         username: "arben.kola",
         email: "arben@test.com",
+        password: "",
         roles: [],
+        authorities: [],
+        userInfo: {
+          phoneNumber: "0692222222",
+          birthDate: "1995-05-10",
+          gender: "M",
+          street: "Durres",
+        },
       },
     ],
+    page: 0,
+    size: 5,
     totalElements: 2,
-    total: 2,
-  };
+    totalPages: 1,
+    last: true,
+  } satisfies UserResponse;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -135,16 +154,34 @@ describe("UserPage", () => {
       },
     });
 
-    vi.mocked(getUsers).mockResolvedValue(mockUsers as unknown as any);
-    vi.mocked(getRole).mockResolvedValue({ content: [] } as unknown as any);
+    vi.mocked(getUsers).mockResolvedValue(mockUsers as UserResponse);
+    vi.mocked(getRole).mockResolvedValue({
+      content: [],
+      page: 0,
+      size: 5,
+      totalElements: 0,
+      totalPages: 0,
+      last: true,
+    });
 
     vi.mocked(useToast).mockReturnValue({
       addToast: vi.fn(),
-    } as unknown as any);
+      toasts: [],
+      removeToast: vi.fn(),
+    });
 
     vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: false,
+      user: null,
+      userId: null,
+      roles: [],
       hasPermission: () => false,
-    } as unknown as any);
+      hasRole: () => false,
+      authenticateUser: vi.fn(),
+      unAuthenticateUser: vi.fn(),
+      updateUser: vi.fn(),
+      loading: false,
+    });
   });
 
   const renderPage = () =>
@@ -195,9 +232,12 @@ describe("UserPage", () => {
   it("should display an empty table when the API returns no users", async () => {
     vi.mocked(getUsers).mockResolvedValue({
       content: [],
+      page: 0,
+      size: 5,
       totalElements: 0,
-      total: 0,
-    } as unknown as any);
+      totalPages: 0,
+      last: true,
+    });
 
     renderPage();
 

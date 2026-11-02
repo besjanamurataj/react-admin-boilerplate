@@ -7,7 +7,8 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import ViewUserPage from "./ViewUser";
 import { getById } from "../../services/useService";
 import { getRole } from "../../services/roleService";
-
+import type { UserResponse } from "../../types/user";
+import type { RoleResponse } from "../../types/role";
 
 vi.mock("../../services/useService", () => ({
   getById: vi.fn(),
@@ -129,28 +130,47 @@ vi.mock("../../components/ui/Radion", () => ({
   ),
 }));
 
-const mockUser = {
-  id: "1",
-  name: "Besjana",
-  surname: "Murataj",
-  email: "besjana@example.com",
-  username: "besjana",
-  password: "password",
-  roles: [{ id: "admin", name: "Admin" }],
-  userInfo: {
-    phoneNumber: "0691234567",
-    birthDate: "1998-05-10",
-    gender: "F",
-    street: "Tirana",
-  },
-  authorities: [{ id: "read", label: "Read" }, { id: "write", label: "Write" }],
+const mockUser: UserResponse = {
+  content: [
+    {
+      id: 1,
+      name: "Besjana",
+      surname: "Murataj",
+      email: "besjana@example.com",
+      username: "besjana",
+      password: "password",
+      roles: ["Admin"],
+      authorities: ["read", "write"],
+      userInfo: {
+        phoneNumber: "0691234567",
+        birthDate: "1998-05-10",
+        gender: "F",
+        street: "Tirana",
+      },
+    },
+  ],
+  page: 0,
+  size: 5,
+  totalElements: 1,
+  totalPages: 1,
+  last: true,
 };
 
-const mockRoles = {
+const mockRoles: RoleResponse = {
   content: [
-    { id: "admin", name: "Admin" },
-    { id: "user", name: "User" },
+    {
+      id: 1,
+      name: "Admin",
+      authorities: [],
+      description: "Administrator role",
+    },
+    { id: 2, name: "User", authorities: [], description: "Regular user role" },
   ],
+  page: 0,
+  size: 5,
+  totalElements: 2,
+  totalPages: 1,
+  last: true,
 };
 
 const renderPage = (id?: string) => {
@@ -178,8 +198,8 @@ describe("ViewUserPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(getById).mockResolvedValue(mockUser as any);
-    vi.mocked(getRole).mockResolvedValue(mockRoles as any);
+    vi.mocked(getById).mockResolvedValue(mockUser as UserResponse);
+    vi.mocked(getRole).mockResolvedValue(mockRoles as RoleResponse);
   });
 
   it("should call getById with the user ID when the page loads", async () => {
