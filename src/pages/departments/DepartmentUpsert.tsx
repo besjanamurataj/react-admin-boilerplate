@@ -46,7 +46,7 @@ export const DepartmentUpsertPage = () => {
       }
 
       return getDepartmentById({
-        id: Number(params.id),
+        id: params.id,
         signal,
       });
     },

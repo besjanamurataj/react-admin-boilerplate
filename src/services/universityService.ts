@@ -44,9 +44,7 @@ export async function getUniversities(
     }
 
     const urlWithQuery =
-      query.toString().length > 0
-        ? `${API_URL}?${query.toString()}`
-        : API_URL;
+      query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
     const response = await HttpClient.get<any>(urlWithQuery);
 
@@ -72,10 +70,7 @@ export async function deleteUniversity(id: number) {
   }
 }
 
-export async function updateUniversity(
-  id: number,
-  data: UniversityRequest,
-) {
+export async function updateUniversity(id: number, data: UniversityRequest) {
   try {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
@@ -92,7 +87,7 @@ export async function getUniversityById({
   id,
   signal,
 }: {
-  id: number;
+  id: string;
   signal?: AbortSignal;
 }) {
   try {

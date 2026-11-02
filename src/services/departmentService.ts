@@ -44,9 +44,7 @@ export async function getDepartments(
     }
 
     const urlWithQuery =
-      query.toString().length > 0
-        ? `${API_URL}?${query.toString()}`
-        : API_URL;
+      query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
     const response = await HttpClient.get<any>(urlWithQuery);
 
@@ -72,10 +70,7 @@ export async function deleteDepartment(id: number) {
   }
 }
 
-export async function updateDepartment(
-  id: number,
-  data: DepartmentRequest,
-) {
+export async function updateDepartment(id: number, data: DepartmentRequest) {
   try {
     const response = await HttpClient.put(`${API_URL}/${id}`, data);
 
@@ -92,7 +87,7 @@ export async function getDepartmentById({
   id,
   signal,
 }: {
-  id: number;
+  id: string;
   signal?: AbortSignal;
 }) {
   try {
