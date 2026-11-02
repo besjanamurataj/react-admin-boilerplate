@@ -205,9 +205,9 @@ export const DepartmentUpsertPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                universities?.map((university: any) => ({
-                  label: university.label,
-                  value: university.value,
+                universities?.map((university) => ({
+                  label: university.name,
+                  value: university.id,
                 })) || []
               }
               value={

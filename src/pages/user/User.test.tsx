@@ -6,6 +6,8 @@ import { getRole } from "../../services/roleService";
 import { useAuth } from "../../hooks/useAuth";
 import UserPage from "./User";
 import { useToast } from "../../contexts/toast/ToastProvider";
+import type { User } from "../../types/user";
+import type { ComponentProps, ReactNode } from "react";
 
 vi.mock("../../services/useService", () => ({
   getUsers: vi.fn(),
@@ -36,10 +38,10 @@ vi.mock("react-i18next", () => ({
 
 // Render the data passed from UserPage into a simple test table.
 vi.mock("../../components/ui/DataTable", () => ({
-  DataTable: ({ data, loading }: any) => (
+  DataTable: ({ data, loading }: { data: User[]; loading?: boolean }) => (
     <table data-testid="users-table" data-loading={String(loading)}>
       <tbody>
-        {data.map((user: any) => (
+        {data.map((user: User) => (
           <tr key={user.id}>
             <td>{user.name}</td>
             <td>{user.surname}</td>
@@ -57,38 +59,45 @@ vi.mock("../../components/PageTitle", () => ({
 }));
 
 vi.mock("../../components/ui/Button", () => ({
-  Button: ({ children, onClick }: any) => (
-    <button type="button" onClick={onClick}>
+  Button: ({
+    children,
+    onClick,
+    disabled,
+  }: {
+    children: ReactNode;
+    onClick?: () => void;
+    disabled?: boolean;
+  }) => (
+    <button type="button" onClick={onClick} disabled={disabled}>
       {children}
     </button>
   ),
 }));
 
 vi.mock("../../components/ui/Search", () => ({
-  Search: (props: any) => <input {...props} />,
+  Search: (props: ComponentProps<"input">) => <input {...props} />,
 }));
 
 vi.mock("../../components/ui/Input", () => ({
-  Input: (props: any) => <input {...props} />,
+  Input: (props: ComponentProps<"input">) => <input {...props} />,
 }));
-
 vi.mock("../../components/ui/Label", () => ({
-  Label: ({ children }: any) => <label>{children}</label>,
+  Label: ({ children }: { children: ReactNode }) => <label>{children}</label>,
 }));
 
 vi.mock("../../components/ui/MultiSelect", () => ({
-  MultiSelect: () => <div />,
+  MultiSelect: () => <div data-testid="multi-select" />,
 }));
 
 vi.mock("../../components/ui/Dialog", () => ({
-  Dialog: ({ open, children }: any) => (open ? <div>{children}</div> : null),
-  DialogContent: ({ children }: any) => <div>{children}</div>,
+  Dialog: ({ children, open }: { children: ReactNode; open: boolean }) =>
+    open ? <div role="dialog">{children}</div> : null,
 }));
 
 describe("UserPage", () => {
   let queryClient: QueryClient;
 
-  const mockUsers: any = {
+  const mockUsers = {
     content: [
       {
         id: 1,
@@ -126,16 +135,16 @@ describe("UserPage", () => {
       },
     });
 
-    vi.mocked(getUsers).mockResolvedValue(mockUsers as any);
-    vi.mocked(getRole).mockResolvedValue({ content: [] } as any);
+    vi.mocked(getUsers).mockResolvedValue(mockUsers as unknown as any);
+    vi.mocked(getRole).mockResolvedValue({ content: [] } as unknown as any);
 
     vi.mocked(useToast).mockReturnValue({
       addToast: vi.fn(),
-    } as any);
+    } as unknown as any);
 
     vi.mocked(useAuth).mockReturnValue({
       hasPermission: () => false,
-    } as any);
+    } as unknown as any);
   });
 
   const renderPage = () =>
@@ -188,7 +197,7 @@ describe("UserPage", () => {
       content: [],
       totalElements: 0,
       total: 0,
-    } as any);
+    } as unknown as any);
 
     renderPage();
 
