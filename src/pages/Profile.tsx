@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+
+import { useState } from "react";
 import { PageTitle } from "../components/PageTitle";
 import { Button } from "../components/ui/Button";
 import { DatePicker } from "../components/ui/DatePicker";
@@ -8,7 +9,11 @@ import { passwordSchema, userSchema } from "../types/validations/schema";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { changePassword, getById, updateProfile } from "../services/useService";
+import {
+  changePassword,
+  getById,
+  updateProfile,
+} from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
 import type { PasswordUpdate, User, UserResponse } from "../types/user";
 import { Label } from "../components/ui/Label";
@@ -21,6 +26,22 @@ import { useToast } from "../contexts/toast/ToastProvider";
 const initialPasswordState: PasswordUpdate = {
   password: "",
   confirmPassword: "",
+};
+
+const initialFormData: Profile = {
+  name: "",
+  surname: "",
+  email: "",
+  username: "",
+  password: "",
+  confirmPassword: "",
+  roles: [],
+  userInfo: {
+    phoneNumber: "",
+    birthDate: "",
+    gender: "",
+    street: "",
+  },
 };
 
 export const ProfilePage = () => {
@@ -36,25 +57,15 @@ export const ProfilePage = () => {
   const [updatePassword, setUpdatePassword] =
     useState<PasswordUpdate>(initialPasswordState);
 
-  const [formData, setFormData] = useState<Profile>({
-    name: "",
-    surname: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    roles: [],
-    userInfo: {
-      phoneNumber: "",
-      birthDate: "",
-      gender: "",
-      street: "",
-    },
-  });
-
+  const [formData, setFormData] = useState<Profile>(initialFormData);
   const [errors, setErrors] = useState<Record<string, unknown>>({});
 
-  const { data } = useQuery<UserResponse>({
+  // Fetch current user
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useQuery<UserResponse>({
     queryKey: ["user", userId],
     queryFn: ({ signal }): Promise<UserResponse> => {
       if (!userId) throw new Error("No ID provided");
@@ -63,33 +74,64 @@ export const ProfilePage = () => {
     enabled: !!userId,
   });
 
+  // Fetch roles
   const { data: roles } = useQuery({
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
 
-  useEffect(() => {
-    if (!data) return;
-    const user = data as unknown as User;
+  const user = data as unknown as User | undefined;
+
+  const displayedFormData: Profile = isEditing
+    ? formData
+    : {
+        name: user?.name ?? "",
+        surname: user?.surname ?? "",
+        email: user?.email ?? "",
+        username: user?.username ?? "",
+        password: "",
+        confirmPassword: "",
+        roles: user?.roles?.map(String) ?? [],
+        userInfo: {
+          phoneNumber: user?.userInfo?.phoneNumber ?? "",
+          birthDate: user?.userInfo?.birthDate ?? "",
+          street: user?.userInfo?.street ?? "",
+          gender: user?.userInfo?.gender ?? "",
+        },
+      };
+
+  // Initialize form when clicking Edit
+  const handleEdit = () => {
+    if (!user) return;
+
     setFormData({
-      name: user?.name ?? "",
-      surname: user?.surname ?? "",
-      email: user?.email ?? "",
-      username: user?.username ?? "",
+      name: user.name ?? "",
+      surname: user.surname ?? "",
+      email: user.email ?? "",
+      username: user.username ?? "",
+      password: "",
+      confirmPassword: "",
       roles: user.roles?.map(String) ?? [],
       userInfo: {
-        phoneNumber: user?.userInfo?.phoneNumber ?? "",
-        birthDate: user?.userInfo?.birthDate ?? "",
-        street: user?.userInfo?.street ?? "",
-        gender: user?.userInfo?.gender ?? "",
+        phoneNumber: user.userInfo?.phoneNumber ?? "",
+        birthDate: user.userInfo?.birthDate ?? "",
+        street: user.userInfo?.street ?? "",
+        gender: user.userInfo?.gender ?? "",
       },
     });
-  }, [data]);
 
+    setErrors({});
+    setIsEditing(true);
+  };
+
+  // Change password mutation
   const updatePasswordMutate = useMutation({
     mutationFn: (payload: PasswordUpdate) => changePassword(payload),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["user", userId],
+      });
 
       addToast({
         title: t("messages.success"),
@@ -99,13 +141,26 @@ export const ProfilePage = () => {
 
       setOpen(false);
       setUpdatePassword(initialPasswordState);
+      setErrors({});
+    },
+
+    onError: (error: Error) => {
+      addToast({
+        title: t("messages.error"),
+        description: t(error.message || "messages.passwordUpdateFailed"),
+        variant: "error",
+      });
     },
   });
 
+  // Update profile mutation
   const profileMutation = useMutation({
     mutationFn: (payload: Profile) => updateProfile(payload),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["user", userId] });
+      queryClient.invalidateQueries({
+        queryKey: ["user", userId],
+      });
 
       addToast({
         title: t("messages.success"),
@@ -113,32 +168,40 @@ export const ProfilePage = () => {
         variant: "success",
       });
 
+      setIsEditing(false);
       navigate("/user");
     },
-    onError: (error: any) => {
+
+    onError: (error: Error) => {
       addToast({
         title: t("messages.error"),
-        description: t(error?.response?.data?.message),
+        description: t(error.message || "messages.profileUpdateFailed"),
         variant: "error",
       });
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Profile form submit
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const result = userSchema.safeParse(formData);
 
     if (!result.success) {
-      const fieldErrors: Record<string, any> = {};
+      const fieldErrors: Record<string, unknown> = {};
 
       result.error.issues.forEach((issue) => {
         const parent = String(issue.path[0]);
-        const child = issue.path.length > 1 ? String(issue.path[1]) : undefined;
+        const child =
+          issue.path.length > 1 ? String(issue.path[1]) : undefined;
 
         if (child) {
+          const existing = fieldErrors[parent];
+
           fieldErrors[parent] = {
-            ...(fieldErrors[parent] || {}),
+            ...(typeof existing === "object" && existing !== null
+              ? existing
+              : {}),
             [child]: issue.message,
           };
         } else {
@@ -154,17 +217,18 @@ export const ProfilePage = () => {
     profileMutation.mutate(formData);
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  // Password form submit
+  const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const result = passwordSchema.safeParse(updatePassword);
-    console.log(result, result);
+
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
 
-      result.error.issues.forEach((err) => {
-        const field = err.path[0] as string;
-        fieldErrors[field] = err.message;
+      result.error.issues.forEach((issue) => {
+        const field = String(issue.path[0]);
+        fieldErrors[field] = issue.message;
       });
 
       setErrors(fieldErrors);
@@ -174,6 +238,28 @@ export const ProfilePage = () => {
     setErrors({});
     updatePasswordMutate.mutate(updatePassword);
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <PageTitle title={t("profile.title")} />
+        <p className="mt-4 text-muted-foreground">
+          Loading profile...
+        </p>
+      </div>
+    );
+  }
+
+  if (isError || !user) {
+    return (
+      <div className="p-6">
+        <PageTitle title={t("profile.title")} />
+        <p className="mt-4 text-destructive">
+          Error loading profile.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -187,18 +273,24 @@ export const ProfilePage = () => {
             <div className="col-span-12 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {Object.entries(errors).map(([key, value]) => (
                 <p key={key}>
-                  {typeof value === "string" ? value : JSON.stringify(value)}
+                  {typeof value === "string"
+                    ? value
+                    : JSON.stringify(value)}
                 </p>
               ))}
             </div>
           )}
+
           <div className="col-span-6">
             <Label>{t("users.table.firstName")}</Label>
             <Input
-              value={formData.name}
+              value={displayedFormData.name}
               disabled={!isEditing}
               onChange={(e) =>
-                setFormData((p) => ({ ...p, name: e.target.value }))
+                setFormData((previous) => ({
+                  ...previous,
+                  name: e.target.value,
+                }))
               }
             />
           </div>
@@ -206,10 +298,13 @@ export const ProfilePage = () => {
           <div className="col-span-6">
             <Label>{t("users.table.lastName")}</Label>
             <Input
-              value={formData.surname}
+              value={displayedFormData.surname}
               disabled={!isEditing}
               onChange={(e) =>
-                setFormData((p) => ({ ...p, surname: e.target.value }))
+                setFormData((previous) => ({
+                  ...previous,
+                  surname: e.target.value,
+                }))
               }
             />
           </div>
@@ -217,10 +312,13 @@ export const ProfilePage = () => {
           <div className="col-span-6">
             <Label>{t("users.table.email")}</Label>
             <Input
-              value={formData.email}
+              value={displayedFormData.email}
               disabled={!isEditing}
               onChange={(e) =>
-                setFormData((p) => ({ ...p, email: e.target.value }))
+                setFormData((previous) => ({
+                  ...previous,
+                  email: e.target.value,
+                }))
               }
             />
           </div>
@@ -228,7 +326,7 @@ export const ProfilePage = () => {
           <div className="col-span-6">
             <Label>{t("users.table.role")}</Label>
             <MultiSelect
-              value={formData.roles}
+              value={displayedFormData.roles}
               options={
                 roles?.content.map((role) => ({
                   label: role.name,
@@ -248,13 +346,13 @@ export const ProfilePage = () => {
           <div className="col-span-6">
             <Label>{t("users.phoneNumber")}</Label>
             <Input
-              value={formData.userInfo.phoneNumber}
+              value={displayedFormData.userInfo.phoneNumber}
               disabled={!isEditing}
               onChange={(e) =>
-                setFormData((p) => ({
-                  ...p,
+                setFormData((previous) => ({
+                  ...previous,
                   userInfo: {
-                    ...p.userInfo,
+                    ...previous.userInfo,
                     phoneNumber: e.target.value,
                   },
                 }))
@@ -266,15 +364,15 @@ export const ProfilePage = () => {
             <Label>{t("users.birthDate")}</Label>
             <DatePicker
               value={
-                formData.userInfo.birthDate
-                  ? new Date(formData.userInfo.birthDate)
+                displayedFormData.userInfo.birthDate
+                  ? new Date(displayedFormData.userInfo.birthDate)
                   : null
               }
               onChange={(date) =>
-                setFormData((p) => ({
-                  ...p,
+                setFormData((previous) => ({
+                  ...previous,
                   userInfo: {
-                    ...p.userInfo,
+                    ...previous.userInfo,
                     birthDate: date ? formatToLocal(date) : "",
                   },
                 }))
@@ -284,14 +382,22 @@ export const ProfilePage = () => {
           </div>
 
           <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => setOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setErrors({});
+                setOpen(true);
+              }}
+            >
               {t("common.changePassword")}
             </Button>
 
             {!isEditing ? (
               <Button
+                type="button"
                 variant="default"
-                onClick={() => setIsEditing(true)}
+                onClick={handleEdit}
                 className="bg-green-700 text-white hover:bg-green-700"
               >
                 {t("profile.updateProfile")}
@@ -300,6 +406,7 @@ export const ProfilePage = () => {
               <Button
                 type="submit"
                 variant="default"
+                disabled={profileMutation.isPending}
                 className="bg-green-700 text-white hover:bg-green-700"
               >
                 {t("common.save")}
@@ -318,8 +425,8 @@ export const ProfilePage = () => {
               type="password"
               value={updatePassword.password}
               onChange={(e) =>
-                setUpdatePassword((p) => ({
-                  ...p,
+                setUpdatePassword((previous) => ({
+                  ...previous,
                   password: e.target.value,
                 }))
               }
@@ -330,8 +437,8 @@ export const ProfilePage = () => {
               type="password"
               value={updatePassword.confirmPassword}
               onChange={(e) =>
-                setUpdatePassword((p) => ({
-                  ...p,
+                setUpdatePassword((previous) => ({
+                  ...previous,
                   confirmPassword: e.target.value,
                 }))
               }
@@ -341,7 +448,11 @@ export const ProfilePage = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setOpen(false)}
+                onClick={() => {
+                  setOpen(false);
+                  setUpdatePassword(initialPasswordState);
+                  setErrors({});
+                }}
               >
                 {t("common.cancel")}
               </Button>
@@ -349,6 +460,7 @@ export const ProfilePage = () => {
               <Button
                 type="submit"
                 variant="default"
+                disabled={updatePasswordMutate.isPending}
                 className="bg-green-700 text-white hover:bg-green-700"
               >
                 {t("common.updatePassword")}
