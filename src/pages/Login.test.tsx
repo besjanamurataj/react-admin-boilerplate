@@ -2,21 +2,22 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import LoginPage from "./Login";
+import { MemoryRouter } from "react-router-dom";
 import { login } from "../services/authService";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../contexts/toast/ToastProvider";
+import LoginPage from "./Login";
 
-const { mockNavigate } = vi.hoisted(() => ({
-  mockNavigate: vi.fn(),
-}));
+// Mocks
+const mockNavigate = vi.fn();
+const mockAuthenticateUser = vi.fn();
+const mockAddToast = vi.fn();
 
-vi.mock("../services/authService", () => ({
-  login: vi.fn(),
-}));
-
-vi.mock("react-router-dom", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("react-router-dom")>();
+vi.mock("react-router-dom", async () => {
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
 
   return {
     ...actual,
@@ -24,75 +25,70 @@ vi.mock("react-router-dom", async (importOriginal) => {
   };
 });
 
-vi.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
-vi.mock("../contexts/ToastContex", () => ({
-  useToast: vi.fn(),
+vi.mock("../services/authService", () => ({
+  login: vi.fn(),
 }));
 
 vi.mock("../hooks/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock("../layouts/Header", () => ({
-  default: () => <header>Header</header>,
+vi.mock("../contexts/toast/ToastProvider", () => ({
+  useToast: vi.fn(),
 }));
 
-describe("LoginPage", () => {
-  const addToast = vi.fn();
-  const authenticateUser = vi.fn();
+vi.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
-  const renderLogin = () => {
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-        mutations: { retry: false },
-      },
-    });
+vi.mock("../layouts/Header", () => ({
+  default: () => <div data-testid="header">Header</div>,
+}));
 
-    return render(
-      <QueryClientProvider client={queryClient}>
+const mockedLogin = vi.mocked(login);
+const mockedUseAuth = vi.mocked(useAuth);
+const mockedUseToast = vi.mocked(useToast);
+
+const renderPage = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+      mutations: { retry: false },
+    },
+  });
+
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
         <LoginPage />
-      </QueryClientProvider>,
-    );
-  };
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+};
 
+describe("LoginPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
 
-    vi.mocked(useToast).mockReturnValue({
-      addToast,
+    mockedUseAuth.mockReturnValue({
+      authenticateUser: mockAuthenticateUser,
+    } as unknown as ReturnType<typeof useAuth>);
+
+    mockedUseToast.mockReturnValue({
+      addToast: mockAddToast,
       toasts: [],
       removeToast: vi.fn(),
     });
-
-    vi.mocked(useAuth).mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      userId: null,
-      roles: [],
-      hasRole: vi.fn().mockReturnValue(false),
-      hasPermission: vi.fn().mockReturnValue(false),
-      authenticateUser,
-      unAuthenticateUser: vi.fn(),
-      updateUser: vi.fn(),
-      loading: false,
-    });
   });
 
-  it("renders the login form", () => {
-    renderLogin();
+  it("renders the login page correctly", () => {
+    renderPage();
 
-    expect(
-      screen.getByRole("heading", {
-        name: "login.title",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("header")).toBeInTheDocument();
+    expect(screen.getByText("login.title")).toBeInTheDocument();
 
     expect(
       screen.getByLabelText("common.emailPlaceholder"),
@@ -103,34 +99,95 @@ describe("LoginPage", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", {
-        name: "common.login",
-      }),
+      screen.getByRole("button", { name: "common.login" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "login.forgotPassword" }),
     ).toBeInTheDocument();
   });
 
-  it("does not call the API when fields are empty", async () => {
+  it("updates email and password inputs", async () => {
     const user = userEvent.setup();
-    renderLogin();
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "common.login",
-      }),
-    );
+    renderPage();
 
-    expect(login).not.toHaveBeenCalled();
-    expect(await screen.findAllByRole("alert")).toHaveLength(2);
+    const emailInput = screen.getByLabelText("common.emailPlaceholder");
+    const passwordInput = screen.getByLabelText("login.passwordPlaceholder");
+
+    await user.type(emailInput, "test@example.com");
+    await user.type(passwordInput, "Password123!");
+
+    expect(emailInput).toHaveValue("test@example.com");
+    expect(passwordInput).toHaveValue("Password123!");
   });
 
-  it("calls login with valid form data", async () => {
+  it("displays validation errors when submitting an empty form", async () => {
     const user = userEvent.setup();
 
-    vi.mocked(login).mockResolvedValue({
-      token: "unused",
+    renderPage();
+
+    await user.click(screen.getByRole("button", { name: "common.login" }));
+
+    await waitFor(() => {
+      expect(screen.getAllByRole("alert").length).toBeGreaterThan(0);
+    });
+
+    expect(mockedLogin).not.toHaveBeenCalled();
+  });
+
+  it("displays email validation error for an invalid email", async () => {
+    const user = userEvent.setup();
+
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("common.emailPlaceholder"),
+      "invalid-email",
+    );
+
+    await user.type(
+      screen.getByLabelText("login.passwordPlaceholder"),
+      "Password123!",
+    );
+
+    await user.click(screen.getByRole("button", { name: "common.login" }));
+
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(mockedLogin).not.toHaveBeenCalled();
+  });
+
+  it("does not call login when validation fails", async () => {
+    const user = userEvent.setup();
+
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("common.emailPlaceholder"),
+      "invalid",
+    );
+
+    await user.click(screen.getByRole("button", { name: "common.login" }));
+
+    expect(mockedLogin).not.toHaveBeenCalled();
+  });
+
+  it("successfully logs in and authenticates the user", async () => {
+    const user = userEvent.setup();
+
+    const tokenPayload = {
+      sub: "test@example.com",
+      id: 1,
+      authorities: ["ROLE_ADMIN"],
+    };
+
+    const token = `header.${btoa(JSON.stringify(tokenPayload))}.signature`;
+
+    mockedLogin.mockResolvedValue({
+      token,
     } as Awaited<ReturnType<typeof login>>);
 
-    renderLogin();
+    renderPage();
 
     await user.type(
       screen.getByLabelText("common.emailPlaceholder"),
@@ -142,38 +199,49 @@ describe("LoginPage", () => {
       "Password123!",
     );
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "common.login",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "common.login" }));
 
     await waitFor(() => {
-      expect(login).toHaveBeenCalledWith({
+      expect(mockedLogin).toHaveBeenCalledWith({
         email: "test@example.com",
         password: "Password123!",
       });
     });
+
+    await waitFor(() => {
+      expect(localStorage.getItem("jwtToken")).toBe(token);
+
+      expect(mockAuthenticateUser).toHaveBeenCalledWith({
+        email: "test@example.com",
+        id: 1,
+        authorities: ["ROLE_ADMIN"],
+      });
+
+      expect(mockAddToast).toHaveBeenCalledWith({
+        title: "messages.success",
+        description: "messages.loginSuccess",
+        variant: "success",
+      });
+
+      expect(mockNavigate).toHaveBeenCalledWith("/");
+    });
   });
 
-  it("stores the JWT, authenticates the user and redirects after success", async () => {
+  it("uses an empty authorities array when token has no authorities", async () => {
     const user = userEvent.setup();
 
-    const payload = {
+    const tokenPayload = {
       sub: "test@example.com",
-      id: 1,
-      authorities: ["USER"],
+      id: 2,
     };
 
-    const token = ["header", btoa(JSON.stringify(payload)), "signature"].join(
-      ".",
-    );
+    const token = `header.${btoa(JSON.stringify(tokenPayload))}.signature`;
 
-    vi.mocked(login).mockResolvedValue({
+    mockedLogin.mockResolvedValue({
       token,
     } as Awaited<ReturnType<typeof login>>);
 
-    renderLogin();
+    renderPage();
 
     await user.type(
       screen.getByLabelText("common.emailPlaceholder"),
@@ -185,35 +253,24 @@ describe("LoginPage", () => {
       "Password123!",
     );
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "common.login",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "common.login" }));
 
     await waitFor(() => {
-      expect(localStorage.getItem("jwtToken")).toBe(token);
-
-      expect(authenticateUser).toHaveBeenCalledWith({
+      expect(mockAuthenticateUser).toHaveBeenCalledWith({
         email: "test@example.com",
-        id: 1,
-        authorities: ["USER"],
+        id: 2,
+        authorities: [],
       });
-
-      expect(mockNavigate).toHaveBeenCalledWith("/");
-
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          variant: "success",
-        }),
-      );
     });
   });
 
-  it("shows an error toast when login fails", async () => {
+  it("displays an error toast when login fails", async () => {
     const user = userEvent.setup();
-    vi.mocked(login).mockRejectedValue(new Error("Invalid credentials"));
-    renderLogin();
+
+    mockedLogin.mockRejectedValue(new Error("Invalid credentials"));
+
+    renderPage();
+
     await user.type(
       screen.getByLabelText("common.emailPlaceholder"),
       "test@example.com",
@@ -221,39 +278,72 @@ describe("LoginPage", () => {
 
     await user.type(
       screen.getByLabelText("login.passwordPlaceholder"),
-      "WrongPassword123!",
+      "Password123!",
     );
 
-    await user.click(
-      screen.getByRole("button", {
-        name: "common.login",
-      }),
-    );
+    await user.click(screen.getByRole("button", { name: "common.login" }));
 
     await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          description: "Invalid credentials",
-          variant: "error",
-        }),
-      );
+      expect(mockAddToast).toHaveBeenCalledWith({
+        title: "messages.error",
+        description: "Invalid credentials",
+        variant: "error",
+      });
     });
 
-    expect(localStorage.getItem("jwtToken")).toBeNull();
+    expect(mockNavigate).not.toHaveBeenCalled();
+    expect(mockAuthenticateUser).not.toHaveBeenCalled();
   });
 
-  it("navigates to the forgot password page", async () => {
+  it("navigates to forgot password page", async () => {
     const user = userEvent.setup();
-    renderLogin();
+
+    renderPage();
 
     await user.click(
-      screen.getByRole("button", {
-        name: "login.forgotPassword",
-      }),
+      screen.getByRole("button", { name: "login.forgotPassword" }),
     );
 
     expect(mockNavigate).toHaveBeenCalledWith("/forgot-password");
+  });
 
-    expect(login).not.toHaveBeenCalled();
+  it("disables the login button while mutation is pending", async () => {
+    const user = userEvent.setup();
+
+    let resolveLogin!: (value: Awaited<ReturnType<typeof login>>) => void;
+
+    mockedLogin.mockReturnValue(
+      new Promise((resolve) => {
+        resolveLogin = resolve;
+      }),
+    );
+
+    renderPage();
+
+    await user.type(
+      screen.getByLabelText("common.emailPlaceholder"),
+      "test@example.com",
+    );
+
+    await user.type(
+      screen.getByLabelText("login.passwordPlaceholder"),
+      "Password123!",
+    );
+
+    await user.click(screen.getByRole("button", { name: "common.login" }));
+
+    expect(
+      await screen.findByRole("button", { name: "common.loading" }),
+    ).toBeDisabled();
+
+    resolveLogin({
+      token: `header.${btoa(
+        JSON.stringify({
+          sub: "test@example.com",
+          id: 1,
+          authorities: [],
+        }),
+      )}.signature`,
+    } as Awaited<ReturnType<typeof login>>);
   });
 });

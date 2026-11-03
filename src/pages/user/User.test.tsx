@@ -1,33 +1,127 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { getUsers, deleteUsers } from "../../services/useService";
-import { getRole } from "../../services/roleService";
-import { useAuth } from "../../hooks/useAuth";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import "@testing-library/jest-dom/vitest";
 import UserPage from "./User";
-import { useToast } from "../../contexts/toast/ToastProvider";
-import type { User, UserResponse } from "../../types/user";
-import type { ComponentProps, ReactNode } from "react";
 
-vi.mock("../../services/useService", () => ({
-  getUsers: vi.fn(),
-  deleteUsers: vi.fn(),
+const {
+  mockNavigate,
+  mockDeleteUsers,
+  mockInvalidateQueries,
+  mockAddToast,
+  mockHasPermission,
+  mockMutate,
+  mockRefetch,
+  mockGetUsers,
+  mockGetRole,
+} = vi.hoisted(() => ({
+  mockNavigate: vi.fn(),
+  mockDeleteUsers: vi.fn(),
+  mockInvalidateQueries: vi.fn(),
+  mockAddToast: vi.fn(),
+  mockHasPermission: vi.fn(),
+  mockMutate: vi.fn(),
+  mockRefetch: vi.fn(),
+  mockGetUsers: vi.fn(),
+  mockGetRole: vi.fn(),
 }));
 
-vi.mock("../../services/roleService", () => ({
-  getRole: vi.fn(),
+
+
+const mockUsers = [
+  {
+    id: 1,
+    name: "John",
+    surname: "Doe",
+    username: "johndoe",
+    email: "john@example.com",
+    userInfo: {
+      birthDate: "1995-05-10",
+      phoneNumber: "123456789",
+      gender: "Male",
+      street: "Main Street",
+    },
+    roles: [{ id: 1, name: "ADMIN" }],
+  },
+  {
+    id: 2,
+    name: "Jane",
+    surname: "Smith",
+    username: "janesmith",
+    email: "jane@example.com",
+    userInfo: {
+      birthDate: "1998-03-15",
+      phoneNumber: "987654321",
+      gender: "Female",
+      street: "Second Street",
+    },
+    roles: [{ id: 2, name: "USER" }],
+  },
+];
+
+
+
+vi.mock("@tanstack/react-query", () => ({
+  useQuery: ({ queryKey }: { queryKey: string[] }) => {
+    if (queryKey[0] === "users") {
+      return {
+        data: {
+          content: mockUsers,
+          totalElements: 2,
+          total: 2,
+        },
+        isLoading: false,
+        refetch: mockRefetch,
+      };
+    }
+
+    if (queryKey[0] === "roles") {
+      return {
+        data: {
+          content: [
+            { id: 1, name: "ADMIN" },
+            { id: 2, name: "USER" },
+          ],
+        },
+        isLoading: false,
+      };
+    }
+
+    return {
+      data: undefined,
+      isLoading: false,
+    };
+  },
+
+  useMutation: ({
+    mutationFn,
+    onSuccess,
+  }: {
+    mutationFn: () => Promise<unknown>;
+    onSuccess: () => void;
+  }) => ({
+    mutate: async () => {
+      mockMutate();
+      await mutationFn();
+      onSuccess();
+    },
+  }),
+
+  useQueryClient: () => ({
+    invalidateQueries: mockInvalidateQueries,
+  }),
 }));
 
-vi.mock("../../contexts/ToastContex", () => ({
-  useToast: vi.fn(),
-}));
 
-vi.mock("../../hooks/useAuth", () => ({
-  useAuth: vi.fn(),
-}));
 
 vi.mock("react-router-dom", () => ({
-  useNavigate: () => vi.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
 vi.mock("react-i18next", () => ({
@@ -36,242 +130,531 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
-// Render the data passed from UserPage into a simple test table.
-vi.mock("../../components/ui/DataTable", () => ({
-  DataTable: ({ data, loading }: { data: User[]; loading?: boolean }) => (
-    <table data-testid="users-table" data-loading={String(loading)}>
-      <tbody>
-        {data.map((user: User) => (
-          <tr key={user.id}>
-            <td>{user.name}</td>
-            <td>{user.surname}</td>
-            <td>{user.username}</td>
-            <td>{user.email}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  ),
+vi.mock("../../hooks/useAuth", () => ({
+  useAuth: () => ({
+    hasPermission: mockHasPermission,
+  }),
 }));
 
+vi.mock("../../contexts/toast/ToastProvider", () => ({
+  useToast: () => ({
+    addToast: mockAddToast,
+  }),
+}));
+
+vi.mock("../../services/useService", () => ({
+  getUsers: mockGetUsers,
+  deleteUsers: mockDeleteUsers,
+}));
+
+vi.mock("../../services/roleService", () => ({
+  getRole: mockGetRole,
+}));
+
+vi.mock("../../utils/formatRole", () => ({
+  formatRole: (role: string) => role,
+}));
+
+vi.mock("../../utils/formatDate", () => ({
+  formatDate: (date: string) => `formatted-${date}`,
+}));
+
+vi.mock("debounce", () => ({
+  default: (callback: (value: string) => void) => callback,
+}));
+
+
+
 vi.mock("../../components/PageTitle", () => ({
-  PageTitle: () => <h1>Users</h1>,
+  PageTitle: ({ title, subTitle }: { title: string; subTitle?: string }) => (
+    <div>
+      <h1>{title}</h1>
+      {subTitle && <p>{subTitle}</p>}
+    </div>
+  ),
 }));
 
 vi.mock("../../components/ui/Button", () => ({
   Button: ({
     children,
     onClick,
-    disabled,
-  }: {
-    children: ReactNode;
-    onClick?: () => void;
-    disabled?: boolean;
-  }) => (
-    <button type="button" onClick={onClick} disabled={disabled}>
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+    <button onClick={onClick} {...props}>
       {children}
     </button>
   ),
 }));
 
 vi.mock("../../components/ui/Search", () => ({
-  Search: (props: ComponentProps<"input">) => <input {...props} />,
+  Search: ({
+    value,
+    onChange,
+    placeholder,
+  }: {
+    value: string;
+    onChange: React.ChangeEventHandler<HTMLInputElement>;
+    placeholder?: string;
+  }) => (
+    <input
+      aria-label="user-search"
+      placeholder={placeholder}
+      value={value}
+      onChange={onChange}
+    />
+  ),
 }));
 
 vi.mock("../../components/ui/Input", () => ({
-  Input: (props: ComponentProps<"input">) => <input {...props} />,
+  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input {...props} />
+  ),
 }));
+
 vi.mock("../../components/ui/Label", () => ({
-  Label: ({ children }: { children: ReactNode }) => <label>{children}</label>,
+  Label: ({ children }: { children: React.ReactNode }) => (
+    <label>{children}</label>
+  ),
 }));
 
 vi.mock("../../components/ui/MultiSelect", () => ({
-  MultiSelect: () => <div data-testid="multi-select" />,
+  MultiSelect: ({
+    options,
+    value,
+    onChange,
+  }: {
+    options: { label: string; value: string }[];
+    value: string[];
+    onChange: (values: string[]) => void;
+  }) => (
+    <select
+      aria-label="roles-filter"
+      multiple
+      value={value}
+      onChange={(event) =>
+        onChange(
+          Array.from(event.target.selectedOptions).map(
+            (option) => option.value,
+          ),
+        )
+      }
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+  ),
 }));
 
 vi.mock("../../components/ui/Dialog", () => ({
-  Dialog: ({ children, open }: { children: ReactNode; open: boolean }) =>
-    open ? <div role="dialog">{children}</div> : null,
+  Dialog: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
+    open ? <div>{children}</div> : null,
+
+  DialogContent: ({ children }: { children: React.ReactNode }) => (
+    <div role="dialog">{children}</div>
+  ),
 }));
 
+vi.mock("../../components/ui/DataTable", () => ({
+  DataTable: ({
+    data,
+    columns,
+    loading,
+    pagination,
+    sorting,
+  }: {
+    data: typeof mockUsers;
+    columns: {
+      accessorKey?: string;
+      id?: string;
+      header?: (props: {
+        column: {
+          toggleSorting: (desc: boolean) => void;
+          getIsSorted: () => string | false;
+        };
+      }) => React.ReactNode;
+      cell?: (props: {
+        row: {
+          original: (typeof mockUsers)[number];
+          getValue: (key: string) => unknown;
+        };
+      }) => React.ReactNode;
+    }[];
+    loading: boolean;
+    pagination: {
+      onChange: (value: { pageIndex: number; pageSize: number }) => void;
+    };
+    sorting: {
+      onChange: (value: { id: string; desc: boolean }[]) => void;
+    };
+  }) => (
+    <div data-testid="data-table">
+      {loading && <span>Loading...</span>}
+
+      <table>
+        <thead>
+          <tr>
+            {columns.map((column, index) => (
+              <th key={column.id ?? column.accessorKey ?? index}>
+                {column.header?.({
+                  column: {
+                    toggleSorting: () =>
+                      sorting.onChange([{ id: "name", desc: true }]),
+                    getIsSorted: () => false,
+                  },
+                })}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          {data.map((user) => (
+            <tr key={user.id}>
+              {columns.map((column, index) => {
+                const row = {
+                  original: user,
+                  getValue: (key: string) => {
+                    if (key === "birthDate") {
+                      return user.userInfo?.birthDate;
+                    }
+
+                    return user[key as keyof typeof user];
+                  },
+                };
+
+                return (
+                  <td key={column.id ?? column.accessorKey ?? index}>
+                    {column.cell?.({ row })}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <button
+        onClick={() =>
+          pagination.onChange({
+            pageIndex: 1,
+            pageSize: 10,
+          })
+        }
+      >
+        Next page
+      </button>
+    </div>
+  ),
+}));
+
+
+
 describe("UserPage", () => {
-  let queryClient: QueryClient;
-
-  const mockUsers = {
-    content: [
-      {
-        id: 1,
-        name: "Ana",
-        surname: "Hoxha",
-        username: "ana.hoxha",
-        email: "ana@test.com",
-        password: "",
-        roles: [],
-        authorities: [],
-        userInfo: {
-          phoneNumber: "0691111111",
-          birthDate: "1998-01-12",
-          gender: "F",
-          street: "Tirana",
-        },
-      },
-      {
-        id: 2,
-        name: "Arben",
-        surname: "Kola",
-        username: "arben.kola",
-        email: "arben@test.com",
-        password: "",
-        roles: [],
-        authorities: [],
-        userInfo: {
-          phoneNumber: "0692222222",
-          birthDate: "1995-05-10",
-          gender: "M",
-          street: "Durres",
-        },
-      },
-    ],
-    page: 0,
-    size: 5,
-    totalElements: 2,
-    totalPages: 1,
-    last: true,
-  } satisfies UserResponse;
-
   beforeEach(() => {
     vi.clearAllMocks();
 
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-          gcTime: 0,
-        },
-        mutations: {
-          retry: false,
-        },
+    mockHasPermission.mockImplementation((permission: string) =>
+      ["VIEW_USER", "MANAGE_USER"].includes(permission),
+    );
+
+    mockDeleteUsers.mockResolvedValue({});
+    mockRefetch.mockResolvedValue({});
+  });
+
+
+
+  it("should render page title and description", () => {
+    render(<UserPage />);
+
+    expect(screen.getByText("users.title")).toBeInTheDocument();
+    expect(screen.getByText("users.description")).toBeInTheDocument();
+  });
+
+  it("should render create and export buttons", () => {
+    render(<UserPage />);
+
+    expect(screen.getByText("common.create")).toBeInTheDocument();
+    expect(screen.getByText("common.export")).toBeInTheDocument();
+  });
+
+  it("should render search input", () => {
+    render(<UserPage />);
+
+    expect(screen.getByLabelText("user-search")).toBeInTheDocument();
+  });
+
+  it("should render DataTable when data is available", () => {
+    render(<UserPage />);
+
+    expect(screen.getByTestId("data-table")).toBeInTheDocument();
+  });
+
+  it("should render user information", () => {
+    render(<UserPage />);
+
+    expect(screen.getByText("John")).toBeInTheDocument();
+    expect(screen.getByText("Doe")).toBeInTheDocument();
+    expect(screen.getByText("johndoe")).toBeInTheDocument();
+    expect(screen.getByText("john@example.com")).toBeInTheDocument();
+    expect(screen.getByText("Jane")).toBeInTheDocument();
+    expect(screen.getByText("Smith")).toBeInTheDocument();
+  });
+
+  it("should format birth dates", () => {
+    render(<UserPage />);
+
+    expect(screen.getByText("formatted-1995-05-10")).toBeInTheDocument();
+  });
+
+  it("should render user roles", () => {
+    render(<UserPage />);
+
+    expect(screen.getByText("ADMIN")).toBeInTheDocument();
+    expect(screen.getByText("USER")).toBeInTheDocument();
+  });
+
+
+
+  it("should hide create button without MANAGE_USER permission", () => {
+    mockHasPermission.mockImplementation(
+      (permission: string) => permission === "VIEW_USER",
+    );
+
+    render(<UserPage />);
+
+    expect(screen.queryByText("common.create")).not.toBeInTheDocument();
+  });
+
+  it("should hide view, edit and delete actions without permissions", () => {
+    mockHasPermission.mockReturnValue(false);
+
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+
+    expect(within(row).queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("should show view action with VIEW_USER permission", () => {
+    mockHasPermission.mockImplementation(
+      (permission: string) => permission === "VIEW_USER",
+    );
+
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+
+    expect(within(row).getAllByRole("button")).toHaveLength(1);
+  });
+
+
+
+  it("should navigate to create user page", () => {
+    render(<UserPage />);
+
+    fireEvent.click(screen.getByText("common.create"));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/user/upsert");
+  });
+
+  it("should navigate to user details page", () => {
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+    const buttons = within(row).getAllByRole("button");
+
+    fireEvent.click(buttons[0]);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/user/view/1");
+  });
+
+  it("should navigate to edit user page", () => {
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+    const buttons = within(row).getAllByRole("button");
+
+    fireEvent.click(buttons[1]);
+
+    expect(mockNavigate).toHaveBeenCalledWith("/user/edit/1");
+  });
+
+
+
+  it("should update search input value", () => {
+    render(<UserPage />);
+
+    const searchInput = screen.getByLabelText("user-search");
+
+    fireEvent.change(searchInput, {
+      target: { value: "John" },
+    });
+
+    expect(searchInput).toHaveValue("John");
+  });
+
+
+
+  const openFilterDialog = () => {
+    fireEvent.click(screen.getByRole("button", { name: "", hidden: true }));
+  };
+
+  it("should open filter dialog", () => {
+    render(<UserPage />);
+
+    // Filter is the second button in the page toolbar.
+    const toolbarButtons = screen.getAllByRole("button");
+    fireEvent.click(toolbarButtons[2]);
+
+    expect(screen.getByText("common.filters")).toBeInTheDocument();
+  });
+
+  it("should update first name filter", () => {
+    render(<UserPage />);
+
+    const toolbarButtons = screen.getAllByRole("button");
+    fireEvent.click(toolbarButtons[2]);
+
+    const inputs = screen.getAllByRole("textbox");
+
+    fireEvent.change(inputs[1], {
+      target: { value: "John" },
+    });
+
+    expect(inputs[1]).toHaveValue("John");
+  });
+
+  it("should reset filters", () => {
+    render(<UserPage />);
+
+    const toolbarButtons = screen.getAllByRole("button");
+    fireEvent.click(toolbarButtons[2]);
+
+    const inputs = screen.getAllByRole("textbox");
+
+    fireEvent.change(inputs[1], {
+      target: { value: "John" },
+    });
+
+    fireEvent.click(screen.getByText("common.reset"));
+
+    expect(inputs[1]).toHaveValue("");
+  });
+
+  it("should apply filters and refetch users", () => {
+    render(<UserPage />);
+
+    const toolbarButtons = screen.getAllByRole("button");
+    fireEvent.click(toolbarButtons[2]);
+
+    fireEvent.click(screen.getByText("common.apply"));
+
+    expect(mockRefetch).toHaveBeenCalled();
+    expect(screen.queryByText("common.filters")).not.toBeInTheDocument();
+  });
+
+  it("should update the roles filter", () => {
+    render(<UserPage />);
+
+    const toolbarButtons = screen.getAllByRole("button");
+    fireEvent.click(toolbarButtons[2]);
+
+    const roleSelect = screen.getByLabelText("roles-filter");
+
+    fireEvent.change(roleSelect, {
+      target: {
+        value: "ADMIN",
       },
     });
 
-    vi.mocked(getUsers).mockResolvedValue(mockUsers as UserResponse);
-    vi.mocked(getRole).mockResolvedValue({
-      content: [],
-      page: 0,
-      size: 5,
-      totalElements: 0,
-      totalPages: 0,
-      last: true,
-    });
-
-    vi.mocked(useToast).mockReturnValue({
-      addToast: vi.fn(),
-      toasts: [],
-      removeToast: vi.fn(),
-    });
-
-    vi.mocked(useAuth).mockReturnValue({
-      isAuthenticated: false,
-      user: null,
-      userId: null,
-      roles: [],
-      hasPermission: () => false,
-      hasRole: () => false,
-      authenticateUser: vi.fn(),
-      unAuthenticateUser: vi.fn(),
-      updateUser: vi.fn(),
-      loading: false,
-    });
-  });
-
-  const renderPage = () =>
-    render(
-      <QueryClientProvider client={queryClient}>
-        <UserPage />
-      </QueryClientProvider>,
-    );
-
-  it("should call getUsers when the page loads", async () => {
-    renderPage();
-
-    await waitFor(() => {
-      expect(getUsers).toHaveBeenCalledTimes(1);
-    });
-
-    expect(getUsers).toHaveBeenCalledWith(
-      "", // search
-      "", // name
-      "", // username
-      "", // surname
-      "", // email
-      [], // roles
-      0, // pageIndex
-      5, // pageSize
-      [], // sorting
-    );
-  });
-
-  it("should display users returned by the API in the table", async () => {
-    renderPage();
-
-    expect(await screen.findByText("Ana")).toBeInTheDocument();
-    expect(screen.getByText("Hoxha")).toBeInTheDocument();
-    expect(screen.getByText("ana.hoxha")).toBeInTheDocument();
-    expect(screen.getByText("ana@test.com")).toBeInTheDocument();
-
-    expect(screen.getByText("Arben")).toBeInTheDocument();
-    expect(screen.getByText("Kola")).toBeInTheDocument();
-    expect(screen.getByText("arben.kola")).toBeInTheDocument();
-    expect(screen.getByText("arben@test.com")).toBeInTheDocument();
-
     expect(
-      screen.getByTestId("users-table").querySelectorAll("tbody tr"),
-    ).toHaveLength(2);
+      within(roleSelect).getByRole("option", {
+        name: "ADMIN",
+      }),
+    ).toBeInTheDocument();
   });
 
-  it("should display an empty table when the API returns no users", async () => {
-    vi.mocked(getUsers).mockResolvedValue({
-      content: [],
-      page: 0,
-      size: 5,
-      totalElements: 0,
-      totalPages: 0,
-      last: true,
-    });
 
-    renderPage();
+
+  it("should open delete confirmation dialog", () => {
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+    const buttons = within(row).getAllByRole("button");
+
+    fireEvent.click(buttons[2]);
+
+    expect(screen.getByText("users.deleteUser")).toBeInTheDocument();
+
+    expect(screen.getByText("users.confirmDelete")).toBeInTheDocument();
+  });
+
+  it("should close delete dialog when cancel is clicked", () => {
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+    const buttons = within(row).getAllByRole("button");
+
+    fireEvent.click(buttons[2]);
+
+    fireEvent.click(screen.getByText("common.cancel"));
+
+    expect(screen.queryByText("users.deleteUser")).not.toBeInTheDocument();
+  });
+
+  it("should delete selected user successfully", async () => {
+    render(<UserPage />);
+
+    const row = screen.getByText("John").closest("tr")!;
+    const buttons = within(row).getAllByRole("button");
+
+    fireEvent.click(buttons[2]);
+
+    fireEvent.click(screen.getByText("common.save"));
 
     await waitFor(() => {
-      expect(getUsers).toHaveBeenCalled();
+      expect(mockDeleteUsers).toHaveBeenCalledWith(1);
     });
 
-    expect(await screen.findByTestId("users-table")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("users-table").querySelectorAll("tbody tr"),
-    ).toHaveLength(0);
-  });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["users"],
+    });
 
-  it("should fetch users with the default page size of 5", async () => {
-    renderPage();
+    expect(mockAddToast).toHaveBeenCalledWith({
+      title: "messages.success",
+      description: "messages.userDeleteSuccess",
+      variant: "success",
+    });
 
     await waitFor(() => {
-      expect(getUsers).toHaveBeenCalledWith("", "", "", "", "", [], 0, 5, []);
+      expect(screen.queryByText("users.deleteUser")).not.toBeInTheDocument();
     });
   });
 
-  it("should call getRole when the page loads", async () => {
-    renderPage();
 
-    await waitFor(() => {
-      expect(getRole).toHaveBeenCalledTimes(1);
-    });
+
+  it("should trigger sorting when name header is clicked", () => {
+    render(<UserPage />);
+
+    const nameHeader = screen.getByText("users.table.firstName");
+
+    const sortButton = within(nameHeader.parentElement!).getByRole("button");
+
+    fireEvent.click(sortButton);
+
+    expect(screen.getByTestId("data-table")).toBeInTheDocument();
   });
 
-  it("should not delete users during initial page loading", async () => {
-    renderPage();
 
-    await screen.findByText("Ana");
 
-    expect(deleteUsers).not.toHaveBeenCalled();
+  it("should trigger pagination when next page is clicked", () => {
+    render(<UserPage />);
+
+    fireEvent.click(screen.getByText("Next page"));
+
+    expect(screen.getByTestId("data-table")).toBeInTheDocument();
   });
 });

@@ -1,14 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
 
-import ViewUserPage from "./ViewUser";
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getById } from "../../services/useService";
 import { getRole } from "../../services/roleService";
-import type { UserDetailResponse } from "../../types/user";
-import type { RoleResponse } from "../../types/role";
+import ViewUserPage from "./ViewUser";
+
+
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  params: { id: "1" as string | undefined },
+}));
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mocks.navigate,
+  useParams: () => mocks.params,
+}));
 
 vi.mock("../../services/useService", () => ({
   getById: vi.fn(),
@@ -24,8 +37,40 @@ vi.mock("react-i18next", () => ({
   }),
 }));
 
+// --------------------------------------------------
+// UI component mocks
+// --------------------------------------------------
+
 vi.mock("../../components/PageTitle", () => ({
-  PageTitle: ({ title }: { title: string }) => <h1>{title}</h1>,
+  PageTitle: ({
+    title,
+    subTitle,
+  }: {
+    title: string;
+    subTitle?: string;
+  }) => (
+    <div>
+      <h1>{title}</h1>
+      <p>{subTitle}</p>
+    </div>
+  ),
+}));
+
+vi.mock("../../components/ui/Button", () => ({
+  Button: ({
+    children,
+    onClick,
+    type,
+    ...props
+  }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+    <button
+      type={type ?? "button"}
+      onClick={onClick}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
 }));
 
 vi.mock("../../components/ui/Input", () => ({
@@ -37,24 +82,11 @@ vi.mock("../../components/ui/Input", () => ({
 vi.mock("../../components/ui/Label", () => ({
   Label: ({
     children,
-    ...props
-  }: React.LabelHTMLAttributes<HTMLLabelElement>) => (
-    <label {...props}>{children}</label>
-  ),
-}));
-
-vi.mock("../../components/ui/Button", () => ({
-  Button: ({
-    children,
-    onClick,
-    ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-    variant?: string;
-  }) => (
-    <button type="button" onClick={onClick} {...props}>
-      {children}
-    </button>
-  ),
+    htmlFor,
+  }: {
+    children: React.ReactNode;
+    htmlFor?: string;
+  }) => <label htmlFor={htmlFor}>{children}</label>,
 }));
 
 vi.mock("../../components/ui/MultiSelect", () => ({
@@ -62,18 +94,21 @@ vi.mock("../../components/ui/MultiSelect", () => ({
     options,
     value,
     disabled,
+    placeholder,
   }: {
     options: { label: string; value: string }[];
     value: string[];
     disabled?: boolean;
+    placeholder?: string;
   }) => (
     <select
+      aria-label="Roles"
       multiple
       disabled={disabled}
-      aria-label="roles"
       value={value}
       onChange={() => {}}
     >
+      <option value="">{placeholder}</option>
       {options.map((option) => (
         <option key={option.value} value={option.value}>
           {option.label}
@@ -83,34 +118,18 @@ vi.mock("../../components/ui/MultiSelect", () => ({
   ),
 }));
 
-vi.mock("../../components/ui/DatePicker", () => ({
-  DatePicker: ({
-    value,
-    disabled,
-  }: {
-    value: Date | null;
-    disabled?: boolean;
-  }) => (
-    <input
-      aria-label="birthDate"
-      disabled={disabled}
-      value={value ? value.toISOString().slice(0, 10) : ""}
-      readOnly
-    />
-  ),
-}));
-
 vi.mock("../../components/ui/Radion", () => ({
   RadioGroup: ({
     value,
-    options,
     disabled,
+    options,
     name,
   }: {
     value: string;
-    options: { label: string; value: string }[];
     disabled?: boolean;
+    options: { label: string; value: string }[];
     name: string;
+    onValueChange: (value: string) => void;
   }) => (
     <div>
       {options.map((option) => (
@@ -130,139 +149,394 @@ vi.mock("../../components/ui/Radion", () => ({
   ),
 }));
 
-const mockUser: UserDetailResponse = {
+vi.mock("../../components/ui/DatePicker", () => ({
+  DatePicker: ({
+    value,
+    disabled,
+  }: {
+    value: Date | null;
+    disabled?: boolean;
+  }) => (
+    <input
+      aria-label="Birth date"
+      type="date"
+      disabled={disabled}
+      value={value ? value.toISOString().split("T")[0] : ""}
+      readOnly
+    />
+  ),
+}));
+
+// --------------------------------------------------
+// Test data
+// --------------------------------------------------
+
+const mockUser = {
   id: 1,
-  name: "Besjana",
-  surname: "Murataj",
-  email: "besjana@example.com",
-  username: "besjana",
-  password: "password",
-  roles: [{ id: 1, name: "Admin", description: "Administrator role" }],
-  authorities: ["read", "write"],
+  name: "John",
+  surname: "Doe",
+  username: "johndoe",
+  email: "john@example.com",
+  password: "",
+  roles: [
+    { id: 1, name: "ADMIN" },
+    { id: 2, name: "USER" },
+  ],
+  authorities: [],
   userInfo: {
-    phoneNumber: "0691234567",
-    birthDate: "1998-05-10",
-    gender: "F",
-    street: "Tirana",
+    phoneNumber: "123456789",
+    birthDate: "1995-01-01",
+    gender: "M",
+    street: "Main Street",
   },
 };
 
-const mockRoles: RoleResponse = {
+const mockRoles = {
   content: [
-    {
-      id: 1,
-      name: "Admin",
-      authorities: [],
-      description: "Administrator role",
-    },
-    { id: 2, name: "User", authorities: [], description: "Regular user role" },
+    { id: 1, name: "ADMIN" },
+    { id: 2, name: "USER" },
   ],
-  page: 0,
-  size: 5,
-  totalElements: 2,
-  totalPages: 1,
-  last: true,
 };
 
-const renderPage = (id?: string) => {
+// --------------------------------------------------
+// Render helper
+// --------------------------------------------------
+
+const renderViewUserPage = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
+        gcTime: 0,
       },
     },
   });
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={id ? [`/user/${id}`] : ["/user"]}>
-        <Routes>
-          <Route path="/user/:id" element={<ViewUserPage />} />
-          <Route path="/user" element={<h1>User List Page</h1>} />
-        </Routes>
-      </MemoryRouter>
+      <ViewUserPage />
     </QueryClientProvider>,
   );
 };
+
 
 describe("ViewUserPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(getById).mockResolvedValue(mockUser);
-    vi.mocked(getRole).mockResolvedValue(mockRoles as RoleResponse);
+    mocks.params.id = "1";
+
+    vi.mocked(getById).mockResolvedValue(mockUser as never);
+    vi.mocked(getRole).mockResolvedValue(mockRoles as never);
   });
 
-  it("should call getById with the user ID when the page loads", async () => {
-    renderPage("1");
+  // -----------------------------------------------
+  // Rendering
+  // -----------------------------------------------
+
+  it("should render the page title and subtitle", () => {
+    renderViewUserPage();
+
+    expect(screen.getByText("View User")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Create or update user information"),
+    ).toBeInTheDocument();
+  });
+
+  it("should render all form fields", () => {
+    renderViewUserPage();
+
+    expect(
+      screen.getByPlaceholderText("users.namePlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("users.lastNamePlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("users.usernamePlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("users.emailPlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("users.phonePlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByPlaceholderText("users.streetPlaceholder"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByLabelText("Birth date"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByLabelText("Roles"),
+    ).toBeInTheDocument();
+  });
+
+  // -----------------------------------------------
+  // API calls
+  // -----------------------------------------------
+
+  it("should fetch user details using the route ID", async () => {
+    renderViewUserPage();
 
     await waitFor(() => {
+      expect(getById).toHaveBeenCalledTimes(1);
+
       expect(getById).toHaveBeenCalledWith(
-        expect.objectContaining({ id: "1" }),
+        expect.objectContaining({
+          id: "1",
+          signal: expect.any(AbortSignal),
+        }),
       );
     });
   });
 
-  it("should display the user information returned by the API", async () => {
-    renderPage("1");
-
-    expect(await screen.findByDisplayValue("Besjana")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Murataj")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("besjana")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("besjana@example.com")).toBeInTheDocument();
-  });
-
-  it("should display the user's additional information", async () => {
-    renderPage("1");
-
-    expect(await screen.findByDisplayValue("0691234567")).toBeInTheDocument();
-
-    expect(screen.getByDisplayValue("Tirana")).toBeInTheDocument();
-    expect(screen.getByLabelText("birthDate")).toHaveValue("1998-05-10");
-    expect(screen.getByRole("radio", { name: "Female" })).toBeChecked();
-  });
-
-  it("should display the user's assigned role", async () => {
-    renderPage("1");
-
-    await screen.findByDisplayValue("Besjana");
+  it("should fetch available roles", async () => {
+    renderViewUserPage();
 
     await waitFor(() => {
-      expect(screen.getByRole("option", { name: "Admin" })).toBeInTheDocument();
+      expect(getRole).toHaveBeenCalledTimes(1);
     });
-  });
-
-  it("should render the form fields as disabled", async () => {
-    renderPage("1");
-
-    expect(await screen.findByDisplayValue("Besjana")).toBeDisabled();
-    expect(screen.getByDisplayValue("Murataj")).toBeDisabled();
-    expect(screen.getByDisplayValue("besjana")).toBeDisabled();
-    expect(screen.getByDisplayValue("besjana@example.com")).toBeDisabled();
-    expect(screen.getByLabelText("roles")).toBeDisabled();
-    expect(screen.getByLabelText("birthDate")).toBeDisabled();
-    expect(screen.getByRole("radio", { name: "Female" })).toBeDisabled();
-  });
-
-  it("should navigate to the user list when Cancel is clicked", async () => {
-    const user = userEvent.setup();
-
-    renderPage("1");
-
-    await user.click(
-      await screen.findByRole("button", { name: "common.cancel" }),
-    );
 
     expect(
-      await screen.findByRole("heading", { name: "User List Page" }),
+      await screen.findByRole("option", { name: "ADMIN" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("option", { name: "USER" }),
     ).toBeInTheDocument();
   });
 
-  it("should not call getById when no user ID is provided", async () => {
-    renderPage();
+  it("should not fetch user details when ID is missing", () => {
+    mocks.params.id = undefined;
+
+    renderViewUserPage();
+
+    expect(getById).not.toHaveBeenCalled();
+  });
+
+  // -----------------------------------------------
+  // User information
+  // -----------------------------------------------
+
+  it("should display fetched user information", async () => {
+    renderViewUserPage();
 
     await waitFor(() => {
-      expect(getById).not.toHaveBeenCalled();
+      expect(
+        screen.getByPlaceholderText("users.namePlaceholder"),
+      ).toHaveValue("John");
     });
+
+    expect(
+      screen.getByPlaceholderText("users.lastNamePlaceholder"),
+    ).toHaveValue("Doe");
+
+    expect(
+      screen.getByPlaceholderText("users.usernamePlaceholder"),
+    ).toHaveValue("johndoe");
+
+    expect(
+      screen.getByPlaceholderText("users.emailPlaceholder"),
+    ).toHaveValue("john@example.com");
+
+    expect(
+      screen.getByPlaceholderText("users.phonePlaceholder"),
+    ).toHaveValue("123456789");
+
+    expect(
+      screen.getByPlaceholderText("users.streetPlaceholder"),
+    ).toHaveValue("Main Street");
+  });
+
+  it("should display user roles", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Roles")).toHaveValue([
+        "1",
+        "2",
+      ]);
+    });
+  });
+
+  it("should display user gender", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("radio", { name: "Male" }),
+      ).toBeChecked();
+    });
+
+    expect(
+      screen.getByRole("radio", { name: "Female" }),
+    ).not.toBeChecked();
+  });
+
+  it("should display user birth date", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByLabelText("Birth date"),
+      ).toHaveValue("1995-01-01");
+    });
+  });
+
+  // -----------------------------------------------
+  // Read-only behavior
+  // -----------------------------------------------
+
+  it("should disable all input fields", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("users.namePlaceholder"),
+      ).toHaveValue("John");
+    });
+
+    expect(
+      screen.getByPlaceholderText("users.namePlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByPlaceholderText("users.lastNamePlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByPlaceholderText("users.usernamePlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByPlaceholderText("users.emailPlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByPlaceholderText("users.phonePlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByPlaceholderText("users.streetPlaceholder"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByLabelText("Roles"),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByLabelText("Birth date"),
+    ).toBeDisabled();
+  });
+
+  it("should disable gender options", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("radio", { name: "Male" }),
+      ).toBeInTheDocument();
+    });
+
+    expect(
+      screen.getByRole("radio", { name: "Male" }),
+    ).toBeDisabled();
+
+    expect(
+      screen.getByRole("radio", { name: "Female" }),
+    ).toBeDisabled();
+  });
+
+  it("should not allow editing form fields", async () => {
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("users.namePlaceholder"),
+      ).toHaveValue("John");
+    });
+
+    expect(
+      screen.getByPlaceholderText("users.namePlaceholder"),
+    ).toBeDisabled();
+  });
+
+  // -----------------------------------------------
+  // Missing optional data
+  // -----------------------------------------------
+
+  it("should display empty values when user data is missing", async () => {
+    vi.mocked(getById).mockResolvedValueOnce({
+      id: 1,
+      roles: [],
+      authorities: [],
+    } as never);
+
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByPlaceholderText("users.namePlaceholder"),
+      ).toHaveValue("");
+    });
+
+    expect(
+      screen.getByPlaceholderText("users.lastNamePlaceholder"),
+    ).toHaveValue("");
+
+    expect(
+      screen.getByPlaceholderText("users.emailPlaceholder"),
+    ).toHaveValue("");
+
+    expect(
+      screen.getByPlaceholderText("users.phonePlaceholder"),
+    ).toHaveValue("");
+
+    expect(
+      screen.getByPlaceholderText("users.streetPlaceholder"),
+    ).toHaveValue("");
+
+    expect(screen.getByLabelText("Roles")).toHaveValue([]);
+
+    expect(screen.getByLabelText("Birth date")).toHaveValue("");
+  });
+
+  it("should display female gender when user gender is F", async () => {
+    vi.mocked(getById).mockResolvedValueOnce({
+      ...mockUser,
+      userInfo: {
+        ...mockUser.userInfo,
+        gender: "F",
+      },
+    } as never);
+
+    renderViewUserPage();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("radio", { name: "Female" }),
+      ).toBeChecked();
+    });
+  });
+
+  // -----------------------------------------------
+  // Navigation
+  // -----------------------------------------------
+
+  it("should navigate to users page when clicking cancel", () => {
+    renderViewUserPage();
+
+    fireEvent.click(screen.getByText("common.cancel"));
+
+    expect(mocks.navigate).toHaveBeenCalledWith("/user");
   });
 });

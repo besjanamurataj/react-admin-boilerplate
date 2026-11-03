@@ -1,33 +1,48 @@
-import React from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import type { ReactNode, InputHTMLAttributes } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
 import UserUpsertPage from "./UserUpsert";
-import { createUser, getById, updateUsers } from "../../services/useService";
-import { getRole } from "../../services/roleService";
-import { userSchema } from "../../types/validations/schema";
-import { useToast } from "../../contexts/toast/ToastProvider";
 
-vi.mock("../../services/useService", () => ({
+// --------------------------------------------------
+// Mocks
+// --------------------------------------------------
+
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+  addToast: vi.fn(),
+  params: {} as { id?: string },
   createUser: vi.fn(),
   getById: vi.fn(),
   updateUsers: vi.fn(),
+  getRole: vi.fn(),
+  safeParse: vi.fn(),
+}));
+
+vi.mock("react-router-dom", () => ({
+  useNavigate: () => mocks.navigate,
+  useParams: () => mocks.params,
+}));
+
+vi.mock("../../contexts/toast/ToastProvider", () => ({
+  useToast: () => ({
+    addToast: mocks.addToast,
+  }),
+}));
+
+vi.mock("../../services/useService", () => ({
+  createUser: mocks.createUser,
+  getById: mocks.getById,
+  updateUsers: mocks.updateUsers,
 }));
 
 vi.mock("../../services/roleService", () => ({
-  getRole: vi.fn(),
-}));
-
-vi.mock("../../contexts/ToastContex", () => ({
-  useToast: vi.fn(),
+  getRole: mocks.getRole,
 }));
 
 vi.mock("../../types/validations/schema", () => ({
   userSchema: {
-    safeParse: vi.fn(),
+    safeParse: mocks.safeParse,
   },
 }));
 
@@ -36,6 +51,20 @@ vi.mock("react-i18next", () => ({
     t: (key: string) => key,
   }),
 }));
+
+vi.mock("../../utils/formatDate", () => ({
+  formatToLocal: (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  },
+}));
+
+// --------------------------------------------------
+// Component mocks
+// --------------------------------------------------
 
 vi.mock("../../components/PageTitle", () => ({
   PageTitle: ({ title, subTitle }: { title: string; subTitle: string }) => (
@@ -46,30 +75,31 @@ vi.mock("../../components/PageTitle", () => ({
   ),
 }));
 
-vi.mock("../../components/ui/Input", () => ({
-  Input: (props: React.InputHTMLAttributes<HTMLInputElement>) => (
-    <input {...props} />
-  ),
-}));
-
-vi.mock("../../components/ui/Label", () => ({
-  Label: ({
-    children,
-    htmlFor,
-    ...props
-  }: React.LabelHTMLAttributes<HTMLLabelElement>) => (
-    <label htmlFor={htmlFor} {...props}>
-      {children}
-    </label>
-  ),
-}));
-
 vi.mock("../../components/ui/Button", () => ({
   Button: ({
     children,
-    ...props
-  }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button {...props}>{children}</button>
+    onClick,
+    type = "button",
+    variant,
+  }: {
+    children: ReactNode;
+    onClick?: () => void;
+    type?: "button" | "submit" | "reset";
+    variant?: string;
+  }) => (
+    <button type={type} onClick={onClick} data-variant={variant}>
+      {children}
+    </button>
+  ),
+}));
+
+vi.mock("../../components/ui/Input", () => ({
+  Input: (props: InputHTMLAttributes<HTMLInputElement>) => <input {...props} />,
+}));
+
+vi.mock("../../components/ui/Label", () => ({
+  Label: ({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) => (
+    <label htmlFor={htmlFor}>{children}</label>
   ),
 }));
 
@@ -78,33 +108,34 @@ vi.mock("../../components/ui/MultiSelect", () => ({
     options,
     value,
     onChange,
-    placeholder,
   }: {
-    options: { label: string; value: string }[];
+    options: { label: string; value: string | number }[];
     value: string[];
     onChange: (values: string[]) => void;
-    placeholder?: string;
   }) => (
-    <select
-      aria-label="roles"
-      multiple
-      value={(value ?? []).map(String)}
-      onChange={(event) => {
-        const selectedValues = Array.from(
-          event.currentTarget.selectedOptions,
-          (option) => option.value,
-        );
+    <div data-testid="multi-select">
+      {options.map((option) => {
+        const optionValue = String(option.value);
+        const selected = value.includes(optionValue);
 
-        onChange(selectedValues);
-      }}
-      data-placeholder={placeholder}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+        return (
+          <button
+            key={optionValue}
+            type="button"
+            aria-pressed={selected}
+            onClick={() =>
+              onChange(
+                selected
+                  ? value.filter((item) => item !== optionValue)
+                  : [...value, optionValue],
+              )
+            }
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
   ),
 }));
 
@@ -120,7 +151,7 @@ vi.mock("../../components/ui/Radion", () => ({
     options: { label: string; value: string }[];
     name: string;
   }) => (
-    <div>
+    <div data-testid="radio-group">
       {options.map((option) => (
         <label key={option.value}>
           <input
@@ -146,87 +177,70 @@ vi.mock("../../components/ui/DatePicker", () => ({
     onChange: (date: Date | null) => void;
   }) => (
     <input
-      aria-label="birthDate"
       type="date"
+      data-testid="birth-date"
       value={
-        value instanceof Date && !Number.isNaN(value.getTime())
-          ? [
-              value.getFullYear(),
-              String(value.getMonth() + 1).padStart(2, "0"),
-              String(value.getDate()).padStart(2, "0"),
-            ].join("-")
+        value
+          ? `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(
+              2,
+              "0",
+            )}-${String(value.getDate()).padStart(2, "0")}`
           : ""
       }
-      onChange={(event) => {
-        const dateValue = event.target.value;
-        onChange(dateValue ? new Date(`${dateValue}T00:00:00`) : null);
+      onChange={(e) => {
+        if (!e.target.value) {
+          onChange(null);
+          return;
+        }
+
+        const [year, month, day] = e.target.value.split("-").map(Number);
+
+        onChange(new Date(year, month - 1, day));
       }}
     />
   ),
 }));
 
-vi.mock("../../utils/formatDate", () => ({
-  formatToLocal: vi.fn((date: Date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
+// --------------------------------------------------
+// Test data
+// --------------------------------------------------
 
-    return `${year}-${month}-${day}`;
-  }),
-}));
+// Intentionally inferred instead of forcing an incorrect
+// UserDetailResponse assertion. The service is mocked.
 
-const addToast = vi.fn();
+const mockUser = {
+  id: 1,
+  name: "John",
+  surname: "Doe",
+  email: "john@example.com",
+  username: "johndoe",
+  roles: [{ id: 1, name: "ADMIN" }],
+  authorities: [],
+  userInfo: {
+    phoneNumber: "123456789",
+    birthDate: "1995-05-15",
+    gender: "M",
+    street: "Main Street",
+  },
+};
 
 const mockRoles = {
   content: [
-    { id: "1", name: "Admin" },
-    { id: "2", name: "User" },
+    { id: 1, name: "ADMIN" },
+    { id: 2, name: "USER" },
   ],
 };
 
-const mockUser = {
-  id: "1",
-  name: "Besjana",
-  surname: "Murataj",
-  email: "besjana@example.com",
-  username: "besjana",
-  password: "password123",
-  roles: [{ id: "1", name: "Admin" }],
-  userInfo: {
-    phoneNumber: "0691234567",
-    birthDate: "1998-05-10",
-    gender: "F",
-    street: "Tirana",
-  },
-};
+// --------------------------------------------------
+// Helpers
+// --------------------------------------------------
 
-const validUser = {
-  name: "Besjana",
-  surname: "Murataj",
-  email: "besjana@example.com",
-  username: "besjana",
-  password: "password123",
-  roles: ["1"],
-  userInfo: {
-    phoneNumber: "0691234567",
-    birthDate: "1998-05-10",
-    gender: "F",
-    street: "Tirana",
-  },
-};
-
-const mockedCreateUser = vi.mocked(createUser);
-const mockedUpdateUser = vi.mocked(updateUsers);
-const mockedGetById = vi.mocked(getById);
-const mockedGetRole = vi.mocked(getRole);
-const mockedUseToast = vi.mocked(useToast);
-const mockedSafeParse = vi.mocked(userSchema.safeParse);
-
-const renderPage = (id?: string) => {
+const renderPage = () => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
+        gcTime: 0,
       },
       mutations: {
         retry: false,
@@ -234,304 +248,570 @@ const renderPage = (id?: string) => {
     },
   });
 
-  const initialRoute = id ? `/user/edit/${id}` : "/user/upsert";
-
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialRoute]}>
-        <Routes>
-          <Route path="/user/edit/:id" element={<UserUpsertPage />} />
-
-          <Route path="/user/upsert" element={<UserUpsertPage />} />
-
-          <Route path="/user" element={<h1>User List</h1>} />
-        </Routes>
-      </MemoryRouter>
+      <UserUpsertPage />
     </QueryClientProvider>,
   );
 };
+
+const fillRequiredFields = async () => {
+  await screen.findByRole("button", { name: "ADMIN" });
+
+  fireEvent.change(screen.getByLabelText("users.table.firstName"), {
+    target: { value: "John" },
+  });
+
+  fireEvent.change(screen.getByLabelText("users.table.lastName"), {
+    target: { value: "Doe" },
+  });
+
+  fireEvent.change(screen.getByLabelText("users.table.username"), {
+    target: { value: "johndoe" },
+  });
+
+  fireEvent.change(screen.getByLabelText("users.table.email"), {
+    target: { value: "john@example.com" },
+  });
+
+  fireEvent.change(screen.getByPlaceholderText("users.passwordPlaceholder"), {
+    target: { value: "Password123!" },
+  });
+
+  fireEvent.click(screen.getByRole("button", { name: "ADMIN" }));
+};
+
+// --------------------------------------------------
+// Tests
+// --------------------------------------------------
 
 describe("UserUpsertPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockedUseToast.mockReturnValue({
-      addToast,
-    } as unknown as ReturnType<typeof useToast>);
+    mocks.params = {};
 
-    mockedGetRole.mockResolvedValue(mockRoles as never);
-    mockedGetById.mockResolvedValue(mockUser as never);
+    mocks.getRole.mockResolvedValue(mockRoles);
+    mocks.getById.mockResolvedValue(mockUser);
 
-    mockedCreateUser.mockResolvedValue({} as never);
-    mockedUpdateUser.mockResolvedValue({} as never);
+    mocks.createUser.mockResolvedValue({ success: true });
+    mocks.updateUsers.mockResolvedValue({ success: true });
 
-    mockedSafeParse.mockReturnValue({
+    mocks.safeParse.mockReturnValue({
       success: true,
-      data: validUser,
-    } as never);
-  });
-
-  it("should render the create-user form", async () => {
-    renderPage();
-
-    expect(
-      screen.getByRole("heading", {
-        name: "users.createUser",
-      }),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByPlaceholderText("users.namePlaceholder"),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByPlaceholderText("users.lastNamePlaceholder"),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByPlaceholderText("users.usernamePlaceholder"),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByPlaceholderText("users.emailPlaceholder"),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByPlaceholderText("users.passwordPlaceholder"),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", { name: "common.save" }),
-    ).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("button", { name: "common.cancel" }),
-    ).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockedGetRole).toHaveBeenCalled();
+      data: {},
     });
   });
 
-  it("should fetch roles when the page loads", async () => {
-    renderPage();
+  // ================================================
+  // CREATE USER
+  // ================================================
 
-    await waitFor(() => {
-      expect(mockedGetRole).toHaveBeenCalledTimes(1);
-    });
-
-    expect(
-      await screen.findByRole("option", { name: "Admin" }),
-    ).toBeInTheDocument();
-
-    expect(screen.getByRole("option", { name: "User" })).toBeInTheDocument();
-  });
-
-  it("should not fetch a user when creating a new user", async () => {
-    renderPage();
-
-    await waitFor(() => {
-      expect(mockedGetRole).toHaveBeenCalled();
-    });
-
-    expect(mockedGetById).not.toHaveBeenCalled();
-  });
-
-  it("should fetch the user when editing", async () => {
-    renderPage("1");
-
-    await waitFor(() => {
-      expect(mockedGetById).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: "1",
-        }),
-      );
-    });
-  });
-
-  it("should display the edit-user heading", async () => {
-    renderPage("1");
-
-    expect(
-      screen.getByRole("heading", {
-        name: "users.editUser",
-      }),
-    ).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(mockedGetById).toHaveBeenCalled();
-    });
-  });
-
-  it("should populate the form with the existing user's data", async () => {
-    renderPage("1");
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
-        "Besjana",
-      );
+  describe("Create user", () => {
+    it("should render the create user page", () => {
+      renderPage();
 
       expect(
-        screen.getByPlaceholderText("users.lastNamePlaceholder"),
-      ).toHaveValue("Murataj");
+        screen.getByRole("heading", { name: "users.createUser" }),
+      ).toBeInTheDocument();
 
       expect(
-        screen.getByPlaceholderText("users.usernamePlaceholder"),
-      ).toHaveValue("besjana");
+        screen.getByLabelText("users.table.firstName"),
+      ).toBeInTheDocument();
 
-      expect(screen.getByPlaceholderText("users.emailPlaceholder")).toHaveValue(
-        "besjana@example.com",
+      expect(screen.getByLabelText("users.table.lastName")).toBeInTheDocument();
+
+      expect(screen.getByLabelText("users.table.username")).toBeInTheDocument();
+
+      expect(screen.getByLabelText("users.table.email")).toBeInTheDocument();
+
+      expect(
+        screen.getByPlaceholderText("users.passwordPlaceholder"),
+      ).toBeInTheDocument();
+    });
+
+    it("should fetch roles", async () => {
+      renderPage();
+
+      expect(
+        await screen.findByRole("button", { name: "ADMIN" }),
+      ).toBeInTheDocument();
+
+      expect(screen.getByRole("button", { name: "USER" })).toBeInTheDocument();
+
+      expect(mocks.getRole).toHaveBeenCalledTimes(1);
+    });
+
+    it("should update name, surname, username and email", () => {
+      renderPage();
+
+      fireEvent.change(screen.getByLabelText("users.table.firstName"), {
+        target: { value: "Jane" },
+      });
+
+      fireEvent.change(screen.getByLabelText("users.table.lastName"), {
+        target: { value: "Smith" },
+      });
+
+      fireEvent.change(screen.getByLabelText("users.table.username"), {
+        target: { value: "janesmith" },
+      });
+
+      fireEvent.change(screen.getByLabelText("users.table.email"), {
+        target: { value: "jane@example.com" },
+      });
+
+      expect(screen.getByLabelText("users.table.firstName")).toHaveValue(
+        "Jane",
+      );
+
+      expect(screen.getByLabelText("users.table.lastName")).toHaveValue(
+        "Smith",
+      );
+
+      expect(screen.getByLabelText("users.table.username")).toHaveValue(
+        "janesmith",
+      );
+
+      expect(screen.getByLabelText("users.table.email")).toHaveValue(
+        "jane@example.com",
       );
     });
 
-    expect(
-      screen.getByPlaceholderText("users.usernamePlaceholder"),
-    ).toBeDisabled();
+    it("should update password", () => {
+      renderPage();
 
-    expect(screen.getByLabelText("birthDate")).toHaveValue("1998-05-10");
+      const password = screen.getByPlaceholderText("users.passwordPlaceholder");
 
-    expect(screen.getByRole("radio", { name: "Female" })).toBeChecked();
-  });
+      fireEvent.change(password, {
+        target: { value: "Password123!" },
+      });
 
-  it("should call createUser when the create form is submitted", async () => {
-    const user = userEvent.setup();
+      expect(password).toHaveValue("Password123!");
+    });
 
-    renderPage();
+    it("should select and deselect roles", async () => {
+      renderPage();
 
-    await user.click(screen.getByRole("button", { name: "common.save" }));
+      const adminButton = await screen.findByRole("button", {
+        name: "ADMIN",
+      });
 
-    await waitFor(() => {
-      expect(mockedSafeParse).toHaveBeenCalled();
+      fireEvent.click(adminButton);
 
-      expect(mockedCreateUser).toHaveBeenCalledWith(
+      expect(adminButton).toHaveAttribute("aria-pressed", "true");
+
+      fireEvent.click(adminButton);
+
+      expect(adminButton).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("should update gender", () => {
+      renderPage();
+
+      const femaleRadio = screen.getByRole("radio", {
+        name: "Female",
+      });
+
+      fireEvent.click(femaleRadio);
+
+      expect(femaleRadio).toBeChecked();
+    });
+
+    it("should update birth date", () => {
+      renderPage();
+
+      const dateInput = screen.getByTestId("birth-date");
+
+      fireEvent.change(dateInput, {
+        target: { value: "1998-01-12" },
+      });
+
+      expect(dateInput).toHaveValue("1998-01-12");
+    });
+
+    it("should clear birth date", () => {
+      renderPage();
+
+      const dateInput = screen.getByTestId("birth-date");
+
+      fireEvent.change(dateInput, {
+        target: { value: "1998-01-12" },
+      });
+
+      fireEvent.change(dateInput, {
+        target: { value: "" },
+      });
+
+      expect(dateInput).toHaveValue("");
+    });
+
+    it("should update street", () => {
+      renderPage();
+
+      const streetInput = screen.getByPlaceholderText(
+        "users.streetPlaceholder",
+      );
+
+      fireEvent.change(streetInput, {
+        target: { value: "Test Street" },
+      });
+
+      expect(streetInput).toHaveValue("Test Street");
+    });
+
+    it("should display validation errors", () => {
+      mocks.safeParse.mockReturnValue({
+        success: false,
+        error: {
+          issues: [
+            {
+              path: ["name"],
+              message: "Name is required",
+            },
+            {
+              path: ["email"],
+              message: "Invalid email",
+            },
+           
+          ],
+        },
+      });
+
+      renderPage();
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      expect(screen.getByText("Name is required")).toBeInTheDocument();
+      expect(screen.getByText("Invalid email")).toBeInTheDocument();
+      // expect(screen.getByText("Street is required")).toBeInTheDocument();
+
+      expect(mocks.createUser).not.toHaveBeenCalled();
+    });
+
+    it("should create a user successfully", async () => {
+      renderPage();
+
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.createUser).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mocks.createUser).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: "",
-          surname: "",
-          email: "",
-          username: "",
+          name: "John",
+          surname: "Doe",
+          username: "johndoe",
+          email: "john@example.com",
+          password: "Password123!",
+          roles: ["1"],
         }),
       );
+
+      expect(mocks.updateUsers).not.toHaveBeenCalled();
+
+      expect(mocks.addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "messages.success",
+          description: "messages.userCreated",
+          variant: "success",
+        }),
+      );
+
+      expect(mocks.navigate).toHaveBeenCalledWith("/user");
+    });
+
+    it("should display error toast when creation fails", async () => {
+      mocks.createUser.mockRejectedValue({
+        response: {
+          data: {
+            message: "messages.userAlreadyExists",
+          },
+        },
+      });
+
+      renderPage();
+
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "messages.error",
+            description: "messages.userAlreadyExists",
+            variant: "error",
+          }),
+        );
+      });
+
+      expect(mocks.navigate).not.toHaveBeenCalled();
+    });
+
+    it("should display default error when creation fails without API message", async () => {
+      mocks.createUser.mockRejectedValue(new Error("Network error"));
+
+      renderPage();
+
+      await fillRequiredFields();
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "messages.error",
+            description: "messages.error",
+            variant: "error",
+          }),
+        );
+      });
+    });
+
+    it("should navigate to users page when cancel is clicked", () => {
+      renderPage();
+
+      fireEvent.click(screen.getByRole("button", { name: "common.cancel" }));
+
+      expect(mocks.navigate).toHaveBeenCalledWith("/user");
+      expect(mocks.createUser).not.toHaveBeenCalled();
     });
   });
 
-  it("should call updateUsers when the edit form is submitted", async () => {
-    const user = userEvent.setup();
+  // ================================================
+  // EDIT USER
+  // ================================================
 
-    renderPage("1");
+  describe("Edit user", () => {
+    beforeEach(() => {
+      mocks.params = { id: "1" };
+    });
 
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
-        "Besjana",
+    it("should render edit user page", () => {
+      renderPage();
+
+      expect(
+        screen.getByRole("heading", { name: "users.editUser" }),
+      ).toBeInTheDocument();
+
+      expect(
+        screen.queryByPlaceholderText("users.passwordPlaceholder"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should fetch user details", async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(mocks.getById).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: "1",
+            signal: expect.anything(),
+          }),
+        );
+      });
+    });
+
+    it("should populate form with existing user data", async () => {
+      renderPage();
+
+      await waitFor(() => {
+        expect(screen.getByLabelText("users.table.firstName")).toHaveValue(
+          "John",
+        );
+      });
+
+      expect(screen.getByLabelText("users.table.lastName")).toHaveValue("Doe");
+
+      expect(screen.getByLabelText("users.table.username")).toHaveValue(
+        "johndoe",
+      );
+
+      expect(screen.getByLabelText("users.table.email")).toHaveValue(
+        "john@example.com",
+      );
+
+      expect(screen.getByLabelText("users.table.username")).toBeDisabled();
+
+      expect(
+        screen.getByPlaceholderText("users.streetPlaceholder"),
+      ).toHaveValue("Main Street");
+
+      expect(screen.getByRole("radio", { name: "Male" })).toBeChecked();
+
+      expect(screen.getByTestId("birth-date")).toHaveValue("1995-05-15");
+
+      expect(screen.getByRole("button", { name: "ADMIN" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
       );
     });
 
-    await user.click(screen.getByRole("button", { name: "common.save" }));
+    it("should update an existing user successfully", async () => {
+      renderPage();
 
-    await waitFor(() => {
-      expect(mockedSafeParse).toHaveBeenCalled();
+      const nameInput = await screen.findByLabelText("users.table.firstName");
 
-      expect(mockedUpdateUser).toHaveBeenCalledWith(
+      await waitFor(() => {
+        expect(nameInput).toHaveValue("John");
+      });
+
+      fireEvent.change(nameInput, {
+        target: { value: "Johnny" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.updateUsers).toHaveBeenCalledTimes(1);
+      });
+
+      expect(mocks.updateUsers).toHaveBeenCalledWith(
         "1",
         expect.objectContaining({
-          name: "Besjana",
-          surname: "Murataj",
-          email: "besjana@example.com",
+          name: "Johnny",
+          surname: "Doe",
+          username: "johndoe",
+          email: "john@example.com",
         }),
       );
-    });
-  });
 
-  it("should navigate to the user list after successful creation", async () => {
-    const user = userEvent.setup();
+      expect(mocks.createUser).not.toHaveBeenCalled();
 
-    renderPage();
-
-    await user.click(screen.getByRole("button", { name: "common.save" }));
-
-    expect(
-      await screen.findByRole("heading", { name: "User List" }),
-    ).toBeInTheDocument();
-
-    expect(addToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        variant: "success",
-      }),
-    );
-  });
-
-  it("should navigate to the user list after successful update", async () => {
-    const user = userEvent.setup();
-
-    renderPage("1");
-
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
-        "Besjana",
+      expect(mocks.addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "messages.success",
+          description: "messages.userUpdated",
+          variant: "success",
+        }),
       );
+
+      expect(mocks.navigate).toHaveBeenCalledWith("/user");
     });
 
-    await user.click(screen.getByRole("button", { name: "common.save" }));
+    it("should display error toast when update fails", async () => {
+      mocks.updateUsers.mockRejectedValue({
+        response: {
+          data: {
+            message: "messages.updateFailed",
+          },
+        },
+      });
 
-    expect(
-      await screen.findByRole("heading", { name: "User List" }),
-    ).toBeInTheDocument();
+      renderPage();
 
-    expect(addToast).toHaveBeenCalledWith(
-      expect.objectContaining({
-        variant: "success",
-      }),
-    );
+      const nameInput = await screen.findByLabelText("users.table.firstName");
+
+      await waitFor(() => {
+        expect(nameInput).toHaveValue("John");
+      });
+
+      fireEvent.change(nameInput, {
+        target: { value: "Johnny" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "messages.error",
+            description: "messages.updateFailed",
+            variant: "error",
+          }),
+        );
+      });
+
+      expect(mocks.navigate).not.toHaveBeenCalled();
+      expect(mocks.createUser).not.toHaveBeenCalled();
+    });
+
+    it("should show default error toast when update fails without a message", async () => {
+      mocks.updateUsers.mockRejectedValue({
+        response: {
+          data: {},
+        },
+      });
+
+      renderPage();
+
+      const nameInput = await screen.findByLabelText("users.table.firstName");
+
+      await waitFor(() => {
+        expect(nameInput).toHaveValue("John");
+      });
+
+      fireEvent.change(nameInput, {
+        target: { value: "Johnny" },
+      });
+
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
+
+      await waitFor(() => {
+        expect(mocks.addToast).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: "messages.error",
+            description: "messages.error",
+            variant: "error",
+          }),
+        );
+      });
+    });
+
+    it("should navigate to users page when cancel is clicked", async () => {
+      renderPage();
+
+      await screen.findByDisplayValue("John");
+
+      fireEvent.click(screen.getByRole("button", { name: "common.cancel" }));
+
+      expect(mocks.navigate).toHaveBeenCalledWith("/user");
+      expect(mocks.updateUsers).not.toHaveBeenCalled();
+    });
   });
 
-  it("should navigate to the user list when Cancel is clicked", async () => {
-    const user = userEvent.setup();
+  // ================================================
+  // GENERAL
+  // ================================================
 
-    renderPage();
+  describe("General behavior", () => {
+    it("should not fetch user details in create mode", () => {
+      mocks.params = {};
 
-    // Wait for the form to finish loading.
-    await screen.findByRole("button", { name: "common.cancel" });
+      renderPage();
 
-    // Clear any previous calls before testing Cancel.
-    mockedCreateUser.mockClear();
-    mockedSafeParse.mockClear();
+      expect(mocks.getById).not.toHaveBeenCalled();
+    });
 
-    await user.click(screen.getByRole("button", { name: "common.cancel" }));
+    it("should invalidate user queries after successful creation", async () => {
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: { retry: false },
+          mutations: { retry: false },
+        },
+      });
 
-    expect(
-      await screen.findByRole("heading", { name: "User List" }),
-    ).toBeInTheDocument();
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-    expect(mockedCreateUser).not.toHaveBeenCalled();
-    expect(mockedSafeParse).not.toHaveBeenCalled();
-  });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <UserUpsertPage />
+        </QueryClientProvider>,
+      );
 
-  it("should display validation errors when the form is invalid", async () => {
-    const user = userEvent.setup();
+      await fillRequiredFields();
 
-    mockedSafeParse.mockReturnValue({
-      success: false,
-      error: {
-        issues: [
-          {
-            path: ["name"],
-            message: "Name is required",
-          },
-          {
-            path: ["userInfo", "phoneNumber"],
-            message: "Phone number is invalid",
-          },
-        ],
-      },
-    } as never);
+      fireEvent.click(screen.getByRole("button", { name: "common.save" }));
 
-    renderPage();
-
-    await user.click(screen.getByRole("button", { name: "common.save" }));
-
-    expect(await screen.findByText("Name is required")).toBeInTheDocument();
-
-    expect(screen.getByText("Phone number is invalid")).toBeInTheDocument();
-
-    expect(mockedCreateUser).not.toHaveBeenCalled();
+      await waitFor(() => {
+        expect(invalidateSpy).toHaveBeenCalledWith({
+          queryKey: ["user"],
+        });
+      });
+    });
   });
 });

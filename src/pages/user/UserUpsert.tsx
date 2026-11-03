@@ -65,8 +65,6 @@ export const UserUpsertPage = () => {
       name: data.name ?? "",
       surname: data.surname ?? "",
       email: data.email ?? "",
-      // The API never returns the password. Leaving it empty makes the backend
-      // keep the current one; any other value would overwrite it on save
       password: "",
       username: data.username ?? "",
       roles: data.roles?.map((role) => String(role.id)) ?? [],
