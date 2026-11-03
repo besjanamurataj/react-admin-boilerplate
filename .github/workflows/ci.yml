@@ -93,8 +93,8 @@ jobs:
 
     steps:
       - name: Pull and restart frontend
-        working-directory: /opt/base-nestjs
+        working-directory: /opt/base-react
         run: |
-          docker compose pull frontend
-          docker compose up -d frontend
+          docker compose pull frontend-react
+          docker compose up -d frontend-react
           docker image prune -f
