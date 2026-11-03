@@ -1,0 +1,12 @@
+# Keep the build context small and keep local files out of the image
+node_modules/
+dist/
+coverage/
+.git/
+.github/
+.vscode/
+.idea/
+.env*
+Dockerfile
+.dockerignore
+README.md
