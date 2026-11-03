@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -56,26 +56,29 @@ export const UserUpsertPage = () => {
     queryKey: ["roles"],
     queryFn: () => getRole(),
   });
-  const user = data as unknown as User | undefined;
-  useEffect(() => {
-    if (data) {
-      setFormData({
-        name: user?.name ?? "",
-        surname: user?.surname ?? "",
-        email: user?.email ?? "",
-        password: user?.password ?? "123456789",
-        username: user?.username ?? "",
-        roles: data.roles?.map((role) => String(role.id)) ?? [],
-        authorities: user?.authorities ?? [],
-        userInfo: {
-          phoneNumber: user?.userInfo?.phoneNumber ?? "",
-          birthDate: user?.userInfo?.birthDate ?? "",
-          gender: user?.userInfo?.gender ?? "",
-          street: user?.userInfo?.street ?? "",
-        },
-      });
-    }
-  }, [data]);
+  // Copy the fetched user into the form when it arrives. Done during render
+  // rather than in an effect, which would render the empty form first
+  const [loadedUser, setLoadedUser] = useState<UserDetailResponse>();
+  if (data && data !== loadedUser) {
+    setLoadedUser(data);
+    setFormData({
+      name: data.name ?? "",
+      surname: data.surname ?? "",
+      email: data.email ?? "",
+      // The API never returns the password. Leaving it empty makes the backend
+      // keep the current one; any other value would overwrite it on save
+      password: "",
+      username: data.username ?? "",
+      roles: data.roles?.map((role) => String(role.id)) ?? [],
+      authorities: data.authorities ?? [],
+      userInfo: {
+        phoneNumber: data.userInfo?.phoneNumber ?? "",
+        birthDate: data.userInfo?.birthDate ?? "",
+        gender: data.userInfo?.gender ?? "",
+        street: data.userInfo?.street ?? "",
+      },
+    });
+  }
 
   const { mutate } = useMutation({
     mutationFn: (data: User) =>
@@ -115,25 +118,15 @@ export const UserUpsertPage = () => {
     e.preventDefault();
 
     const result = userSchema.safeParse(formData);
-    console.log(result, "result");
     if (!result.success) {
-      const fieldErrors: any = {};
+      const fieldErrors: Record<string, string> = {};
 
+      // Nested fields are keyed by their full path, e.g. "userInfo.phoneNumber"
       result.error.issues.forEach((issue) => {
-        if (issue.path.length === 2) {
-          const [parent, child] = issue.path;
-
-          fieldErrors[parent] = {
-            ...(fieldErrors[parent] || {}),
-            [child]: issue.message,
-          };
-        } else {
-          fieldErrors[issue.path[0]] = issue.message;
-        }
+        fieldErrors[issue.path.join(".")] = issue.message;
       });
 
       setErrors(fieldErrors);
-      console.log(formData, "updatedFormData");
     } else {
       mutate({ ...formData });
     }

@@ -10,7 +10,8 @@ import RoleSummary from "../../components/dashboard/RoleSummary";
 
 import { getUsers } from "../../services/useService";
 import { getAuthorities, getRole } from "../../services/roleService";
-import type { User } from "../../types/user";
+import type { UserDetailResponse } from "../../types/user";
+import type { RoleUsageData } from "../../components/dashboard/RoleSummary";
 
 const AnalyticsDashboard = () => {
   const { t } = useTranslation();
@@ -37,22 +38,21 @@ const AnalyticsDashboard = () => {
   );
 
   const roleUsageData = useMemo(() => {
-    const roleCounter = new Map<string, number>();
+    // Roles are objects, so count by id rather than by reference
+    const roleCounter = new Map<number, RoleUsageData>();
 
-    users.forEach((user: User) => {
-      user.roles?.forEach((role: string) => {
-        const currentCount = roleCounter.get(role) ?? 0;
+    users.forEach((user: UserDetailResponse) => {
+      user.roles?.forEach((role) => {
+        const currentCount = roleCounter.get(role.id)?.usersCount ?? 0;
 
-        roleCounter.set(role, currentCount + 1);
+        roleCounter.set(role.id, {
+          role: role.name,
+          usersCount: currentCount + 1,
+        });
       });
     });
 
-    return Array.from(roleCounter.entries()).map(
-      ([role, usersCount]) => ({
-        role,
-        usersCount,
-      })
-    );
+    return Array.from(roleCounter.values());
   }, [users]);
 
   return (

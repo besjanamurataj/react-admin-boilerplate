@@ -11,7 +11,7 @@ export interface Role {
   name: string;
   description: string;
   authorities: AuthorityResponse[];
-   permission: { [category: string]: string[] };
+  permission?: { [category: string]: string[] };
 }
 export interface RoleSelection {
   name: string;

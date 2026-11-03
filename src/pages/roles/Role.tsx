@@ -95,7 +95,7 @@ export const RolePage = () => {
   });
 
   // Columns for DataTable
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<Role>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -107,7 +107,7 @@ export const RolePage = () => {
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">{row.getValue("description")}</span>
+        <span className="font-medium">{formatRole(row.getValue("name"))}</span>
       ),
     },
     {
@@ -126,7 +126,8 @@ export const RolePage = () => {
       enableSorting: false,
     },
     {
-      accessorFn: (row: Role) => row.authorities?.join(", "),
+      accessorFn: (row: Role) =>
+        row.authorities?.map((authority) => authority.name).join(", "),
       id: "permission",
       header: () => <span>{t("roles.table.permission")}</span>,
       cell: ({ row }) => (

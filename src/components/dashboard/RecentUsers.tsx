@@ -14,7 +14,7 @@ export type RecentUser = {
   surname: string;
   username: string;
   email: string;
-  admin: boolean;
+  admin?: boolean;
   roles: UserRole[];
 };
 

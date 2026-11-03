@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -32,7 +31,6 @@ const initialFormData: User = {
 };
 
 export const ViewUserPage = () => {
-  const [formData, setFormData] = useState<User>(initialFormData);
   const params = useParams();
   const { t } = useTranslation();
   const title = "View User";
@@ -52,9 +50,9 @@ export const ViewUserPage = () => {
     queryFn: () => getRole(),
   });
 
-  useEffect(() => {
-    if (data) {
-      setFormData({
+  // Read-only page, so the form values come straight from the fetched user
+  const formData: User = data
+    ? {
         name: data.name ?? "",
         surname: data.surname ?? "",
         email: data.email ?? "",
@@ -68,9 +66,8 @@ export const ViewUserPage = () => {
           gender: data.userInfo?.gender ?? "",
           street: data.userInfo?.street ?? "",
         },
-      });
-    }
-  }, [data]);
+      }
+    : initialFormData;
 
   return (
     <div className="p-6">
@@ -194,12 +191,7 @@ export const ViewUserPage = () => {
             <RadioGroup
               value={formData.userInfo?.gender ?? ""}
               disabled={true}
-              onValueChange={(value: string) =>
-                setFormData({
-                  ...formData,
-                  userInfo: { ...formData.userInfo, gender: value },
-                })
-              }
+              onValueChange={() => {}}
               options={[
                 { label: "Male", value: "M" },
                 { label: "Female", value: "F" },

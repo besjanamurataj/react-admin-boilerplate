@@ -15,7 +15,7 @@ import {
   updateProfile,
 } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
-import type { PasswordUpdate, User, UserResponse } from "../types/user";
+import type { PasswordUpdate, UserDetailResponse } from "../types/user";
 import { Label } from "../components/ui/Label";
 import { Dialog, DialogContent } from "../components/ui/Dialog";
 import { MultiSelect } from "../components/ui/MultiSelect";
@@ -65,9 +65,9 @@ export const ProfilePage = () => {
     data,
     isLoading,
     isError,
-  } = useQuery<UserResponse>({
+  } = useQuery<UserDetailResponse>({
     queryKey: ["user", userId],
-    queryFn: ({ signal }): Promise<UserResponse> => {
+    queryFn: ({ signal }) => {
       if (!userId) throw new Error("No ID provided");
       return getById({ id: userId, signal });
     },
@@ -80,7 +80,7 @@ export const ProfilePage = () => {
     queryFn: () => getRole(),
   });
 
-  const user = data as unknown as User | undefined;
+  const user = data;
 
   const displayedFormData: Profile = isEditing
     ? formData
@@ -91,7 +91,7 @@ export const ProfilePage = () => {
         username: user?.username ?? "",
         password: "",
         confirmPassword: "",
-        roles: user?.roles?.map(String) ?? [],
+        roles: user?.roles?.map((role) => String(role.id)) ?? [],
         userInfo: {
           phoneNumber: user?.userInfo?.phoneNumber ?? "",
           birthDate: user?.userInfo?.birthDate ?? "",
@@ -111,7 +111,7 @@ export const ProfilePage = () => {
       username: user.username ?? "",
       password: "",
       confirmPassword: "",
-      roles: user.roles?.map(String) ?? [],
+      roles: user.roles?.map((role) => String(role.id)) ?? [],
       userInfo: {
         phoneNumber: user.userInfo?.phoneNumber ?? "",
         birthDate: user.userInfo?.birthDate ?? "",

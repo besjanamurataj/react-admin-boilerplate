@@ -42,7 +42,8 @@ export interface UserRequest {
 }
 
 export interface UserResponse {
-  content: User[];
+  // List rows come back with role objects, same shape as GET /users/:id
+  content: UserDetailResponse[];
   page: number;
   size: number;
   totalElements: number;

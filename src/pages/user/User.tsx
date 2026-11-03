@@ -112,7 +112,7 @@ export const UserPage = () => {
     [],
   );
 
-  const columns: ColumnDef<any>[] = [
+  const columns: ColumnDef<UserDetailResponse>[] = [
     //   {
     //     id: 'select',
     //     size: 10,
@@ -214,7 +214,7 @@ export const UserPage = () => {
       enableSorting: false,
     },
     {
-      accessorFn: (row) => row.roles?.join(", "),
+      accessorFn: (row) => row.roles?.map((role) => role.name).join(", "),
       id: "role",
       header: () => <span>{t("users.table.role")}</span>,
 
@@ -223,8 +223,8 @@ export const UserPage = () => {
 
         return (
           <div className="flex flex-col gap-1">
-            {roles?.map((role: { name: string; id: number }) => (
-              <span className="font-medium hidden sm:table-cell">
+            {roles?.map((role) => (
+              <span key={role.id} className="font-medium hidden sm:table-cell">
                 {formatRole(role.name)}
               </span>
             ))}

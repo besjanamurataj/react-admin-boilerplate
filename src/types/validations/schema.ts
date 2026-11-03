@@ -10,7 +10,8 @@ export const userSchema = z.object({
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       "Email is not valid, put a valid email",
     ),
-  roles: z.array(z.number()).min(1, "Select at least one role"),
+  // Role ids are kept as strings in the form; the backend converts them to numbers
+  roles: z.array(z.string()).min(1, "Select at least one role"),
   userInfo: z.object({
     phoneNumber: z
       .string()

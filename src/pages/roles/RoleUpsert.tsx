@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -66,17 +66,18 @@ export const RoleUpsertPage = () => {
     queryFn: getAuthorities,
   });
 
-  // Populate form when editing
-  useEffect(() => {
-    if (role) {
-      setFormData({
-        name: role.name ?? "",
-        description: role.description ?? "",
-        authorities:
-          role.authorities?.map((authority) => Number(authority.id)) ?? [],
-      });
-    }
-  }, [role]);
+  // Populate form when editing. Done during render rather than in an effect,
+  // which would render the empty form first
+  const [loadedRole, setLoadedRole] = useState<Role>();
+  if (role && role !== loadedRole) {
+    setLoadedRole(role);
+    setFormData({
+      name: role.name ?? "",
+      description: role.description ?? "",
+      authorities:
+        role.authorities?.map((authority) => Number(authority.id)) ?? [],
+    });
+  }
 
   // Create / Update mutation
   const mutation = useMutation({

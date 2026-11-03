@@ -7,7 +7,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import ViewUserPage from "./ViewUser";
 import { getById } from "../../services/useService";
 import { getRole } from "../../services/roleService";
-import type { UserResponse } from "../../types/user";
+import type { UserDetailResponse } from "../../types/user";
 import type { RoleResponse } from "../../types/role";
 
 vi.mock("../../services/useService", () => ({
@@ -130,30 +130,21 @@ vi.mock("../../components/ui/Radion", () => ({
   ),
 }));
 
-const mockUser: UserResponse = {
-  content: [
-    {
-      id: 1,
-      name: "Besjana",
-      surname: "Murataj",
-      email: "besjana@example.com",
-      username: "besjana",
-      password: "password",
-      roles: ["Admin"],
-      authorities: ["read", "write"],
-      userInfo: {
-        phoneNumber: "0691234567",
-        birthDate: "1998-05-10",
-        gender: "F",
-        street: "Tirana",
-      },
-    },
-  ],
-  page: 0,
-  size: 5,
-  totalElements: 1,
-  totalPages: 1,
-  last: true,
+const mockUser: UserDetailResponse = {
+  id: 1,
+  name: "Besjana",
+  surname: "Murataj",
+  email: "besjana@example.com",
+  username: "besjana",
+  password: "password",
+  roles: [{ id: 1, name: "Admin", description: "Administrator role" }],
+  authorities: ["read", "write"],
+  userInfo: {
+    phoneNumber: "0691234567",
+    birthDate: "1998-05-10",
+    gender: "F",
+    street: "Tirana",
+  },
 };
 
 const mockRoles: RoleResponse = {
@@ -198,7 +189,7 @@ describe("ViewUserPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(getById).mockResolvedValue(mockUser as UserResponse);
+    vi.mocked(getById).mockResolvedValue(mockUser);
     vi.mocked(getRole).mockResolvedValue(mockRoles as RoleResponse);
   });
 
