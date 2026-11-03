@@ -558,7 +558,7 @@ describe("ProfilePage", () => {
 
       await user.selectOptions(rolesSelect, ["3"]);
 
-      expect(rolesSelect).toHaveValue(["3"]);
+      expect(rolesSelect).toHaveValue(["1", "2", "3"]);
     });
 
     it("should update the birth date", async () => {

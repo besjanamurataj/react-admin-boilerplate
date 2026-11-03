@@ -677,6 +677,7 @@ describe("UserUpsertPage", () => {
           surname: "Doe",
           username: "johndoe",
           email: "john@example.com",
+          password: "",
         }),
       );
 

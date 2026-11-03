@@ -498,10 +498,6 @@ describe("UserPage", () => {
 
 
 
-  const openFilterDialog = () => {
-    fireEvent.click(screen.getByRole("button", { name: "", hidden: true }));
-  };
-
   it("should open filter dialog", () => {
     render(<UserPage />);
 
