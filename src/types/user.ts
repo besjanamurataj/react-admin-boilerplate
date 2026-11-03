@@ -47,5 +47,21 @@ export interface UserResponse {
   size: number;
   totalElements: number;
   totalPages: number;
+  total?: number;
   last: boolean;
+}
+export interface UserDetailResponse {
+  id: number;
+  name: string;
+  surname: string;
+  email: string;
+  password?: string;
+  username: string;
+  roles: {
+    id: number;
+    name: string;
+    description: string;
+  }[];
+  authorities: string[];
+  userInfo?: UserInfo;
 }

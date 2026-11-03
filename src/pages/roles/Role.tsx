@@ -95,7 +95,7 @@ export const RolePage = () => {
   });
 
   // Columns for DataTable
-  const columns: ColumnDef<Role>[] = [
+  const columns: ColumnDef<any>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
@@ -107,7 +107,7 @@ export const RolePage = () => {
         </div>
       ),
       cell: ({ row }) => (
-        <span className="font-medium">{formatRole(row.getValue("name"))}</span>
+        <span className="font-medium">{row.getValue("description")}</span>
       ),
     },
     {

@@ -9,41 +9,41 @@ import { getById, getAuthorities } from "../../services/roleService";
 import { Textarea } from "../../components/ui/Textarea";
 import { useTranslation } from "react-i18next";
 import type { Role } from "../../types/role";
-import type { AuthorityResponse } from "../../types/authorities.service";
 
 export const ViewRolePage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const { t } = useTranslation();
-  const title = "View Role";
 
   const { data } = useQuery<Role>({
     queryKey: ["roles", params.id],
     queryFn: ({ signal }) => {
-      if (!params?.id) throw new Error("No ID provided");
+      if (!params.id) {
+        throw new Error("No ID provided");
+      }
+
       return getById({ id: params.id, signal });
     },
-    enabled: !!params?.id,
+    enabled: !!params.id,
   });
 
-  const role = data
-    ? {
-        name: data.name,
-        description: data.description,
-        authorities:
-          data.authorities?.map((a: AuthorityResponse) => a.id) || [],
-      }
-    : null;
-  const { data: permission } = useQuery({
+  const { data: permission = [] } = useQuery({
     queryKey: ["permission"],
     queryFn: getAuthorities,
   });
 
+  const selectedAuthorities =
+    data?.authorities?.map((authority) => authority.id) ?? [];
+
   return (
     <div className="p-6">
-      <PageTitle title={title} subTitle="Create or update role information" />
+      <PageTitle
+        title="View Role"
+        subTitle="Create or update role information"
+      />
+
       <form>
-        <div className="mb-4 grid grid-cols-12 gap-6 mt-4">
+        <div className="mb-4 mt-4 grid grid-cols-12 gap-6">
           <div className="col-span-6">
             <Label
               htmlFor="name"
@@ -51,50 +51,57 @@ export const ViewRolePage = () => {
             >
               {t("roles.table.name")}
             </Label>
+
             <Input
               id="name"
               placeholder={t("roles.namePlaceholder") || ""}
-              value={role?.name}
-              disabled={true}
+              value={data?.name ?? ""}
+              disabled
             />
           </div>
 
           <div className="col-span-6">
             <Label
-              htmlFor="roles"
+              htmlFor="authorities"
               className="block text-md font-medium text-gray-700"
             >
               {t("roles.table.permission")}
             </Label>
+
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
-              options={
-                permission?.map((role) => ({
-                  label: role.label,
-                  value: role.value,
-                })) || []
-              }
-              value={(role?.authorities ?? []).map(String)}
+              options={permission.map((authority) => ({
+                label: authority.label,
+                value: authority.value,
+              }))}
+              value={selectedAuthorities}
               onChange={() => {}}
+              disabled
             />
           </div>
 
           <div className="col-span-6">
             <Label
-              htmlFor="username"
+              htmlFor="description"
               className="block text-md font-medium text-gray-700"
             >
               {t("roles.table.description")}
             </Label>
+
             <Textarea
               id="description"
               placeholder={t("roles.descriptionPlaceholder") || ""}
-              value={role?.description}
-              disabled={true}
+              value={data?.description ?? ""}
+              disabled
             />
           </div>
-          <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button variant="outline" onClick={() => navigate("/role")}>
+
+          <div className="col-span-12 mt-4 flex justify-end gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/role")}
+            >
               {t("common.cancel")}
             </Button>
           </div>
@@ -103,4 +110,5 @@ export const ViewRolePage = () => {
     </div>
   );
 };
+
 export default ViewRolePage;

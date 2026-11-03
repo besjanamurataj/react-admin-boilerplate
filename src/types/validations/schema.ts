@@ -67,9 +67,9 @@ export const passwordSchema = z
   });
 
 export const roleSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  authorities: z.array(z.number()).min(1, "Select at least one permission"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string().optional(),
+  authorities: z.array(z.number()).min(1, "Select at least one authority"),
 });
 
 export const universitySchema = z.object({

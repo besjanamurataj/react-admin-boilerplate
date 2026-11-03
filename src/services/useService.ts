@@ -1,4 +1,9 @@
-import type { PasswordUpdate, User, UserResponse } from "../types/user";
+import type {
+  PasswordUpdate,
+  User,
+  UserDetailResponse,
+  UserResponse,
+} from "../types/user";
 import { HttpClient } from "../libs/https/http-client";
 import type { Profile } from "../types/profile";
 
@@ -82,11 +87,14 @@ export async function getById({
 }: {
   id: string;
   signal?: AbortSignal;
-}): Promise<UserResponse> {
+}): Promise<UserDetailResponse> {
   try {
-    const response = await HttpClient.get<UserResponse>(API_URL + `/${id}`, {
-      signal,
-    });
+    const response = await HttpClient.get<UserDetailResponse>(
+      API_URL + `/${id}`,
+      {
+        signal,
+      },
+    );
     return response;
   } catch (error: unknown) {
     throw new Error(

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -30,7 +31,6 @@ const initialFormData: RoleRequest = {
 export const RoleUpsertPage = () => {
   // Form state
   const [formData, setFormData] = useState<RoleRequest>(initialFormData);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Hooks
@@ -44,7 +44,8 @@ export const RoleUpsertPage = () => {
 
   const title = isEditMode ? t("roles.editRole") : t("roles.createRole");
 
-  const { data, isLoading } = useQuery<Role>({
+  // Fetch role details
+  const { data: role, isLoading } = useQuery<Role>({
     queryKey: ["roles", params.id],
     queryFn: ({ signal }) => {
       if (!params.id) {
@@ -60,19 +61,22 @@ export const RoleUpsertPage = () => {
   });
 
   // Fetch available permissions
-  const { data: permission } = useQuery({
+  const { data: permission = [] } = useQuery({
     queryKey: ["permission"],
     queryFn: getAuthorities,
   });
-  const role = data as unknown as Role | undefined;
-  const displayedFormData: RoleRequest =
-    isEditMode && role
-      ? {
-          name: role.name ?? "",
-          description: role.description ?? "",
-          authorities: role.authorities ?? [],
-        }
-      : formData;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (role) {
+      setFormData({
+        name: role.name ?? "",
+        description: role.description ?? "",
+        authorities:
+          role.authorities?.map((authority) => Number(authority.id)) ?? [],
+      });
+    }
+  }, [role]);
 
   // Create / Update mutation
   const mutation = useMutation({
@@ -104,7 +108,7 @@ export const RoleUpsertPage = () => {
     },
   });
 
-  // Form submit
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -126,8 +130,8 @@ export const RoleUpsertPage = () => {
     mutation.mutate(formData);
   };
 
-  // Update individual form fields
-  const handleChange = (field: keyof RoleRequest, value: string | string[]) => {
+  // Handle individual form fields
+  const handleChange = (field: keyof RoleRequest, value: string | number[]) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -139,7 +143,7 @@ export const RoleUpsertPage = () => {
     }));
   };
 
-  // Loading state for edit mode
+  // Loading state
   if (isEditMode && isLoading) {
     return (
       <div className="p-6">
@@ -167,7 +171,7 @@ export const RoleUpsertPage = () => {
             <Input
               id="name"
               placeholder={t("roles.namePlaceholder")}
-              value={displayedFormData.name}
+              value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
             />
 
@@ -187,16 +191,14 @@ export const RoleUpsertPage = () => {
 
             <MultiSelect
               placeholder={t("common.selectOptions")}
-              options={(permission ?? []).map((role) => ({
-                label: role.label,
-                value: role.value,
+              options={(permission ?? []).map((authority) => ({
+                label: authority.label,
+                value: Number(authority.value),
               }))}
-              value={displayedFormData.authorities.map(
-                (authority) => authority.id,
-              )}
-              onChange={(values) =>
-                handleChange("authorities", values.map(String))
-              }
+              value={formData.authorities}
+              onChange={(values) => {
+                handleChange("authorities", values.map(Number));
+              }}
             />
 
             {errors.authorities && (
@@ -216,7 +218,7 @@ export const RoleUpsertPage = () => {
             <Textarea
               id="description"
               placeholder={t("roles.descriptionPlaceholder")}
-              value={displayedFormData.description}
+              value={formData.description ?? ""}
               onChange={(e) => handleChange("description", e.target.value)}
             />
 

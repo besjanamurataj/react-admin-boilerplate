@@ -3,7 +3,7 @@ import type { AuthorityResponse } from "./authorities.service";
 export interface RoleRequest {
   name: string;
   description: string;
-  authorities: AuthorityResponse[];
+  authorities: number[];
 }
 
 export interface Role {
@@ -11,7 +11,7 @@ export interface Role {
   name: string;
   description: string;
   authorities: AuthorityResponse[];
-  // permission: { [category: string]: string[] };
+   permission: { [category: string]: string[] };
 }
 export interface RoleSelection {
   name: string;
