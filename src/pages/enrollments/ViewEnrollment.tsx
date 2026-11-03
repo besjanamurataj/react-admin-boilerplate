@@ -4,11 +4,9 @@ import { Input } from "../../components/ui/Input";
 import { Label } from "../../components/ui/Label";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  getEnrollmentById,
-} from "../../services/enrollmentService";
+import { getEnrollmentById } from "../../services/enrollmentService";
 import { useTranslation } from "react-i18next";
-import type { EnrollmentResponse } from "../../types/enrollment";
+import type { Enrollment, EnrollmentResponse } from "../../types/enrollment";
 
 export const ViewEnrollmentPage = () => {
   const navigate = useNavigate();
@@ -17,7 +15,6 @@ export const ViewEnrollmentPage = () => {
 
   const { data } = useQuery<EnrollmentResponse>({
     queryKey: ["enrollments", params.id],
-
     queryFn: ({ signal }) => {
       if (!params?.id) {
         throw new Error("No ID provided");
@@ -31,15 +28,15 @@ export const ViewEnrollmentPage = () => {
 
     enabled: !!params?.id,
   });
-
-  const enrollment = data
+  const enrollment = data as unknown as Enrollment;
+  const displayedFormData = data
     ? {
-      enrollmentDate: data.enrollmentDate,
-      universityName: data.universityName,
-      departmentName: data.departmentName,
-      studentFirstName: data.studentFirstName,
-      studentLastName: data.studentLastName,
-    }
+        enrollmentDate: enrollment.enrollmentDate,
+        universityName: enrollment.universityName,
+        departmentName: enrollment.departmentName,
+        studentFirstName: enrollment.studentFirstName,
+        studentLastName: enrollment.studentLastName,
+      }
     : null;
 
   return (
@@ -51,7 +48,6 @@ export const ViewEnrollmentPage = () => {
 
       <form>
         <div className="mb-4 grid grid-cols-12 gap-6 mt-4">
-
           <div className="col-span-6">
             <Label
               htmlFor="student"
@@ -63,8 +59,8 @@ export const ViewEnrollmentPage = () => {
             <Input
               id="student"
               value={
-                enrollment
-                  ? `${enrollment.studentFirstName} ${enrollment.studentLastName}`
+                displayedFormData
+                  ? `${displayedFormData.studentFirstName} ${displayedFormData.studentLastName}`
                   : ""
               }
               disabled
@@ -81,7 +77,7 @@ export const ViewEnrollmentPage = () => {
 
             <Input
               id="university"
-              value={enrollment?.universityName ?? ""}
+              value={displayedFormData?.universityName ?? ""}
               disabled
             />
           </div>
@@ -96,7 +92,7 @@ export const ViewEnrollmentPage = () => {
 
             <Input
               id="department"
-              value={enrollment?.departmentName ?? ""}
+              value={displayedFormData?.departmentName ?? ""}
               disabled
             />
           </div>
@@ -112,7 +108,7 @@ export const ViewEnrollmentPage = () => {
             <Input
               id="enrollmentDate"
               type="date"
-              value={enrollment?.enrollmentDate ?? ""}
+              value={displayedFormData?.enrollmentDate ?? ""}
               disabled
             />
           </div>
@@ -126,7 +122,6 @@ export const ViewEnrollmentPage = () => {
               {t("common.cancel")}
             </Button>
           </div>
-
         </div>
       </form>
     </div>

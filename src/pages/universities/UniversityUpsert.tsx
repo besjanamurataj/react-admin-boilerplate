@@ -11,7 +11,10 @@ import {
   getUniversityById,
   updateUniversity,
 } from "../../services/universityService";
-import type { UniversityRequest } from "../../types/university";
+import type {
+  UniversityRequest,
+  UniversityResponse,
+} from "../../types/university";
 import { useTranslation } from "react-i18next";
 import { useToast } from "../../contexts/toast/ToastProvider";
 export const UniversityUpsertPage = () => {
@@ -29,7 +32,7 @@ export const UniversityUpsertPage = () => {
     ? t("universities.editUniversity")
     : t("universities.createUniversity");
 
-  const { data } = useQuery<UniversityRequest>({
+  const { data } = useQuery<UniversityResponse>({
     queryKey: ["universities", params.id],
     queryFn: ({ signal }) => {
       if (!params.id) {
@@ -44,11 +47,12 @@ export const UniversityUpsertPage = () => {
     enabled: !!params.id,
   });
 
+  const university = data as unknown as UniversityRequest | undefined;
   const formData: UniversityRequest = editedFormData ?? {
-    name: data?.name ?? "",
-    code: data?.code ?? "",
-    city: data?.city ?? "",
-    email: data?.email ?? "",
+    name: university?.name ?? "",
+    code: university?.code ?? "",
+    city: university?.city ?? "",
+    email: university?.email ?? "",
   };
 
   const mutation = useMutation({

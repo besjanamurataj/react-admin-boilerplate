@@ -9,7 +9,7 @@ import { getStudentById } from "../../services/studentService";
 import { useTranslation } from "react-i18next";
 import type { DepartmentResponse } from "../../types/department";
 import { getDepartments } from "../../services/departmentService";
-import type { StudentResponse } from "../../types/student";
+import type { Student, StudentResponse } from "../../types/student";
 
 export const ViewStudentPage = () => {
   const navigate = useNavigate();
@@ -31,20 +31,21 @@ export const ViewStudentPage = () => {
     enabled: !!params?.id,
   });
 
-  const student = data
+  const student = data as unknown as Student | undefined;
+  const displayFormData = data
     ? {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        birthDate: data.birthDate,
-        active: data.active,
-        departmentId: data.departmentId,
+        firstName: student?.firstName,
+        lastName: student?.lastName,
+        email: student?.email,
+        birthDate: student?.birthDate,
+        active: student?.active,
+        departmentId: student?.departmentId,
       }
     : null;
 
   const { data: departments } = useQuery({
     queryKey: ["departments-options"],
-    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
+    queryFn: (): Promise<DepartmentResponse> => getDepartments(),
   });
 
   return (
@@ -67,7 +68,7 @@ export const ViewStudentPage = () => {
             <Input
               id="firstName"
               placeholder={t("students.firstNamePlaceholder") || ""}
-              value={student?.firstName ?? ""}
+              value={displayFormData?.firstName ?? ""}
               disabled
             />
           </div>
@@ -83,7 +84,7 @@ export const ViewStudentPage = () => {
             <Input
               id="lastName"
               placeholder={t("students.lastNamePlaceholder") || ""}
-              value={student?.lastName ?? ""}
+              value={displayFormData?.lastName ?? ""}
               disabled
             />
           </div>
@@ -100,7 +101,7 @@ export const ViewStudentPage = () => {
               id="email"
               type="email"
               placeholder={t("students.emailPlaceholder") || ""}
-              value={student?.email ?? ""}
+              value={displayFormData?.email ?? ""}
               disabled
             />
           </div>
@@ -116,7 +117,7 @@ export const ViewStudentPage = () => {
             <Input
               id="birthDate"
               type="date"
-              value={student?.birthDate ?? ""}
+              value={displayFormData?.birthDate ?? ""}
               disabled
             />
           </div>
@@ -132,8 +133,8 @@ export const ViewStudentPage = () => {
             <Input
               id="active"
               value={
-                student
-                  ? student.active
+                displayFormData
+                  ? displayFormData.active
                     ? t("common.yes")
                     : t("common.no")
                   : ""
@@ -153,14 +154,14 @@ export const ViewStudentPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                departments?.map((department: DepartmentResponse) => ({
+                departments?.content?.map((department) => ({
                   label: department.name,
                   value: department.id,
                 })) || []
               }
               value={
-                student?.departmentId !== undefined
-                  ? [student.departmentId]
+                displayFormData?.departmentId !== undefined
+                  ? [displayFormData.departmentId]
                   : []
               }
               onChange={() => {}}

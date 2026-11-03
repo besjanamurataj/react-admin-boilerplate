@@ -29,18 +29,13 @@ import {
   exportEnrollmentsPdf,
   getEnrollments,
 } from "../../services/enrollmentService";
-
 import { useTranslation } from "react-i18next";
-
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
-
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-
 import type {
   BatchEnrollmentResponse,
   Enrollment,
-  EnrollmentResponse,
 } from "../../types/enrollment";
 import { useToast } from "../../contexts/toast/ToastProvider";
 import { getDepartments } from "../../services/departmentService";
@@ -755,13 +750,11 @@ export const EnrollmentPage = () => {
                 >
                   <option value={0}>Select department</option>
 
-                  {departmentsOptions?.map(
-                    (department) => (
-                      <option key={department.value} value={department.value}>
-                        {department.label}
-                      </option>
-                    ),
-                  )}
+                  {departmentsOptions?.map((department) => (
+                    <option key={department.value} value={department.value}>
+                      {department.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 

@@ -2,11 +2,9 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
 import StatisticsCard from "../../components/dashboard/StatisticsCard";
 import RecentUsers from "../../components/dashboard/RecentUsers";
 import RoleSummary from "../../components/dashboard/RoleSummary";
-
 import { getUsers } from "../../services/useService";
 import { getAuthorities, getRole } from "../../services/roleService";
 import type { User } from "../../types/user";

@@ -6,7 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUniversityById } from "../../services/universityService";
 import { useTranslation } from "react-i18next";
-import type { UniversityResponse } from "../../types/university";
+import type {
+  UniversityRequest,
+  UniversityResponse,
+} from "../../types/university";
 
 export const ViewUniversityPage = () => {
   const navigate = useNavigate();
@@ -26,14 +29,13 @@ export const ViewUniversityPage = () => {
     enabled: !!params?.id,
   });
 
-  const university = data
-    ? {
-        name: data.name,
-        code: data.code,
-        city: data.city,
-        email: data.email,
-      }
-    : null;
+  const university = data as unknown as UniversityRequest | undefined;
+  const displayedFormData: UniversityRequest = {
+    name: university?.name ?? "",
+    code: university?.code ?? "",
+    city: university?.city ?? "",
+    email: university?.email ?? "",
+  };
 
   return (
     <div className="p-6">
@@ -55,7 +57,7 @@ export const ViewUniversityPage = () => {
             <Input
               id="name"
               value={university?.name}
-              placeholder={t("universities.namePlaceholder") || ""}
+              placeholder={t("displayedFormData.namePlaceholder") || ""}
               disabled
             />
           </div>
@@ -70,7 +72,7 @@ export const ViewUniversityPage = () => {
 
             <Input
               id="code"
-              value={university?.code}
+              value={displayedFormData?.code}
               placeholder={t("universities.codePlaceholder") || ""}
               disabled
             />
@@ -86,7 +88,7 @@ export const ViewUniversityPage = () => {
 
             <Input
               id="city"
-              value={university?.city}
+              value={displayedFormData?.city}
               placeholder={t("universities.cityPlaceholder") || ""}
               disabled
             />
@@ -102,17 +104,14 @@ export const ViewUniversityPage = () => {
 
             <Input
               id="email"
-              value={university?.email}
+              value={displayedFormData?.email}
               placeholder={t("universities.emailPlaceholder") || ""}
               disabled
             />
           </div>
 
           <div className="col-span-12 flex justify-end gap-4 mt-4">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/university")}
-            >
+            <Button variant="outline" onClick={() => navigate("/university")}>
               {t("common.cancel")}
             </Button>
           </div>

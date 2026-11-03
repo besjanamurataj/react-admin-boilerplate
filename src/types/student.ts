@@ -8,7 +8,7 @@ export interface StudentRequest {
 }
 
 export interface Student{
-  id: number;
+  id?: number;
   firstName: string;
   lastName: string;
   email: string;
