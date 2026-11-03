@@ -8,8 +8,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getDepartmentById } from "../../services/departmentService";
 import { useTranslation } from "react-i18next";
 import { MultiSelect } from "../../components/ui/MultiSelect";
-import type { DepartmentResponse } from "../../types/department";
+import type {
+  DepartmentRequest,
+  DepartmentResponse,
+} from "../../types/department";
 import { getUniversities } from "../../services/universityService";
+import type { UniversityResponse } from "../../types/university";
 
 export const ViewDepartmentPage = () => {
   const navigate = useNavigate();
@@ -31,16 +35,15 @@ export const ViewDepartmentPage = () => {
     enabled: !!params?.id,
   });
 
-  const department = data
-    ? {
-        name: data.name,
-        code: data.code,
-        description: data.description,
-        universityId: data.universityId,
-      }
-    : null;
+  const department = data as unknown as DepartmentRequest | undefined;
+  const displayedFormData: DepartmentRequest = {
+    name: department?.name ?? "",
+    code: department?.code ?? "",
+    description: department?.description ?? "",
+    universityId: department?.universityId ?? 0,
+  };
 
-  const { data: universities } = useQuery({
+  const { data: universities } = useQuery<UniversityResponse>({
     queryKey: ["universities"],
     queryFn: () => getUniversities(),
   });
@@ -65,7 +68,7 @@ export const ViewDepartmentPage = () => {
             <Input
               id="name"
               placeholder={t("departments.namePlaceholder") || ""}
-              value={department?.name}
+              value={displayedFormData?.name}
               disabled
             />
           </div>
@@ -81,7 +84,7 @@ export const ViewDepartmentPage = () => {
             <Input
               id="code"
               placeholder={t("departments.codePlaceholder") || ""}
-              value={department?.code}
+              value={displayedFormData?.code}
               disabled
             />
           </div>
@@ -97,12 +100,16 @@ export const ViewDepartmentPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                universities?.map((university) => ({
+                universities?.content.map((university) => ({
                   label: university.name,
                   value: university.id,
                 })) || []
               }
-              value={department?.universityId ? [department.universityId] : []}
+              value={
+                displayedFormData?.universityId
+                  ? [displayedFormData.universityId]
+                  : []
+              }
               onChange={() => {}}
             />
           </div>
@@ -118,7 +125,7 @@ export const ViewDepartmentPage = () => {
             <Textarea
               id="description"
               placeholder={t("departments.descriptionPlaceholder") || ""}
-              value={department?.description}
+              value={displayedFormData?.description}
               disabled
             />
           </div>

@@ -57,13 +57,25 @@ export const StudentUpsertPage = () => {
       enabled: isEditMode,
     });
 
-  const { data: departments, isLoading: isDepartmentsLoading } = useQuery({
-    queryKey: ["departments-options"],
-    queryFn: (): Promise<DepartmentResponse[]> => getDepartments(),
-  });
+  const { data: departments, isLoading: isDepartmentsLoading } =
+    useQuery<DepartmentResponse>({
+      queryKey: ["departments-options"],
+      queryFn: (): Promise<DepartmentResponse> => getDepartments(),
+    });
 
+  const student = studentData as unknown as StudentRequest | undefined;
   const displayedFormData: StudentRequest =
-    isEditMode && studentData ? studentData : formData;
+    isEditMode && student
+      ? formData
+      : {
+          ...initialFormData,
+          firstName: student?.firstName ?? "",
+          lastName: student?.lastName ?? "",
+          email: student?.email || "",
+          birthDate: student?.birthDate || "",
+          active: student?.active ?? true,
+          departmentId: student?.departmentId || 0,
+        };
 
   const createMutation = useMutation({
     mutationFn: (student: StudentRequest) => createStudent(student),
@@ -331,7 +343,10 @@ export const StudentUpsertPage = () => {
             <MultiSelect
               placeholder={t("students.departmentPlaceholder") || ""}
               options={
-                departments?.map((d) => ({ value: d.id, label: d.name })) ?? []
+                departments?.content?.map((d) => ({
+                  label: d.name,
+                  value: d.id,
+                })) || []
               }
               value={
                 displayedFormData.departmentId > 0

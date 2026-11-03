@@ -63,19 +63,17 @@ export const DepartmentUpsertPage = () => {
     queryFn: () => getUniversities(),
   });
 
+  const department = data as unknown as DepartmentRequest | undefined;
   const displayedFormData: DepartmentRequest =
-    params.id && data ? data : formData;
-
-  // useEffect(() => {
-  //   if (data) {
-  //     setFormData({
-  //       name: data.name ?? "",
-  //       code: data.code ?? "",
-  //       universityId: data.universityId ?? 0,
-  //       description: data.description ?? "",
-  //     });
-  //   }
-  // }, [data]);
+    params.id && department
+      ? formData
+      : {
+          ...initialFormData,
+          name: department?.name ?? "",
+          code: department?.code ?? "",
+          universityId: department?.universityId ?? 0,
+          description: department?.description ?? "",
+        };
 
   const mutation = useMutation({
     mutationFn: (departmentData: DepartmentRequest) =>
@@ -205,7 +203,7 @@ export const DepartmentUpsertPage = () => {
             <MultiSelect
               placeholder={t("common.selectOptions") || ""}
               options={
-                universities?.map((university) => ({
+                universities?.content?.map((university) => ({
                   label: university.name,
                   value: university.id,
                 })) || []

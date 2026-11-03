@@ -1,14 +1,16 @@
+
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+
 import StatisticsCard from "../../components/dashboard/StatisticsCard";
 import RecentUsers from "../../components/dashboard/RecentUsers";
 import RoleSummary from "../../components/dashboard/RoleSummary";
+
 import { getUsers } from "../../services/useService";
 import { getAuthorities, getRole } from "../../services/roleService";
 import type { User } from "../../types/user";
-import type { RoleResponse } from "../../types/role";
 
 const AnalyticsDashboard = () => {
   const { t } = useTranslation();
@@ -23,27 +25,34 @@ const AnalyticsDashboard = () => {
     queryFn: () => getRole(),
   });
 
-  const { data: authoritiesData, isLoading: isAuthoritiesLoading } = useQuery({
-    queryKey: ["dashboard-authorities-total"],
-    queryFn: () => getAuthorities(),
-  });
+  const { data: authoritiesData, isLoading: isAuthoritiesLoading } =
+    useQuery({
+      queryKey: ["dashboard-authorities-total"],
+      queryFn: () => getAuthorities(),
+    });
 
-  const users = useMemo(() => usersData?.content ?? [], [usersData?.content]);
+  const users = useMemo(
+    () => usersData?.content ?? [],
+    [usersData?.content]
+  );
+
   const roleUsageData = useMemo(() => {
-    const roleCounter = new Map();
+    const roleCounter = new Map<string, number>();
 
     users.forEach((user: User) => {
-      user.roles?.forEach((role: RoleResponse) => {
-        const currentCount = roleCounter.get(role.id)?.usersCount ?? 0;
+      user.roles?.forEach((role: string) => {
+        const currentCount = roleCounter.get(role) ?? 0;
 
-        roleCounter.set(role.id, {
-          role: role.name,
-          usersCount: currentCount + 1,
-        });
+        roleCounter.set(role, currentCount + 1);
       });
     });
 
-    return Array.from(roleCounter.values());
+    return Array.from(roleCounter.entries()).map(
+      ([role, usersCount]) => ({
+        role,
+        usersCount,
+      })
+    );
   }, [users]);
 
   return (
@@ -75,16 +84,26 @@ const AnalyticsDashboard = () => {
 
         <StatisticsCard
           title={t("dashboard.totalAuthorities")}
-          value={isAuthoritiesLoading ? 0 : (authoritiesData?.length ?? 0)}
+          value={
+            isAuthoritiesLoading
+              ? 0
+              : (authoritiesData?.length ?? 0)
+          }
           description={t("dashboard.authorities")}
           icon={<ShieldCheck size={22} />}
         />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RoleSummary data={roleUsageData} isLoading={isUsersLoading} />
+        <RoleSummary
+          data={roleUsageData}
+          isLoading={isUsersLoading}
+        />
 
-        <RecentUsers users={users} isLoading={isUsersLoading} />
+        <RecentUsers
+          users={users}
+          isLoading={isUsersLoading}
+        />
       </div>
     </div>
   );

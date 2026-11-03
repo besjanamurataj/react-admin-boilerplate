@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { DepartmentResponse } from "../../types/department";
+import type { Department,} from "../../types/department";
 import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const DepartmentPage = () => {
@@ -109,7 +109,7 @@ export const DepartmentPage = () => {
     },
   });
 
-  const columns: ColumnDef<DepartmentResponse>[] = [
+  const columns: ColumnDef<Department>[] = [
     {
       accessorKey: "name",
       header: ({ column }) => (
