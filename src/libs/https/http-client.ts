@@ -3,9 +3,10 @@ import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { env } from "../config/env";
 
 const instance = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: env.apiUrl,
   withCredentials: true,
 });
 
