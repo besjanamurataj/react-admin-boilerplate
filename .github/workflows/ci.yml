@@ -27,7 +27,7 @@ jobs:
       # Vite 8 and ESLint 10 need Node 22.13 or newer; '22' resolves to the latest 22.x
       - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
 
       - name: Install dependencies

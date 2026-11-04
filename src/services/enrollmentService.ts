@@ -72,8 +72,7 @@ export async function getEnrollments(
     const urlWithQuery =
       query.toString().length > 0 ? `${API_URL}?${query.toString()}` : API_URL;
 
-    const response =
-      await HttpClient.get<EnrollmentResponse>(urlWithQuery);
+    const response = await HttpClient.get<EnrollmentResponse>(urlWithQuery);
 
     return response;
   } catch (error: unknown) {

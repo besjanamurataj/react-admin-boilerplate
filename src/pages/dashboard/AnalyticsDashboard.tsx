@@ -1,4 +1,3 @@
-
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { ShieldCheck, UserRound, UsersRound } from "lucide-react";
@@ -26,16 +25,12 @@ const AnalyticsDashboard = () => {
     queryFn: () => getRole(),
   });
 
-  const { data: authoritiesData, isLoading: isAuthoritiesLoading } =
-    useQuery({
-      queryKey: ["dashboard-authorities-total"],
-      queryFn: () => getAuthorities(),
-    });
+  const { data: authoritiesData, isLoading: isAuthoritiesLoading } = useQuery({
+    queryKey: ["dashboard-authorities-total"],
+    queryFn: () => getAuthorities(),
+  });
 
-  const users = useMemo(
-    () => usersData?.content ?? [],
-    [usersData?.content]
-  );
+  const users = useMemo(() => usersData?.content ?? [], [usersData?.content]);
 
   const roleUsageData = useMemo(() => {
     // Roles are objects, so count by id rather than by reference
@@ -84,26 +79,16 @@ const AnalyticsDashboard = () => {
 
         <StatisticsCard
           title={t("dashboard.totalAuthorities")}
-          value={
-            isAuthoritiesLoading
-              ? 0
-              : (authoritiesData?.length ?? 0)
-          }
+          value={isAuthoritiesLoading ? 0 : (authoritiesData?.length ?? 0)}
           description={t("dashboard.authorities")}
           icon={<ShieldCheck size={22} />}
         />
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <RoleSummary
-          data={roleUsageData}
-          isLoading={isUsersLoading}
-        />
+        <RoleSummary data={roleUsageData} isLoading={isUsersLoading} />
 
-        <RecentUsers
-          users={users}
-          isLoading={isUsersLoading}
-        />
+        <RecentUsers users={users} isLoading={isUsersLoading} />
       </div>
     </div>
   );

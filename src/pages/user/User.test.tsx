@@ -32,8 +32,6 @@ const {
   mockGetRole: vi.fn(),
 }));
 
-
-
 const mockUsers = [
   {
     id: 1,
@@ -64,8 +62,6 @@ const mockUsers = [
     roles: [{ id: 2, name: "USER" }],
   },
 ];
-
-
 
 vi.mock("@tanstack/react-query", () => ({
   useQuery: ({ queryKey }: { queryKey: string[] }) => {
@@ -118,8 +114,6 @@ vi.mock("@tanstack/react-query", () => ({
   }),
 }));
 
-
-
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
 }));
@@ -162,8 +156,6 @@ vi.mock("../../utils/formatDate", () => ({
 vi.mock("debounce", () => ({
   default: (callback: (value: string) => void) => callback,
 }));
-
-
 
 vi.mock("../../components/PageTitle", () => ({
   PageTitle: ({ title, subTitle }: { title: string; subTitle?: string }) => (
@@ -350,8 +342,6 @@ vi.mock("../../components/ui/DataTable", () => ({
   ),
 }));
 
-
-
 describe("UserPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -363,8 +353,6 @@ describe("UserPage", () => {
     mockDeleteUsers.mockResolvedValue({});
     mockRefetch.mockResolvedValue({});
   });
-
-
 
   it("should render page title and description", () => {
     render(<UserPage />);
@@ -416,8 +404,6 @@ describe("UserPage", () => {
     expect(screen.getByText("USER")).toBeInTheDocument();
   });
 
-
-
   it("should hide create button without MANAGE_USER permission", () => {
     mockHasPermission.mockImplementation(
       (permission: string) => permission === "VIEW_USER",
@@ -450,8 +436,6 @@ describe("UserPage", () => {
     expect(within(row).getAllByRole("button")).toHaveLength(1);
   });
 
-
-
   it("should navigate to create user page", () => {
     render(<UserPage />);
 
@@ -482,8 +466,6 @@ describe("UserPage", () => {
     expect(mockNavigate).toHaveBeenCalledWith("/user/edit/1");
   });
 
-
-
   it("should update search input value", () => {
     render(<UserPage />);
 
@@ -495,8 +477,6 @@ describe("UserPage", () => {
 
     expect(searchInput).toHaveValue("John");
   });
-
-
 
   const openFilterDialog = () => {
     fireEvent.click(screen.getByRole("button", { name: "", hidden: true }));
@@ -577,8 +557,6 @@ describe("UserPage", () => {
     ).toBeInTheDocument();
   });
 
-
-
   it("should open delete confirmation dialog", () => {
     render(<UserPage />);
 
@@ -634,8 +612,6 @@ describe("UserPage", () => {
     });
   });
 
-
-
   it("should trigger sorting when name header is clicked", () => {
     render(<UserPage />);
 
@@ -647,8 +623,6 @@ describe("UserPage", () => {
 
     expect(screen.getByTestId("data-table")).toBeInTheDocument();
   });
-
-
 
   it("should trigger pagination when next page is clicked", () => {
     render(<UserPage />);

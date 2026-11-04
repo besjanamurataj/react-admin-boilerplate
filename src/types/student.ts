@@ -7,7 +7,7 @@ export interface StudentRequest {
   departmentId: number;
 }
 
-export interface Student{
+export interface Student {
   id?: number;
   firstName: string;
   lastName: string;

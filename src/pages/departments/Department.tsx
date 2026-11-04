@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import debounce from "debounce";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
-import type { Department,} from "../../types/department";
+import type { Department } from "../../types/department";
 import { useToast } from "../../contexts/toast/ToastProvider";
 
 export const DepartmentPage = () => {

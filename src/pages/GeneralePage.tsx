@@ -12,15 +12,8 @@ import { useState } from "react";
 import { Spinner } from "../components/ui/Spinner";
 import { Progress } from "../components/ui/Progress";
 import { Checkbox } from "../components/ui/Checkbox";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "../components/ui/Alert";
-import {
-  Accordion,
-  AccordionItem,
-} from "../components/ui/Accordion";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/Alert";
+import { Accordion, AccordionItem } from "../components/ui/Accordion";
 import { DatePicker } from "../components/ui/DatePicker";
 
 export const GeneralPage = () => {
@@ -30,15 +23,10 @@ export const GeneralPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const currentDate: Date = new Date();
 
-  const technologies: string[] = [
-    "React",
-    "TypeScript",
-    "Tailwind CSS",
-  ];
+  const technologies: string[] = ["React", "TypeScript", "Tailwind CSS"];
 
   return (
     <div className=" p-6">
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 justify-items justify-content gap-3  p-4">
         <div>
           <Checkbox checked={checked} onCheckedChange={setChecked} />
@@ -57,9 +45,7 @@ export const GeneralPage = () => {
           <Alert>
             <AlertTitle>Info Alert</AlertTitle>
 
-            <AlertDescription>
-              This is an informational alert.
-            </AlertDescription>
+            <AlertDescription>This is an informational alert.</AlertDescription>
           </Alert>
         </div>
 
@@ -67,9 +53,7 @@ export const GeneralPage = () => {
           <Alert variant="destructive">
             <AlertTitle>Error Alert</AlertTitle>
 
-            <AlertDescription>
-              This is a destructive alert.
-            </AlertDescription>
+            <AlertDescription>This is a destructive alert.</AlertDescription>
           </Alert>
         </div>
 
@@ -109,10 +93,7 @@ export const GeneralPage = () => {
         </div>
 
         <div className="p-6">
-          <Switch
-            checked={switchValue}
-            onCheckedChange={setSwitchValue}
-          />
+          <Switch checked={switchValue} onCheckedChange={setSwitchValue} />
         </div>
 
         <div>
@@ -127,11 +108,7 @@ export const GeneralPage = () => {
         </div>
 
         <div>
-          <Progress
-            value={50}
-            className="w-48 bg-gray-200"
-            color={"blue"}
-          />
+          <Progress value={50} className="w-48 bg-gray-200" color={"blue"} />
         </div>
       </div>
 
@@ -147,15 +124,12 @@ export const GeneralPage = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-
           <div className="rounded-md border p-4">
             <h3 className="mb-4 font-semibold">Date</h3>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div>
-                <h4 className="mb-2 text-sm font-medium">
-                  Current date
-                </h4>
+                <h4 className="mb-2 text-sm font-medium">Current date</h4>
 
                 <p>{currentDate.toLocaleDateString()}</p>
 
@@ -198,7 +172,6 @@ export const GeneralPage = () => {
               ))}
             </ul>
           </div>
-
         </div>
       </section>
     </div>

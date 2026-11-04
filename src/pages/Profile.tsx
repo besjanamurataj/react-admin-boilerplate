@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageTitle } from "../components/PageTitle";
 import { Button } from "../components/ui/Button";
@@ -9,11 +8,7 @@ import { passwordSchema, userSchema } from "../types/validations/schema";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  changePassword,
-  getById,
-  updateProfile,
-} from "../services/useService";
+import { changePassword, getById, updateProfile } from "../services/useService";
 import { useAuth } from "../hooks/useAuth";
 import type { PasswordUpdate, UserDetailResponse } from "../types/user";
 import { Label } from "../components/ui/Label";
@@ -61,11 +56,7 @@ export const ProfilePage = () => {
   const [errors, setErrors] = useState<Record<string, unknown>>({});
 
   // Fetch current user
-  const {
-    data,
-    isLoading,
-    isError,
-  } = useQuery<UserDetailResponse>({
+  const { data, isLoading, isError } = useQuery<UserDetailResponse>({
     queryKey: ["user", userId],
     queryFn: ({ signal }) => {
       if (!userId) throw new Error("No ID provided");
@@ -192,8 +183,7 @@ export const ProfilePage = () => {
 
       result.error.issues.forEach((issue) => {
         const parent = String(issue.path[0]);
-        const child =
-          issue.path.length > 1 ? String(issue.path[1]) : undefined;
+        const child = issue.path.length > 1 ? String(issue.path[1]) : undefined;
 
         if (child) {
           const existing = fieldErrors[parent];
@@ -243,9 +233,7 @@ export const ProfilePage = () => {
     return (
       <div className="p-6">
         <PageTitle title={t("profile.title")} />
-        <p className="mt-4 text-muted-foreground">
-          Loading profile...
-        </p>
+        <p className="mt-4 text-muted-foreground">Loading profile...</p>
       </div>
     );
   }
@@ -254,9 +242,7 @@ export const ProfilePage = () => {
     return (
       <div className="p-6">
         <PageTitle title={t("profile.title")} />
-        <p className="mt-4 text-destructive">
-          Error loading profile.
-        </p>
+        <p className="mt-4 text-destructive">Error loading profile.</p>
       </div>
     );
   }
@@ -273,9 +259,7 @@ export const ProfilePage = () => {
             <div className="col-span-12 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               {Object.entries(errors).map(([key, value]) => (
                 <p key={key}>
-                  {typeof value === "string"
-                    ? value
-                    : JSON.stringify(value)}
+                  {typeof value === "string" ? value : JSON.stringify(value)}
                 </p>
               ))}
             </div>

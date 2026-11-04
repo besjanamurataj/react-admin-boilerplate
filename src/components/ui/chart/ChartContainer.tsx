@@ -1,27 +1,35 @@
-import * as React from 'react'
-import { ResponsiveContainer } from 'recharts'
-import { cn } from '../../../libs/tailwind/merge-tailwind-classes'
+import * as React from "react";
+import { ResponsiveContainer } from "recharts";
+import { cn } from "../../../libs/tailwind/merge-tailwind-classes";
 
 export type ChartConfig = Record<
   string,
   {
-    label: string
-    color: string
+    label: string;
+    color: string;
   }
->
+>;
 
 interface ChartContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  config: ChartConfig
-  children: React.ReactNode
+  config: ChartConfig;
+  children: React.ReactNode;
 }
 
-function ChartContainer({ config, className, children, ...props }: ChartContainerProps) {
+function ChartContainer({
+  config,
+  className,
+  children,
+  ...props
+}: ChartContainerProps) {
   return (
     <div
-      className={cn('w-full rounded-md border bg-background p-4', className)}
+      className={cn("w-full rounded-md border bg-background p-4", className)}
       style={
         Object.fromEntries(
-          Object.entries(config).map(([key, value]) => [`--color-${key}`, value.color]),
+          Object.entries(config).map(([key, value]) => [
+            `--color-${key}`,
+            value.color,
+          ]),
         ) as React.CSSProperties
       }
       {...props}
@@ -30,7 +38,7 @@ function ChartContainer({ config, className, children, ...props }: ChartContaine
         {children}
       </ResponsiveContainer>
     </div>
-  )
+  );
 }
 
-export { ChartContainer }
+export { ChartContainer };

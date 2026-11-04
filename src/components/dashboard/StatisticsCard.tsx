@@ -18,18 +18,12 @@ export const StatisticsCard = ({
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-muted-foreground">
-            {title}
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
 
-          <h3 className="mt-2 text-3xl font-bold text-foreground">
-            {value}
-          </h3>
+          <h3 className="mt-2 text-3xl font-bold text-foreground">{value}</h3>
 
           {description && (
-            <p className="mt-2 text-sm text-muted-foreground">
-              {description}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{description}</p>
           )}
         </div>
 

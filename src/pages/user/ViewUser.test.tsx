@@ -1,17 +1,10 @@
-
 import React from "react";
-import {
-  render,
-  screen,
-  fireEvent,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { getById } from "../../services/useService";
 import { getRole } from "../../services/roleService";
 import ViewUserPage from "./ViewUser";
-
 
 const mocks = vi.hoisted(() => ({
   navigate: vi.fn(),
@@ -42,13 +35,7 @@ vi.mock("react-i18next", () => ({
 // --------------------------------------------------
 
 vi.mock("../../components/PageTitle", () => ({
-  PageTitle: ({
-    title,
-    subTitle,
-  }: {
-    title: string;
-    subTitle?: string;
-  }) => (
+  PageTitle: ({ title, subTitle }: { title: string; subTitle?: string }) => (
     <div>
       <h1>{title}</h1>
       <p>{subTitle}</p>
@@ -63,11 +50,7 @@ vi.mock("../../components/ui/Button", () => ({
     type,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-    <button
-      type={type ?? "button"}
-      onClick={onClick}
-      {...props}
-    >
+    <button type={type ?? "button"} onClick={onClick} {...props}>
       {children}
     </button>
   ),
@@ -219,7 +202,6 @@ const renderViewUserPage = () => {
   );
 };
 
-
 describe("ViewUserPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -271,13 +253,9 @@ describe("ViewUserPage", () => {
       screen.getByPlaceholderText("users.streetPlaceholder"),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByLabelText("Birth date"),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Birth date")).toBeInTheDocument();
 
-    expect(
-      screen.getByLabelText("Roles"),
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Roles")).toBeInTheDocument();
   });
 
   // -----------------------------------------------
@@ -310,9 +288,7 @@ describe("ViewUserPage", () => {
       await screen.findByRole("option", { name: "ADMIN" }),
     ).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("option", { name: "USER" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "USER" })).toBeInTheDocument();
   });
 
   it("should not fetch user details when ID is missing", () => {
@@ -331,9 +307,9 @@ describe("ViewUserPage", () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("users.namePlaceholder"),
-      ).toHaveValue("John");
+      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
+        "John",
+      );
     });
 
     expect(
@@ -344,27 +320,24 @@ describe("ViewUserPage", () => {
       screen.getByPlaceholderText("users.usernamePlaceholder"),
     ).toHaveValue("johndoe");
 
-    expect(
-      screen.getByPlaceholderText("users.emailPlaceholder"),
-    ).toHaveValue("john@example.com");
+    expect(screen.getByPlaceholderText("users.emailPlaceholder")).toHaveValue(
+      "john@example.com",
+    );
 
-    expect(
-      screen.getByPlaceholderText("users.phonePlaceholder"),
-    ).toHaveValue("123456789");
+    expect(screen.getByPlaceholderText("users.phonePlaceholder")).toHaveValue(
+      "123456789",
+    );
 
-    expect(
-      screen.getByPlaceholderText("users.streetPlaceholder"),
-    ).toHaveValue("Main Street");
+    expect(screen.getByPlaceholderText("users.streetPlaceholder")).toHaveValue(
+      "Main Street",
+    );
   });
 
   it("should display user roles", async () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Roles")).toHaveValue([
-        "1",
-        "2",
-      ]);
+      expect(screen.getByLabelText("Roles")).toHaveValue(["1", "2"]);
     });
   });
 
@@ -372,23 +345,17 @@ describe("ViewUserPage", () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("radio", { name: "Male" }),
-      ).toBeChecked();
+      expect(screen.getByRole("radio", { name: "Male" })).toBeChecked();
     });
 
-    expect(
-      screen.getByRole("radio", { name: "Female" }),
-    ).not.toBeChecked();
+    expect(screen.getByRole("radio", { name: "Female" })).not.toBeChecked();
   });
 
   it("should display user birth date", async () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByLabelText("Birth date"),
-      ).toHaveValue("1995-01-01");
+      expect(screen.getByLabelText("Birth date")).toHaveValue("1995-01-01");
     });
   });
 
@@ -400,14 +367,12 @@ describe("ViewUserPage", () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("users.namePlaceholder"),
-      ).toHaveValue("John");
+      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
+        "John",
+      );
     });
 
-    expect(
-      screen.getByPlaceholderText("users.namePlaceholder"),
-    ).toBeDisabled();
+    expect(screen.getByPlaceholderText("users.namePlaceholder")).toBeDisabled();
 
     expect(
       screen.getByPlaceholderText("users.lastNamePlaceholder"),
@@ -429,45 +394,33 @@ describe("ViewUserPage", () => {
       screen.getByPlaceholderText("users.streetPlaceholder"),
     ).toBeDisabled();
 
-    expect(
-      screen.getByLabelText("Roles"),
-    ).toBeDisabled();
+    expect(screen.getByLabelText("Roles")).toBeDisabled();
 
-    expect(
-      screen.getByLabelText("Birth date"),
-    ).toBeDisabled();
+    expect(screen.getByLabelText("Birth date")).toBeDisabled();
   });
 
   it("should disable gender options", async () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("radio", { name: "Male" }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("radio", { name: "Male" })).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByRole("radio", { name: "Male" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "Male" })).toBeDisabled();
 
-    expect(
-      screen.getByRole("radio", { name: "Female" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("radio", { name: "Female" })).toBeDisabled();
   });
 
   it("should not allow editing form fields", async () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("users.namePlaceholder"),
-      ).toHaveValue("John");
+      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
+        "John",
+      );
     });
 
-    expect(
-      screen.getByPlaceholderText("users.namePlaceholder"),
-    ).toBeDisabled();
+    expect(screen.getByPlaceholderText("users.namePlaceholder")).toBeDisabled();
   });
 
   // -----------------------------------------------
@@ -484,26 +437,26 @@ describe("ViewUserPage", () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByPlaceholderText("users.namePlaceholder"),
-      ).toHaveValue("");
+      expect(screen.getByPlaceholderText("users.namePlaceholder")).toHaveValue(
+        "",
+      );
     });
 
     expect(
       screen.getByPlaceholderText("users.lastNamePlaceholder"),
     ).toHaveValue("");
 
-    expect(
-      screen.getByPlaceholderText("users.emailPlaceholder"),
-    ).toHaveValue("");
+    expect(screen.getByPlaceholderText("users.emailPlaceholder")).toHaveValue(
+      "",
+    );
 
-    expect(
-      screen.getByPlaceholderText("users.phonePlaceholder"),
-    ).toHaveValue("");
+    expect(screen.getByPlaceholderText("users.phonePlaceholder")).toHaveValue(
+      "",
+    );
 
-    expect(
-      screen.getByPlaceholderText("users.streetPlaceholder"),
-    ).toHaveValue("");
+    expect(screen.getByPlaceholderText("users.streetPlaceholder")).toHaveValue(
+      "",
+    );
 
     expect(screen.getByLabelText("Roles")).toHaveValue([]);
 
@@ -522,9 +475,7 @@ describe("ViewUserPage", () => {
     renderViewUserPage();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("radio", { name: "Female" }),
-      ).toBeChecked();
+      expect(screen.getByRole("radio", { name: "Female" })).toBeChecked();
     });
   });
 

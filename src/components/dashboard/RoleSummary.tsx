@@ -23,15 +23,10 @@ type RoleSummaryProps = {
   isLoading?: boolean;
 };
 
-const RoleSummary = ({
-  data,
-  isLoading = false,
-}: RoleSummaryProps) => {
-
+const RoleSummary = ({ data, isLoading = false }: RoleSummaryProps) => {
   const { t } = useTranslation();
   const sortedData = [...data].sort(
-    (firstRole, secondRole) =>
-      secondRole.usersCount - firstRole.usersCount,
+    (firstRole, secondRole) => secondRole.usersCount - firstRole.usersCount,
   );
 
   const chartHeight = Math.max(280, sortedData.length * 55);
@@ -73,10 +68,7 @@ const RoleSummary = ({
                 left: 20,
               }}
             >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                horizontal={false}
-              />
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
 
               <XAxis
                 type="number"
@@ -93,10 +85,7 @@ const RoleSummary = ({
               />
 
               <Tooltip
-                formatter={(value) => [
-                  Number(value),
-                  t("roleUsage.users"),
-                ]}
+                formatter={(value) => [Number(value), t("roleUsage.users")]}
                 labelFormatter={(label) => `Role: ${label}`}
               />
 
@@ -107,10 +96,7 @@ const RoleSummary = ({
                 radius={[0, 6, 6, 0]}
                 maxBarSize={32}
               >
-                <LabelList
-                  dataKey="usersCount"
-                  position="right"
-                />
+                <LabelList dataKey="usersCount" position="right" />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

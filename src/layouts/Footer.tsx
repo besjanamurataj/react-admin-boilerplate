@@ -5,5 +5,5 @@ export const Footer = () => {
         <p>&copy; {new Date().getFullYear()} Forward.</p>
       </div>
     </footer>
-  )
-}
+  );
+};

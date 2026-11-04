@@ -1,25 +1,29 @@
-import * as React from 'react'
-import { cn } from '../../libs/tailwind/merge-tailwind-classes'
+import * as React from "react";
+import { cn } from "../../libs/tailwind/merge-tailwind-classes";
 
-export interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'checked' | 'onChange'> {
-  checked?: boolean | 'indeterminate'
-  onCheckedChange?: (checked: boolean) => void
+export interface CheckboxProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "checked" | "onChange"
+> {
+  checked?: boolean | "indeterminate";
+  onCheckedChange?: (checked: boolean) => void;
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ checked, className, onCheckedChange, ...props }, ref) => {
-    const defaultRef = React.useRef<HTMLInputElement>(null)
-    const resolvedRef = (ref as React.RefObject<HTMLInputElement>) || defaultRef
+    const defaultRef = React.useRef<HTMLInputElement>(null);
+    const resolvedRef =
+      (ref as React.RefObject<HTMLInputElement>) || defaultRef;
 
     React.useEffect(() => {
       if (resolvedRef.current) {
-        resolvedRef.current.indeterminate = checked === 'indeterminate'
+        resolvedRef.current.indeterminate = checked === "indeterminate";
       }
-    }, [resolvedRef, checked])
+    }, [resolvedRef, checked]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      onCheckedChange?.(e.target.checked)
-    }
+      onCheckedChange?.(e.target.checked);
+    };
 
     return (
       <input
@@ -52,10 +56,10 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         )}
         {...props}
       />
-    )
+    );
   },
-)
+);
 
-Checkbox.displayName = 'Checkbox'
+Checkbox.displayName = "Checkbox";
 
-export { Checkbox }
+export { Checkbox };

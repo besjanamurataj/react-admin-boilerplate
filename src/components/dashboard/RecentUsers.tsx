@@ -23,11 +23,7 @@ type RecentUsersProps = {
   isLoading?: boolean;
 };
 
-const RecentUsers = ({
-  users,
-  isLoading = false,
-}: RecentUsersProps) => {
-
+const RecentUsers = ({ users, isLoading = false }: RecentUsersProps) => {
   const { t } = useTranslation();
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -132,7 +128,8 @@ const RecentUsers = ({
               </button>
 
               <span className="text-sm text-muted-foreground">
-                {t("recentUsers.page")} {currentPage} {t("recentUsers.of")} {totalPages}
+                {t("recentUsers.page")} {currentPage} {t("recentUsers.of")}{" "}
+                {totalPages}
               </span>
 
               <button

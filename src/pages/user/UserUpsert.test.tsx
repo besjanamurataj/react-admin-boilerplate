@@ -473,7 +473,6 @@ describe("UserUpsertPage", () => {
               path: ["email"],
               message: "Invalid email",
             },
-           
           ],
         },
       });

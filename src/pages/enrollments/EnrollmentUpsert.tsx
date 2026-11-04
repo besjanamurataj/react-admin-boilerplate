@@ -1,4 +1,4 @@
-import {useState } from "react";
+import { useState } from "react";
 import { PageTitle } from "../../components/PageTitle";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -34,7 +34,7 @@ import { getDepartments } from "../../services/departmentService";
 import type { DepartmentResponse } from "../../types/department";
 
 import { getStudents } from "../../services/studentService";
-import type {  StudentResponse } from "../../types/student";
+import type { StudentResponse } from "../../types/student";
 
 export const EnrollmentUpsertPage = () => {
   const navigate = useNavigate();
@@ -96,18 +96,17 @@ export const EnrollmentUpsertPage = () => {
       queryFn: () => getStudents(),
     });
 
+  const enrollment = enrollmentData as unknown as Enrollment;
+  const displayFormData: EnrollmentRequest = isEditMode
+    ? formData
+    : {
+        enrollmentDate: enrollment.enrollmentDate ?? "",
+        universityId: enrollment.universityId ?? 0,
+        departmentId: enrollment.departmentId ?? 0,
+        studentId: enrollment.studentId ?? 0,
+      };
 
-      const enrollment = enrollmentData as unknown as Enrollment ;
-      const displayFormData: EnrollmentRequest = isEditMode
-       ? formData
-       :
-     { enrollmentDate: enrollment.enrollmentDate ?? "",
-      universityId: enrollment.universityId ?? 0,
-      departmentId: enrollment.departmentId ?? 0,
-      studentId: enrollment.studentId ?? 0,}
-    
   // Populate form in edit mode
-
 
   // Filter departments by selected university
   // Assumes Department has a universityId property.

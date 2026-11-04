@@ -19,5 +19,3 @@ This folder contains the app’s **central route table**.
   - If you add a new page route (e.g. `/users`), ensure any `menuItems` entry uses the **same exact path**.
 - **Don’t put business logic here**:
   - No data fetching, auth logic, or side effects. Keep this file purely declarative routing.
-
-

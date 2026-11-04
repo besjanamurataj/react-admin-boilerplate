@@ -11,4 +11,3 @@ Layouts define the shared app **frame** around a page and render page content vi
 - **Reuse UI primitives**: prefer `src/components/ui` instead of re-implementing buttons/inputs, etc.
 - **Keep state minimal**: only layout-level state (e.g. sidebar toggle), not feature state.
 - **Export via the barrel**: expose layouts from `src/layouts/index.ts` for consistent imports.
-
