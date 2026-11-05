@@ -1,7 +1,7 @@
 import type { LoginRequest } from "../types/auth";
 import { HttpClient } from "../libs/https/http-client";
 
-const auth = "auth/api/authenticate";
+const auth = "api/auth/authenticate";
 
 export async function login(data: LoginRequest) {
   try {
