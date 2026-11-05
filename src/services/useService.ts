@@ -7,7 +7,7 @@ import type {
 import { HttpClient } from "../libs/https/http-client";
 import type { Profile } from "../types/profile";
 
-const API_URL = "/users";
+const API_URL = "api/users";
 
 export async function createUser(data: User) {
   const response = await HttpClient.post(API_URL, data);

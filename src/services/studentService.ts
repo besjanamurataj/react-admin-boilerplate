@@ -1,7 +1,7 @@
 import type { StudentRequest, StudentResponse } from "../types/student";
 import { HttpClient } from "../libs/https/http-client";
 
-const API_URL = "/students";
+const API_URL = "api/students";
 
 export async function createStudent(data: StudentRequest) {
   try {
@@ -178,8 +178,8 @@ export async function exportStudentsPdf(
 
     const urlWithQuery =
       query.toString().length > 0
-        ? `http://localhost:3000${API_URL}/export/pdf?${query.toString()}`
-        : `http://localhost:3000${API_URL}/export/pdf`;
+        ? `/export/pdf?${query.toString()}`
+        : `/export/pdf`;
 
     const response = await fetch(urlWithQuery, {
       method: "GET",

@@ -9,7 +9,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   };
 
   const addToast = (toast: Omit<Toast, "id">) => {
-    const id = crypto.randomUUID();
+    const id = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
 
     setToasts((prev) => [...prev, { id, ...toast }]);
 

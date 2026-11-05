@@ -6,7 +6,7 @@ import type {
 } from "../types/enrollment";
 import { HttpClient } from "../libs/https/http-client";
 
-const API_URL = "/enrollments";
+const API_URL = "api/enrollments";
 
 export async function createEnrollment(data: EnrollmentRequest) {
   try {
@@ -176,8 +176,8 @@ export async function exportEnrollmentsCsv(
 
     const urlWithQuery =
       query.toString().length > 0
-        ? `http://localhost:3000${API_URL}/export/csv?${query.toString()}`
-        : `http://localhost:3000${API_URL}/export/csv`;
+        ? `/export/csv?${query.toString()}`
+        : `/export/csv`;
 
     const response = await fetch(urlWithQuery, {
       method: "GET",
@@ -239,8 +239,8 @@ export async function exportEnrollmentsPdf(
 
     const urlWithQuery =
       query.toString().length > 0
-        ? `http://localhost:3000${API_URL}/export/pdf?${query.toString()}`
-        : `http://localhost:3000${API_URL}/export/pdf`;
+        ? `/export/pdf?${query.toString()}`
+        : `/export/pdf`;
 
     const response = await fetch(urlWithQuery, {
       method: "GET",

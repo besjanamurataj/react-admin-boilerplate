@@ -3,10 +3,9 @@ import axios, {
   type AxiosRequestConfig,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { env } from "../config/env";
 
 const instance = axios.create({
-  baseURL: env.apiUrl,
+  baseURL: "/",
   withCredentials: true,
 });
 

@@ -4,7 +4,7 @@ import type {
 } from "../types/university";
 import { HttpClient } from "../libs/https/http-client";
 
-const API_URL = "/universities";
+const API_URL = "api/universities";
 
 export async function createUniversity(data: UniversityRequest) {
   try {

@@ -2,7 +2,7 @@ import type { Role, RoleRequest, RoleResponse } from "../types/role";
 import { HttpClient } from "../libs/https/http-client";
 import type { AuthorityResponse } from "./authoritiesService";
 
-const API_URL = "/roles";
+const API_URL = "api/roles";
 
 export async function createRole(data: RoleRequest): Promise<void> {
   try {

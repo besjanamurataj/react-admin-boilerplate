@@ -4,7 +4,7 @@ import type {
 } from "../types/department";
 import { HttpClient } from "../libs/https/http-client";
 
-const API_URL = "/departments";
+const API_URL = "api/departments";
 
 export async function createDepartment(data: DepartmentRequest) {
   try {
