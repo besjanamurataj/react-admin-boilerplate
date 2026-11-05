@@ -3,13 +3,16 @@ import { ToastContext, type Toast, type ToastContextType } from "./ToastContex";
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-
+  let toastCounter = 0;
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+  const createToastId = (): string => {
+    return crypto.randomUUID?.() ?? `toast-${++toastCounter}`;
+  };
 
   const addToast = (toast: Omit<Toast, "id">) => {
-    const id = crypto.randomUUID();
+    const id = createToastId();
 
     setToasts((prev) => [...prev, { id, ...toast }]);
 
