@@ -360,7 +360,7 @@ export const UserPage = () => {
                     </Label>
                     <MultiSelect
                       options={
-                        roles?.content.map((role) => ({
+                        roles?.content?.map((role) => ({
                           label: role.name,
                           value: String(role.id),
                         })) ?? []
@@ -447,7 +447,7 @@ export const UserPage = () => {
             data={data.content}
             columns={columns}
             loading={isLoading}
-            length={data.totalElements}
+            length={data?.totalElements}
             sorting={{ state: sorting, onChange: setSorting }}
             pagination={{
               ...pagination,
