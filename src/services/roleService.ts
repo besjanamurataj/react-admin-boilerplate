@@ -94,7 +94,8 @@ export async function getById({
 
 export async function getAuthorities() {
   try {
-    const response = await HttpClient.get<AuthorityResponse[]>("/authorities");
+    const response =
+      await HttpClient.get<AuthorityResponse[]>("api/authorities");
     return response.map((element: AuthorityResponse) => ({
       value: element.id,
       label: element.name,

@@ -242,14 +242,14 @@ export const UserUpsertPage = () => {
               {t("users.table.role")}
             </Label>
             <MultiSelect
-              placeholder={t("common.selectOptions") || "Select Options"}
               options={
                 roles?.content?.map((role) => ({
                   label: role.name,
-                  value: role.id,
-                })) || []
+                  value: String(role.id),
+                })) ?? []
               }
-              value={formData.roles}
+              className="col-span-4 h-8"
+              value={formData.roles ?? []}
               onChange={(values) => {
                 setFormData((prev) => ({
                   ...prev,
